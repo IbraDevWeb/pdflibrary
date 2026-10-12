@@ -221,3 +221,10 @@ button{touch-action:manipulation}
 @media(pointer:coarse) and (max-height:540px){
   .reader-tools .reader-control,.reader-tools .icon-button{min-width:38px;min-height:37px}
 }
+
+/* Zoom supérieur à 100 % : glisser pour explorer horizontalement le PDF. */
+.reader[data-kind="pdf"].pdf-zoomed .reader-content,
+.reader[data-kind="pdf"].pdf-zoomed .pdf-page,
+.reader[data-kind="pdf"].pdf-zoomed .pdf-text-layer{
+  touch-action:pan-x pan-y;
+}
