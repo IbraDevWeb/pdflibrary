@@ -97,6 +97,18 @@ Publier uniquement le dossier `dist/` sur un hébergement HTTPS statique (ou Git
 
 La PWA stocke les PDF/EPUB dans **IndexedDB**, propriété du navigateur. L'APK Android stocke les **fichiers** dans `Directory.Data` de Capacitor (stockage privé de l'application) et les **fiches** en IndexedDB dans la WebView. Le stockage reste local dans les deux cas.
 
+## Folio 2.3 — Lecteur perfectionné : recherche, typographie et annotations
+
+Dans le lecteur PDF/EPUB, la barre de commande propose des fonctions supplémentaires :
+
+- **⌕ Rechercher dans le livre** : saisir un mot ou une expression de deux caractères minimum. Folio analyse le texte *localement*, affiche les résultats avec des extraits et permet de toucher un résultat pour ouvrir directement la page PDF ou l'emplacement EPUB correspondant. Les résultats sont limités à 100 pour préserver la réactivité. Un PDF scanné sans couche texte **n'est pas interrogeable** sans OCR, qui n'est pas intégré. L'analyse des gros livres peut prendre du temps.
+- **Aa Typographie EPUB** : choisir la police d'origine, Georgia, Arial ou Verdana ; régler la taille du texte et l'interligne. Les préférences sont enregistrées **par livre**, et incluses dans les sauvegardes ZIP. Les polices et l'interligne ne peuvent pas être changés dans un PDF à mise en page fixe.
+- **Navigation** : une barre de progression sous le lecteur permet de sauter directement à une page du PDF. Pour les EPUB, une barre en pourcentage devient active lorsque les emplacements internes du livre sont indexés. Le sommaire et les signets restent disponibles.
+- **Annotations** : choisir le jaune, vert, bleu ou rose dans le panneau **Sommaire** avant de sélectionner une citation ; les annotations existantes sans couleur conservent le jaune. Les notes sont consultables depuis le carnet. **Exporter les annotations (.txt)** télécharge ou partage un fichier texte contenant les signets et les passages annotés, sans envoyer le contenu à un service distant.
+- **Compatibilité** : un EPUB peut imposer certaines polices ou styles ; Folio s'efforce de respecter le réglage sans garantir qu'il prévale sur tous les livres. La recherche EPUB s'appuie sur les CFI des chapitres et reste hors ligne.
+
+La fonction de recherche ne télécharge aucun contenu externe. Les essais automatisés contrôlent la recherche PDF/EPUB, les positions, les réglages, la persistance et les cas de documents sans résultats.
+
 ## Folio 2.2 — Mode lecture plein écran et teinte personnalisée
 
 Depuis la liseuse PDF ou EPUB, les boutons **⛶** et **☀ Teinte** ouvrent deux nouveaux réglages :
