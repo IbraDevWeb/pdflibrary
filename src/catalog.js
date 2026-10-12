@@ -177,6 +177,11 @@ function open(){
   if(!page)navigate(HOME);else render();
 }
 function close(){requestId++;$('catalog').hidden=true;document.body.style.overflow='';}
+export function backInCatalog(){
+  if($('catalog').hidden)return false;
+  if(history.length){navigate(history.pop(),true);return true;}
+  close();return true;
+}
 export function setupCatalog({onImport}){
   importBook=onImport;
   renderSources();
