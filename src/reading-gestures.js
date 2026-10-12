@@ -6,7 +6,7 @@ import {swipeDirection,pinchRatio,touchDistance} from './gesture-math.js';
  * Les gestes EPUB sont attachés au document de son iframe.
  */
 export function attachReadingGestures(target,callbacks={}){
-  let start=null,pinch=null,lastTap=0,unmounted=false;
+  let start=null,pinch=null,lastTap=0,tapTimer=null,unmounted=false;
   const inControl=node=>node instanceof Element && !!node.closest('button,a,input,textarea,select,[contenteditable="true"]');
   const selectionExists=()=>{
     const doc=target.ownerDocument;
@@ -71,8 +71,19 @@ export function attachReadingGestures(target,callbacks={}){
     }
     if(!wasMoved){
       const now=Date.now();
-      if(now-lastTap<290){lastTap=0;callbacks.onDoubleTap?.();}
-      else lastTap=now;
+      if(now-lastTap<290){
+        lastTap=0;
+        clearTimeout(tapTimer);
+        tapTimer=null;
+        callbacks.onDoubleTap?.();
+      }else{
+        lastTap=now;
+        clearTimeout(tapTimer);
+        tapTimer=setTimeout(()=>{
+          if(!unmounted)callbacks.onTap?.();
+          tapTimer=null;
+        },310);
+      }
     }
   };
   const onCancel=()=>reset();
@@ -81,7 +92,7 @@ export function attachReadingGestures(target,callbacks={}){
   target.addEventListener('touchend',onEnd,{passive:false});
   target.addEventListener('touchcancel',onCancel,{passive:true});
   return ()=>{
-    unmounted=true;reset();
+    unmounted=true;clearTimeout(tapTimer);reset();
     target.removeEventListener('touchstart',onStart);
     target.removeEventListener('touchmove',onMove);
     target.removeEventListener('touchend',onEnd);
