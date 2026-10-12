@@ -3,6 +3,7 @@ import { native } from './storage.js';
 import './catalog.css';
 import { SOURCES, TOPICS } from './catalog-sources.js';
 import { loadGutenberg, loadOPDS } from './catalog-providers.js';
+import { openLibraryWebsite } from './catalog-browser.js';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -92,22 +93,27 @@ function renderSources() {
       '<button type="button" class="source-star'+(star?' selected':'')+'" data-source-star="'+esc(source.id)+'" aria-label="'+(star?'Retirer des favoris':'Ajouter aux favoris')+'" aria-pressed="'+star+'">'+(star?'★':'☆')+'</button></div>'+
       '<strong>'+esc(source.label)+'</strong><small>'+esc(source.language)+' · '+esc(badge)+'</small>'+
       '<p>'+esc(source.desc)+'</p><div class="source-tags">'+source.topics.slice(0,3).map(tag=>'<span>'+esc(tag)+'</span>').join('')+'</div>'+
-      '<button type="button" class="source-open" data-source-open="'+esc(source.id)+'">'+(source.mode==='browse'?'Consulter le site ↗':'Parcourir la bibliothèque →')+'</button></article>';
+      '<div class="source-actions"><button type="button" class="source-open" data-source-visit="'+esc(source.id)+'">Visiter le site ↗</button>'+
+      (source.mode==='browse'?'':'<button type="button" class="source-explore" data-source-open="'+esc(source.id)+'">Chercher les PDF / EPUB ↓</button>')+'</div></article>';
   }).join(''):'<p class="catalog-nothing">Aucune source pour ce filtre. Essayez une autre discipline ou la vue « Toutes les sources ».</p>';
+}
+async function visitSource(id){
+  const source=SOURCES.find(item=>item.id===id);
+  if(!source)return;
+  activeSource=source;
+  renderSources();
+  try{await openLibraryWebsite(validateExternalUrl(source.url));}
+  catch(e){feedback('Impossible d’ouvrir le site : '+e.message,true);}
 }
 function openSource(id){
   const source=SOURCES.find(item=>item.id===id);if(!source)return;
-  activeSource=source;
-  renderSources();
-  if(source.mode==='browse'){
-    try{window.open(validateExternalUrl(source.url),'_blank','noopener,noreferrer');}
-    catch(e){feedback(e.message,true);}
-    return;
-  }
+  activeSource=source;renderSources();
+  if(source.mode==='browse'){visitSource(id);return;}
   history=[];
   $('catalogRemoteForm').hidden=source.mode!=='gutendex';
+  // Aller au navigateur de fichiers immédiatement, même si la réponse distante échoue.
+  $('catalogPanel').scrollIntoView({behavior:'smooth',block:'start'});
   navigate(source.url);
-  $('catalogPageTitle').scrollIntoView?.({behavior:'smooth',block:'start'});
 }
 
 function feedback(message,error=false){
@@ -169,12 +175,17 @@ async function navigate(input,back=false){
     $('catalogSearch').value='';$('catalogLoaded').hidden=false;
     feedback(parsed.files.length||parsed.links.length?'':'Aucun lien PDF/EPUB ni rubrique détecté ici.');
     render();
-  }catch(e){if(id===requestId)feedback('Impossible de charger cette page'+(native?'': ' (restriction CORS possible dans la PWA)')+' : '+e.message,true);}
+  }catch(e){
+    if(id===requestId){
+      feedback('Catalogue non analysable ('+e.message+'). Le bouton « Visiter le site » reste disponible pour parcourir la bibliothèque.'+(native?'':' Sur le web, certaines pages bloquent CORS.'),true);
+    }
+  }
 }
 function open(){
   $('catalog').hidden=false;document.body.style.overflow='hidden';
   renderSources();
-  if(!page)navigate(HOME);else render();
+  // Ne pas ouvrir un site tiers par défaut : l’annuaire reste utilisable hors ligne.
+  if(page)render();
 }
 function close(){requestId++;$('catalog').hidden=true;document.body.style.overflow='';}
 export function backInCatalog(){
@@ -208,6 +219,8 @@ export function setupCatalog({onImport}){
       localStorage.setItem('folio-catalog-favorites',JSON.stringify([...favorites]));
       renderSources();return;
     }
+    const visit=e.target.closest('[data-source-visit]');
+    if(visit){visitSource(visit.dataset.sourceVisit);return;}
     const button=e.target.closest('[data-source-open]');
     if(button)openSource(button.dataset.sourceOpen);
   });
@@ -222,8 +235,8 @@ export function setupCatalog({onImport}){
   });
   $('catalogUrlForm').addEventListener('submit',e=>{e.preventDefault();activeSource=null;renderSources();navigate($('catalogUrlInput').value);});
   $('catalogSearch').addEventListener('input',()=>{bookLimit=70;pageLimit=35;render();});
-  $('catalogExternal').addEventListener('click',()=>{
-    try{window.open(validateExternalUrl(current),'_blank','noopener,noreferrer');}
+  $('catalogExternal').addEventListener('click',async()=>{
+    try{await openLibraryWebsite(validateExternalUrl(current));}
     catch(e){feedback('Ouverture du site impossible : '+e.message,true);}
   });
   $('catalogMore').addEventListener('click',()=>{bookLimit+=70;render();});
