@@ -1,0 +1,210 @@
+/* Folio — adaptation Android/PWA 2026 : respect des barres système,
+   écran étroit, orientation, gestes tactiles et lisibilité. */
+:root{
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-right:env(safe-area-inset-right,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --safe-left:env(safe-area-inset-left,0px);
+}
+html{height:100%;-webkit-text-size-adjust:100%;overflow-x:hidden}
+body{min-height:100dvh;overflow-x:hidden;overscroll-behavior-y:contain}
+button,input,select,textarea{-webkit-tap-highlight-color:transparent}
+button{touch-action:manipulation}
+.app-shell,.main,.content-wrap{min-width:0}
+.topbar{
+  box-sizing:border-box;
+  min-height:calc(72px + var(--safe-top));
+  height:auto;
+  padding-top:var(--safe-top);
+  padding-left:max(16px,var(--safe-left));
+  padding-right:max(16px,var(--safe-right));
+}
+.sidebar{
+  padding-top:calc(30px + var(--safe-top));
+  height:100dvh;
+}
+.mobile-nav{padding-left:var(--safe-left);padding-right:var(--safe-right)}
+.modal{max-height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 22px)}
+.toast{bottom:calc(25px + var(--safe-bottom))}
+.reader{
+  inset:0;
+  width:100vw;
+  height:100dvh;
+  min-height:0;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+.reader-bar{
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  flex-wrap:nowrap;
+  flex:none;
+  width:100%;
+  height:auto;
+  min-height:0;
+  padding:var(--safe-top) max(12px,var(--safe-right)) 0 max(12px,var(--safe-left));
+  gap:0;
+  background:var(--paper);
+  border-bottom:1px solid #e5ece6;
+}
+.reader-head-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:52px;
+  min-width:0;
+  width:100%;
+}
+.reader-head-row .reader-heading{
+  min-width:0;
+  flex:1;
+  max-width:none;
+  margin:0;
+}
+.reader-head-row .reader-heading strong{
+  display:block;
+  font-size:14px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.reader-head-row .reader-heading small{
+  display:block;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.reader-head-row #readerMenu{
+  flex:none;
+  margin-left:auto;
+  border:1px solid #e8eee8;
+}
+.reader-tools{
+  width:100%;
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  overscroll-behavior-x:contain;
+  touch-action:pan-x;
+  flex:none;
+  min-height:51px;
+  padding:3px 4px 7px;
+}
+.reader-tools::-webkit-scrollbar{display:none}
+.reader-tools .reader-control,
+.reader-tools .icon-button{
+  width:auto;
+  min-width:36px;
+  min-height:39px;
+  flex:none;
+  font-size:15px;
+  border-radius:9px;
+}
+.reader-tools .icon-button{width:40px;height:40px}
+.reader-tools .reader-page-label{min-width:60px;white-space:nowrap}
+.reader-tools .reader-zoom-value{min-width:40px;white-space:nowrap;text-align:center}
+.reader-tool-separator{flex:none;width:1px;height:25px;background:#e4ece5;margin:0 3px}
+.reader-nav-arrow{font-size:26px!important;line-height:1}
+.reader-stage{min-height:0;flex:1;overflow:hidden}
+.reader-content{
+  min-height:0;
+  min-width:0;
+  flex:1;
+  overflow:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y;
+  justify-content:safe center;
+  scroll-behavior:auto;
+}
+.reader-content .pdf-page{flex:none;will-change:transform;touch-action:pan-y}
+.pdf-text-layer{touch-action:pan-y}
+.reader[data-kind="epub"] .reader-content{
+  display:block;
+  touch-action:pan-y;
+}
+.reader-tip{
+  flex:none;
+  box-sizing:border-box;
+  min-height:27px;
+  padding:5px max(12px,var(--safe-right)) calc(6px + var(--safe-bottom)) max(12px,var(--safe-left));
+  text-align:center;
+  line-height:1.35;
+  background:#f8faf6;
+  color:#7e9386;
+  font-size:10px;
+}
+.reader[data-theme="dark"] .reader-bar{background:#25332c;border-color:#344a3a}
+.reader[data-theme="dark"] .reader-heading strong,
+.reader[data-theme="dark"] .reader-control,
+.reader[data-theme="dark"] .reader-bar .icon-button{color:#e1e9e2}
+.reader[data-theme="dark"] .reader-heading small,
+.reader[data-theme="dark"] .reader-zoom-value{color:#a2b9a8}
+.reader[data-theme="dark"] .reader-tip{background:#26332b;color:#c7d6c8}
+.reader[data-theme="sepia"] .reader-bar,.reader[data-theme="sepia"] .reader-tip{background:#f5ecdd}
+.reader-sidepanel{
+  max-width:calc(100vw - 20px);
+  overscroll-behavior:contain;
+  touch-action:pan-y;
+}
+.catalog-overlay{width:100vw;height:100dvh;max-height:100dvh;overscroll-behavior:contain}
+.catalog-header{
+  box-sizing:border-box;
+  height:auto;
+  min-height:calc(66px + var(--safe-top));
+  padding-top:calc(8px + var(--safe-top));
+  padding-left:max(12px,var(--safe-left));
+  padding-right:max(12px,var(--safe-right));
+}
+.catalog-body{
+  padding-bottom:calc(65px + var(--safe-bottom));
+  padding-left:max(16px,var(--safe-left));
+  padding-right:max(16px,var(--safe-right));
+}
+@media(max-width:860px){
+  .mobile-nav{height:calc(72px + var(--safe-bottom));}
+  .content-wrap{padding-bottom:calc(105px + var(--safe-bottom));}
+  .toast{bottom:calc(92px + var(--safe-bottom))}
+  .reader-tools{justify-content:flex-start}
+}
+@media(max-width:610px){
+  .reader-bar{gap:0;min-height:0;flex-wrap:nowrap;padding-top:var(--safe-top)}
+  .reader-head-row{min-height:50px;gap:5px}
+  .reader-head-row .reader-heading{max-width:none;min-width:0}
+  .reader-head-row #readerMenu{order:0;flex:none}
+  .reader-tools{gap:5px;min-height:49px;padding:2px 2px 6px;flex-wrap:nowrap;justify-content:flex-start}
+  .reader-tools .reader-control{order:0;min-height:39px;min-width:37px;padding:5px 7px}
+  .reader-tools .icon-button{order:0;min-height:39px}
+  .reader-tools .reader-page-label{order:0;flex:none}
+  .reader-tools .reader-zoom-value{order:0}
+  .reader-stage{min-height:0}
+  .reader-content{padding:10px 8px 38px}
+  .reader[data-kind="epub"] .reader-content{padding:4px 8px}
+  .reader-tip{font-size:9px;min-height:29px}
+  .catalog-header{min-height:calc(60px + var(--safe-top))}
+}
+@media(max-width:390px){
+  .reader-head-row #readerMenu span{display:none}
+  .reader-heading strong{font-size:12px}
+  .reader-tools .reader-control{min-width:36px}
+  .reader-zoom-value{font-size:10px}
+  .catalog-body{padding:12px max(10px,var(--safe-right)) calc(42px + var(--safe-bottom)) max(10px,var(--safe-left))}
+}
+@media(orientation:landscape) and (max-height:540px){
+  .reader-head-row{min-height:39px}
+  .reader-tools{min-height:39px;padding:0 3px 3px}
+  .reader-tools .reader-control,.reader-tools .icon-button{min-height:32px;height:32px}
+  .reader-tip{font-size:9px;padding-top:2px;padding-bottom:calc(3px + var(--safe-bottom))}
+}
+@media(prefers-reduced-motion:reduce){
+  .reader-content,.reader-tools{scroll-behavior:auto}
+}
