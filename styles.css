@@ -5,3 +5,7 @@
 .reset-rating{align-self:center;font-size:11px;color:#819189!important;margin-left:6px;text-decoration:underline}
 .backup-import-label{text-align:center}
 @media(max-width:610px){.book-title-link{max-width:100%}}
+
+/* Accès aux réglages (sauvegarde / installation) également sur téléphone. */
+@media(max-width:860px){.top-settings{display:grid!important;flex:none}}
+@media(max-width:375px){.mobile-brand{font-size:0;gap:0}.mobile-logo{font-size:18px}}
