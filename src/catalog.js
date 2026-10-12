@@ -163,6 +163,7 @@ async function navigate(input,back=false){
     if(id!==requestId)return;
     if(!back&&url!==current)history.push(current);
     current=url;page=parsed;bookLimit=70;pageLimit=35;
+    if(new URL(url).hostname==='gutendex.com')$('catalogRemoteLanguage').value=new URL(url).searchParams.get('languages')||'fr';
     $('catalogUrlInput').value=url;$('catalogLocation').textContent=new URL(url).hostname+' · '+new URL(url).pathname;
     $('catalogBack').disabled=!history.length;
     $('catalogSearch').value='';$('catalogLoaded').hidden=false;
@@ -209,13 +210,17 @@ export function setupCatalog({onImport}){
     e.preventDefault();
     const search=$('catalogRemoteQuery').value.trim();
     const url=new URL('https://gutendex.com/books/');
-    url.searchParams.set('languages','fr');
+    url.searchParams.set('languages',$('catalogRemoteLanguage').value||'fr');
     url.searchParams.set('copyright','false');
     if(search)url.searchParams.set('search',search);
     navigate(url.href);
   });
   $('catalogUrlForm').addEventListener('submit',e=>{e.preventDefault();activeSource=null;renderSources();navigate($('catalogUrlInput').value);});
   $('catalogSearch').addEventListener('input',()=>{bookLimit=70;pageLimit=35;render();});
+  $('catalogExternal').addEventListener('click',()=>{
+    try{window.open(validateExternalUrl(current),'_blank','noopener,noreferrer');}
+    catch(e){feedback('Ouverture du site impossible : '+e.message,true);}
+  });
   $('catalogMore').addEventListener('click',()=>{bookLimit+=70;render();});
   $('catalogMorePages').addEventListener('click',()=>{pageLimit+=35;render();});
   $('catalogBack').addEventListener('click',()=>{if(history.length)navigate(history.pop(),true);});
