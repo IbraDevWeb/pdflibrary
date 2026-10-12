@@ -3,6 +3,8 @@ import { initStorage,allBooks,saveBook,removeBookRecord,storeFile,bookBlob,delet
 import { Reader,generateCover,epubMetadata } from './reader.js';
 import { setupCatalog,validateExternalUrl } from './catalog.js';
 import { downloadToLibrary } from './direct-download.js';
+import { installNavigation } from './navigation.js';
+import './mobile-polish.css';
 
 const $=id=>document.getElementById(id);
 const icon=name=>'<svg class="icon" aria-hidden="true"><use href="#i-'+name+'"/></svg>';
@@ -357,6 +359,7 @@ function events(){
 }
 async function start(){
   events();
+  installNavigation({getView:()=>view,changeView});
   try{await initStorage();await reload();createCoverMissing();}
   catch(e){console.error(e);$('emptyState').hidden=false;$('emptyTitle').textContent='Stockage indisponible';$('emptyDescription').textContent=e.message;toast('Impossible d’ouvrir le stockage local.',true);}
 }
