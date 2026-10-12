@@ -82,3 +82,15 @@
 .catalog-location .catalog-external{margin-left:auto;background:#e6f0e9;color:#2b5c41;flex:none}
 .catalog-remote-form select{background:#fff;border:1px solid #c8ddc9;color:#325741;border-radius:8px;padding:9px 8px;max-width:120px;font-size:12px}
 @media(max-width:620px){.catalog-location .catalog-external{font-size:10px;padding:6px}.catalog-remote-form select{max-width:100%}}
+
+/* Choix explicite entre consulter une bibliothèque et analyser ses PDF/EPUB. */
+.catalog-source-card .source-actions{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.catalog-source-card .source-actions button{width:100%;min-height:43px;padding:11px;border-radius:9px;font-size:12px;font-weight:750}
+.catalog-source-card .source-actions .source-open{margin:0;color:#fff;background:#28523c;border:1px solid #28523c}
+.catalog-source-card .source-actions .source-open:hover{background:#38674f}
+.catalog-source-card .source-explore{color:#2c6445;background:#edf5ee;border:1px solid #c5dac8}
+.catalog-source-card .source-explore:hover{background:#dceede}
+.catalog-source-card{scroll-margin-top:95px}
+.catalog-panel{scroll-margin-top:calc(80px + env(safe-area-inset-top,0px))}
+.catalog-body{overscroll-behavior-y:contain}
+.catalog-error{line-height:1.55}
