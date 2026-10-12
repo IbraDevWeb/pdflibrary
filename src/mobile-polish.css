@@ -208,3 +208,16 @@ button{touch-action:manipulation}
 @media(prefers-reduced-motion:reduce){
   .reader-content,.reader-tools{scroll-behavior:auto}
 }
+
+/* Cibles tactiles plus confortables sur Android, y compris appareils étroits. */
+@media(min-width:861px){.topbar{min-height:calc(88px + var(--safe-top))}.sidebar{padding-bottom:calc(18px + var(--safe-bottom))}}
+@media(pointer:coarse){
+  .reader-tools .reader-control,.reader-tools .icon-button{min-width:44px;min-height:44px}
+  .reader-head-row .icon-button,.reader-head-row #readerMenu{min-height:44px;min-width:44px}
+  .reader-sidebar-top button{min-width:44px;min-height:44px}
+  .book-fav{min-width:40px;min-height:40px}
+  .reader-tools .reader-page-label input{min-height:38px}
+}
+@media(pointer:coarse) and (max-height:540px){
+  .reader-tools .reader-control,.reader-tools .icon-button{min-width:38px;min-height:37px}
+}
