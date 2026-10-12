@@ -1,5 +1,5 @@
 import './reader.css';
-import { initStorage,allBooks,saveBook,removeBookRecord,storeFile,bookBlob,deleteBookFile,inspectFile,kindOf,idForBook,exportZip,restoreZip,native } from './storage.js';
+import { initStorage,allBooks,saveBook,removeBookRecord,storeFile,bookBlob,deleteBookFile,inspectFile,kindOf,idForBook,exportZip,restoreZip,native,saveOrShare } from './storage.js';
 import { Reader,generateCover,epubMetadata } from './reader.js';
 
 const $=id=>document.getElementById(id);
@@ -232,13 +232,11 @@ async function favorite(id){
 }
 async function download(id){
   const book=findBook(id);if(!book)return;
-  try{
-    const blob=await bookBlob(book);
-    const url=URL.createObjectURL(blob),link=document.createElement('a');
-    link.href=url;link.download=(book.title||'livre').replace(/[\\/:*?"<>|]/g,'-').slice(0,110)+'.'+kindOf(book);
-    document.body.append(link);link.click();link.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),30000);
-  }catch(e){toast('Export impossible : '+e.message,true);}
+  try {
+    const file=await bookBlob(book);
+    const filename=(book.title||'livre').replace(/[\\/:*?"<>|]/g,'-').slice(0,110)+'.'+kindOf(book);
+    await saveOrShare(file,filename);
+  } catch(e){toast('Export impossible : '+e.message,true);}
 }
 async function openBook(id){
   const book=findBook(id);
@@ -262,9 +260,8 @@ async function backup(){
   const btn=$('backupExport');
   btn.disabled=true;btn.textContent='Préparation de la sauvegarde…';
   try{
-    const blob=await exportZip(books),url=URL.createObjectURL(blob);
-    const a=document.createElement('a');a.href=url;a.download='folio-'+new Date().toISOString().slice(0,10)+'.zip';
-    document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+    const blob=await exportZip(books);
+    await saveOrShare(blob,'folio-'+new Date().toISOString().slice(0,10)+'.zip');
     toast('Sauvegarde ZIP créée. Conservez-la dans un dossier sûr.');
   }catch(e){toast('Erreur de sauvegarde : '+e.message,true);}
   finally{btn.disabled=false;btn.textContent='Exporter ma bibliothèque (.zip)';}
