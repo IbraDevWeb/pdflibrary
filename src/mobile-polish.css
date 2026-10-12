@@ -228,3 +228,54 @@ button{touch-action:manipulation}
 .reader[data-kind="pdf"].pdf-zoomed .pdf-text-layer{
   touch-action:pan-x pan-y;
 }
+
+/* CORRECTION : le document Android n'était pas un conteneur de défilement fiable.
+   La page d'accueil défile maintenant dans main, quelle que soit l'état de body. */
+@media (max-width:860px) {
+  html, body {
+    height:100%;
+    width:100%;
+    overflow:hidden;
+    overscroll-behavior-y:none;
+  }
+  .app-shell {
+    display:block;
+    height:100dvh;
+    max-height:100dvh;
+    min-height:0;
+    overflow:hidden;
+  }
+  .app-shell > .main {
+    display:block;
+    position:relative;
+    height:100%;
+    min-height:0;
+    max-height:100%;
+    overflow-x:hidden;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-y:contain;
+    touch-action:pan-y;
+    scrollbar-width:thin;
+  }
+  .app-shell > .main .topbar {
+    position:sticky;
+    top:0;
+    z-index:11;
+  }
+  .app-shell > .main .content-wrap {
+    padding-bottom:calc(115px + var(--safe-bottom));
+  }
+}
+/* Les catalogues occupent un écran indépendant et peuvent eux aussi défiler. */
+.catalog-overlay {
+  display:block;
+  height:100dvh;
+  overflow-x:hidden;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:contain;
+  touch-action:pan-y;
+}
+.catalog-overlay .catalog-header { position:sticky;top:0;z-index:6 }
+#catalogPanel { scroll-margin-top:calc(80px + var(--safe-top)) }
