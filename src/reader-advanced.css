@@ -1,0 +1,78 @@
+
+/* Folio lecteur avancé : recherche, typographie, annotations, navigation rapide. */
+.reader-tool-panel{
+  position:absolute;
+  z-index:17;
+  top:calc(57px + var(--safe-top));
+  right:max(9px,var(--safe-right));
+  width:min(410px,calc(100vw - 18px));
+  max-height:min(72dvh,650px);
+  padding:16px;
+  overflow:auto;
+  background:#fffefa;
+  border:1px solid #dbe5dc;
+  border-radius:15px;
+  color:#273b2f;
+  box-shadow:0 16px 42px #11261e38;
+  overscroll-behavior:contain;
+}
+.reader-tool-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.reader-tool-panel-heading strong{font:500 19px/1.2 Georgia,serif}
+.reader-tool-panel-heading button{border:0;background:#edf2ed;border-radius:8px;min-width:42px;min-height:42px;font-size:24px;color:#506b58}
+.reader-tool-panel p{font-size:12px;line-height:1.5;color:#728579;margin:10px 0 13px}
+.reader-find-form{display:flex;align-items:stretch;gap:7px}
+.reader-find-form input{flex:1;min-width:0;border:1px solid #c9d9cf;border-radius:8px;padding:10px;font-size:13px}
+.reader-find-form button{border:0;border-radius:8px;background:#285340;color:#fff;padding:10px 12px;font-size:12px;font-weight:700}
+.reader-find-results{display:flex;flex-direction:column;gap:7px;padding-top:5px}
+.reader-find-result{display:flex;flex-direction:column;text-align:left;gap:6px;border:1px solid #e4ebe4;border-radius:9px;background:#f6faf6;padding:11px;color:#274633;width:100%;max-width:100%;font-size:12px;line-height:1.4}
+.reader-find-result:active,.reader-find-result:hover{background:#e8f2e8}
+.reader-find-result strong{font-size:11px;color:#588469}
+.reader-find-result span{overflow-wrap:anywhere}
+.reader-find-result mark{background:#f1dc88;border-radius:2px;padding:1px 0}
+.reader-type-field{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;font-size:12px;font-weight:700;margin:16px 0;color:#425c4b}
+.reader-type-field select{width:100%;border:1px solid #d5e0d4;background:#fff;padding:11px;border-radius:8px;color:#3d6049;font-size:13px}
+.reader-type-field input[type="range"]{width:100%;accent-color:#517e60;touch-action:pan-x}
+.reader-type-field output{color:#4d845e}
+.reader-position-bar{
+  flex:none;
+  display:flex;
+  align-items:center;
+  min-height:38px;
+  padding:4px max(12px,var(--safe-right)) 4px max(12px,var(--safe-left));
+  background:#fafbf8;
+  gap:10px;
+  border-top:1px solid #e2e8e2;
+}
+.reader-position-bar label,.reader-position-bar span{font-size:10px;color:#657c6c;white-space:nowrap;min-width:38px}
+.reader-position-bar span{text-align:right}
+.reader-position-bar input{flex:1;min-width:0;accent-color:#4a805d;height:28px;touch-action:pan-x}
+.reader[data-immersive="true"] .reader-position-bar{display:none}
+.reader[data-theme="dark"] .reader-position-bar{background:#27352d;border-color:#3a5140}
+.reader[data-theme="dark"] .reader-position-bar label,.reader[data-theme="dark"] .reader-position-bar span{color:#cad5ca}
+.reader-highlight-palette{display:flex;gap:10px;margin:10px 0 15px}
+.reader-highlight-palette button{
+  --swatch:#f2cc3b;
+  width:41px;height:41px;flex:none;
+  display:grid;place-items:center;
+  font-size:30px;line-height:1;color:var(--swatch);
+  background:#fff;border:2px solid #dce5dd;border-radius:11px;
+}
+.reader-highlight-palette [data-highlight-color="green"]{--swatch:#6fbf82}
+.reader-highlight-palette [data-highlight-color="blue"]{--swatch:#76a6e8}
+.reader-highlight-palette [data-highlight-color="pink"]{--swatch:#e7a3c0}
+.reader-highlight-palette button[aria-pressed="true"]{border-color:#27563d;box-shadow:0 0 0 2px #abd0b1}
+.pdf-highlight-rect{background:var(--annotation-color,#f2cc3b60)}
+.reader-annotation-color{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle;background:var(--annotation-color,#f2cc3b)}
+.reader-export-notes{display:block;border:1px solid #bed8c6;background:#eaf3ea;color:#2b6440;border-radius:8px;font-size:12px;font-weight:700;width:100%;padding:12px;margin:15px 0}
+.reader-head-row .reader-head-action{min-width:39px;max-width:44px;flex:none}
+.reader-head-row .reader-heading{min-width:0}
+@media(max-width:430px){
+ .reader-head-row{gap:3px}
+ .reader-head-row .reader-heading small{display:none}
+ .reader-head-row .reader-head-action{min-width:37px;max-width:39px;padding:4px}
+ .reader-head-row #readerMenu{min-width:38px;font-size:15px}
+ .reader-head-row #readerMenu span{display:none}
+ .reader-head-row .reader-heading strong{font-size:12px}
+ .reader-position-bar{gap:6px}
+ .reader-position-bar label,.reader-position-bar span{font-size:9px;min-width:36px}
+}
