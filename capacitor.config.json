@@ -1,5 +1,5 @@
 {
-  "appId": "fr.folio.private.reader",
+  "appId": "fr.folio.lecteurpersonnel",
   "appName": "Folio",
   "webDir": "dist",
   "server": {
