@@ -5,6 +5,7 @@ import { setupCatalog,validateExternalUrl } from './catalog.js';
 import { downloadToLibrary } from './direct-download.js';
 import { installNavigation } from './navigation.js';
 import './mobile-polish.css';
+import './reader-advanced.css';
 
 const $=id=>document.getElementById(id);
 const icon=name=>'<svg class="icon" aria-hidden="true"><use href="#i-'+name+'"/></svg>';
