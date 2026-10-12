@@ -1,6 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import JSZip from 'jszip';
+import { Share } from '@capacitor/share';
 
 const DB = 'folio-library', STORE = 'books';
 export const native = Capacitor.isNativePlatform();
@@ -64,6 +65,21 @@ export async function bookBlob(book){
   if(!book.filePath)throw new Error('Fichier absent de ce livre.');
   const result=await Filesystem.readFile({path:book.filePath,directory:Directory.Data});
   return typeof result.data==='string'?fromBase64(result.data,kindOf(book)==='epub'?'application/epub+zip':'application/pdf'):result.data;
+}
+export async function saveOrShare(blob, filename) {
+  if (native) {
+    const path = 'share/' + filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const encoded = toBase64(await blob.arrayBuffer());
+    await Filesystem.writeFile({ path, data: encoded, directory: Directory.Cache, recursive: true });
+    const { uri } = await Filesystem.getUri({ path, directory: Directory.Cache });
+    await Share.share({ title: filename, url: uri, dialogTitle: 'Enregistrer ou partager ce fichier' });
+    return;
+  }
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url; link.download = filename;
+  document.body.appendChild(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 export async function deleteBookFile(book){
   if(native&&book.filePath){
