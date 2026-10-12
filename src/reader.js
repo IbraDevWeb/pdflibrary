@@ -63,6 +63,9 @@ function setImmersive(enabled){
   }
 }
 function closeAdvancedPanels(){
+  if(state)state.searchToken++;
+  const submit=$('readerFindForm').querySelector('button[type="submit"]');
+  submit.disabled=false;
   $('readerFindPanel').hidden=true;$('readerFontPanel').hidden=true;
   $('readerFindButton').setAttribute('aria-expanded','false');$('readerFontButton').setAttribute('aria-expanded','false');
 }
