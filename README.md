@@ -1,56 +1,98 @@
-# Folio — Ma bibliothèque PDF
+# Folio 2 — Lecteur PDF & EPUB privé (Android et PWA)
 
-Une Progressive Web App (PWA) **100 % statique**, en français, adaptée au téléphone. Elle permet de conserver une bibliothèque personnelle de PDF, **sans créer de compte**.
+Folio est une bibliothèque personnelle en français qui lit des livres **PDF** et **EPUB** sans compte, sans backend, sans analytique et sans synchronisation cloud. Le code de l'application est dans ce dépôt ; les **livres ne sont jamais envoyés sur GitHub**.
 
 ## Fonctionnalités
-- Importer un ou plusieurs fichiers PDF depuis son appareil.
-- Importer un PDF à partir de son URL directe **si le serveur autorise CORS**.
-- Lire les PDF avec le lecteur intégré du navigateur, même sans Internet.
-- Retrouver ses livres par titre, auteur, catégorie, étiquette ou note.
-- Organiser des collections (catégories libres), des favoris et un statut (à lire, en cours, terminé).
-- Noter les livres de 0 à 5 étoiles et y ajouter des notes personnelles.
-- Enregistrer sa page de lecture **manuellement** et reprendre un livre.
-- Télécharger à nouveau un PDF stocké localement.
-- Exporter une **sauvegarde ZIP avec les PDF et leurs fiches**, puis la restaurer sur un autre appareil.
-- Installer l'application sur l'écran d'accueil (Android et iOS selon le navigateur).
 
-## Publication sur GitHub Pages
-1. Ouvrez les paramètres du dépôt **Settings → Pages**.
-2. Sous **Build and deployment**, sélectionnez **Deploy from a branch**.
-3. Choisissez la branche **main**, dossier **/(root)** puis **Save**.
-4. Une fois Pages activé, l'URL sera normalement `https://ibradevweb.github.io/pdflibrary/`.
+- Import PDF / EPUB depuis le téléphone, ou URL directe si le serveur autorise CORS.
+- Lecteur PDF.js avec texte sélectionnable, position sauvegardée à chaque changement de page, sommaire PDF (si disponible), marque-pages, zoom, mode clair/sépia/nuit.
+- Lecteur EPUB.js : pagination, reprise via CFI, chapitres, changement de police (zoom), thèmes, sélection de passages.
+- Surlignage de sélections et notes liées aux passages ; le mode 🖍 doit être activé avant la sélection.
+- Couverture produite à partir de la première page du PDF ; couverture de l'EPUB si disponible (sinon couverture typographique).
+- Bibliothèque avec catégories imbriquées séparées par `/`, ex. `Histoire/Moyen Âge`.
+- Favoris, évaluations, fiches éditables, recherche et filtres auteur / thème / note / statut / format.
+- Sauvegarde ZIP complète (PDF, EPUB, métadonnées, couvertures, notes et signets), et restauration des anciennes archives Folio v1.
+- Navigation hors ligne après installation ; le JavaScript, ses dépendances et les icônes sont compilés dans l'application.
 
-Aucun build, npm, compte, API ni serveur applicatif n'est requis.
+## Installation PERSONNELLE sur Android, sans Play Store
 
-Pour démarrer localement, servez les fichiers en HTTP :
+### Méthode GitHub Actions (APK, sans Android Studio)
+
+1. Ouvrir **GitHub → [Actions](https://github.com/IbraDevWeb/pdflibrary/actions)**.
+2. Cliquer sur le workflow **Construire l'APK personnel Android**.
+3. Cliquer **Run workflow** sur `main`, puis attendre la fin du build.
+4. Dans le workflow terminé, télécharger l'artifact **folio-android-debug-apk** (ZIP).
+5. Extraire le fichier `app-debug.apk` et le copier sur votre téléphone Android.
+6. Ouvrir le fichier APK avec l'application Fichiers Android et autoriser, si demandé, l'installation d'applications depuis **cette source**.
+7. Ouvrir Folio, importer un PDF/EPUB depuis le stockage du téléphone, puis l'utiliser sans réseau.
+
+**Attention pour les mises à jour :** le workflow génère un APK de debug signé avec une clé éphémère sur chaque exécution. Il peut être impossible de l'installer *par-dessus* une version produite par un autre run. Dans ce cas, **exporter une sauvegarde ZIP avant de désinstaller**, réinstaller le nouvel APK puis restaurer. Une clé de signature stable serait nécessaire pour des mises à jour sans désinstallation.
+
+Le projet Android est généré pendant le workflow par `npx cap add android` ; les sources Android générées ne sont pas enregistrées dans le dépôt.
+
+### Méthode ordinateur Windows / macOS / Linux (développement)
+
+Pré-requis : Node 22+, Android Studio récent et SDK Android, Java 21 (Android Studio peut le fournir), un téléphone en USB ou un émulateur.
+
 ```bash
-python3 -m http.server 8000
+git clone https://github.com/IbraDevWeb/pdflibrary.git
+cd pdflibrary
+npm install
+npm run android:init
+npx cap open android
 ```
-Puis ouvrez http://localhost:8000. Le mode PWA fonctionne sous **HTTPS** ou **localhost**, pas sous `file://`.
 
-## Installer sur téléphone
-- **Android (Chrome)** : ouvrez l'URL HTTPS puis menu → *Installer l'application* / *Ajouter à l'écran d'accueil*.
-- **iPhone (Safari)** : ouvrez l'URL HTTPS puis *Partager* → *Sur l'écran d'accueil*.
+Dans Android Studio : sélectionner votre appareil, puis **Run**. Pour créer un APK : **Build → Build APK(s)**.
 
-## Données et vie privée
-Les **PDF sont conservés dans IndexedDB sur l'appareil**, pas dans le dépôt GitHub et pas sur le serveur Pages. Les PDF privés ne sont jamais mis en cache par le service worker. Seuls les fichiers de l'interface sont préchargés pour le mode hors ligne.
+### Alternative PWA
 
-**Important :** le stockage est propre à chaque navigateur/appareil. Il n'y a pas de compte ni de synchronisation en temps réel. Effacer les données du site, désinstaller l'application ou certaines politiques d'évacuation de stockage peuvent supprimer les livres. Utilisez régulièrement **Paramètres → Exporter ma bibliothèque (.zip)** pour en garder une copie et la transférer sur un autre appareil.
+```bash
+npm install
+npm run build
+npm run preview
+```
 
-Le lecteur PDF utilise le moteur natif du navigateur : ses capacités et l'affichage dans un cadre varient selon iOS/Android. Le lien « ouvrez-le dans le lecteur de votre navigateur » sert de solution de repli. Les changements de page effectués par défilement dans le PDF **ne sont pas détectés automatiquement** ; saisissez la page courante dans la barre supérieure.
+Publier uniquement le dossier `dist/` sur un hébergement HTTPS statique (ou GitHub Pages avec le bon chemin). Depuis Chrome Android : **menu ⋮ → Installer l'application**.
 
-Les sauvegardes ZIP sont créées sans compression et supportent les archives classiques non-Zip64 (moins de 4 Go). L'importation attend une archive exportée par Folio.
+La PWA stocke les PDF/EPUB dans **IndexedDB**, propriété du navigateur. L'APK Android stocke les **fichiers** dans `Directory.Data` de Capacitor (stockage privé de l'application) et les **fiches** en IndexedDB dans la WebView. Le stockage reste local dans les deux cas.
 
-## Structure
-- `index.html` : interface
-- `styles.css` : styles responsive
-- `app.js` : stockage, bibliothèque, lecteur et sauvegardes ZIP
-- `manifest.webmanifest` : installation PWA
-- `sw.js` : cache hors ligne de l'interface
-- `icons/` : icônes
+## Sauvegarde et réinstallation
 
-## Limitations
-- Pas de synchronisation cloud automatique.
-- Les liens distants soumis aux restrictions CORS ne sont pas importables directement ; enregistrez alors le PDF sur le téléphone, puis importez le fichier.
-- L'accès aux PDF dépend du navigateur et de son espace de stockage disponible.
-- Importez uniquement des PDF que vous êtes autorisé à conserver.
+1. Paramètres → **Exporter ma bibliothèque (.zip)**.
+2. Sauvegarder le ZIP dans un emplacement personnel (par exemple le dossier Téléchargements, puis une copie USB).
+3. Après réinstallation, Paramètres → **Restaurer une sauvegarde**.
+
+**La désinstallation de l'APK efface son stockage privé.** Ne la faites jamais avant la sauvegarde. Les PDF/EPUB volumineux consomment de la mémoire pendant l'import, l'export et l'ouverture ; tester d'abord avec de petits fichiers.
+
+Une bibliothèque installée en PWA et une autre installée en APK sont **deux stockages distincts** : utilisez le ZIP pour transférer les livres. Il n'existe pas de synchronisation automatique.
+
+## Architecture
+
+| Fichier | Rôle |
+|---|---|
+| `src/main.js` | Bibliothèque, import, catégories, filtres, édition |
+| `src/reader.js` | PDF.js, EPUB.js, couverture, thèmes, lecture et annotations |
+| `src/storage.js` | IndexedDB, fichiers Android natifs, export/restauration ZIP |
+| `src/reader.css`, `styles.css` | Interface responsive et lecture |
+| `vite.config.js` | Bundle Vite et cache PWA pour les ressources statiques |
+| `capacitor.config.json` | Identité Android et assets préembarqués |
+| `.github/workflows/android-apk.yml` | Build APK manuel |
+| `.github/workflows/check.yml` | Compilation automatique |
+
+Bibliothèques utilisées : PDF.js (Mozilla), epub.js, Capacitor Filesystem, JSZip, Vite et vite-plugin-pwa. Tous les scripts sont empaquetés localement ; **aucun CDN n'est nécessaire pendant la lecture**.
+
+## Limites connues
+
+- Les surlignages sont stockés par Folio. Ils ne modifient pas le PDF / EPUB original. La sélection de PDF scannés sans couche de texte n'est pas possible sans OCR (non fourni).
+- Les annotations PDF utilisent des rectangles relatifs sur la page, sans ancrage sémantique ; elles peuvent être légèrement décalées si le document change.
+- Sur certains EPUB complexes, chapitres, sélections et couvertures peuvent varier selon la mise en page.
+- Import depuis un lien Internet uniquement avec réseau et configuration CORS compatible ; **les lectures déjà importées sont hors ligne**.
+- Les EPUB protégés par DRM ne sont pas pris en charge.
+- Le lecteur actuel rend une page PDF à la fois ; aucun défilement continu des pages PDF.
+- Les fichiers ne sont pas chiffrés ; le stockage est privé à l'application Android mais accessible sur un téléphone déverrouillé ou compromis.
+- La sauvegarde ZIP n'est pas chiffrée ; gardez-la dans un lieu sûr.
+- Le dépôt GitHub est actuellement **public** : cela expose le **code**, pas les livres personnels importés dans l'application.
+
+## Vérification
+
+Le workflow *Vérifier Folio* compile le projet automatiquement à chaque commit sur `main`. Cette vérification de build ne remplace pas un test manuel sur un véritable téléphone Android.
