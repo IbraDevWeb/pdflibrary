@@ -9,6 +9,7 @@ export async function openLibraryWebsite(safeHttpsUrl) {
     await Browser.open({url:url.href});
     return;
   }
-  const tab=window.open(url.href,'_blank','noopener,noreferrer');
-  if(!tab)window.location.assign(url.href);
+  // Avec noopener, window.open peut retourner null même lorsque l'onglet s'ouvre.
+  // Ne jamais rediriger Folio : cela ferait quitter l'application et la bibliothèque.
+  window.open(url.href,'_blank','noopener,noreferrer');
 }
