@@ -276,9 +276,9 @@ async function readEPUB(s,blob){
     addHighlight({kind:'epub',cfi,text:text.slice(0,4000)});
   });
   const boundDocuments=new WeakSet();
-  rendition.on('rendered',(_section,contents)=>{
+  rendition.on('rendered',(_section,view)=>{
     if(s!==state)return;
-    const document=contents?.document;
+    const document=view?.contents?.document||view?.document;
     if(document&&!boundDocuments.has(document)){
       boundDocuments.add(document);
       s.gestureCleanup.push(attachGestures(document.documentElement));
