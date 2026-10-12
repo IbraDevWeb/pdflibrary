@@ -39,3 +39,42 @@
 .catalog-launch{height:42px;font-size:13px}
 @media(max-width:860px){.catalog-header{height:62px;min-height:62px}.catalog-body{padding:20px 16px 100px}.catalog-hero{padding:24px}.catalog-content-layout{gap:15px}.catalog-launch{display:flex!important;min-width:38px;padding:7px 9px}.catalog-launch span{display:none}}
 @media(max-width:610px){.catalog-header{gap:8px;padding:9px 12px}.catalog-privacy{display:none}.catalog-brand strong{font-size:16px}.catalog-hero h2{font-size:31px}.catalog-shortcuts{gap:6px}.catalog-shortcuts button{font-size:11px;padding:8px 10px}.catalog-url-form>div{gap:5px}.catalog-url-form .button{padding:9px 11px;font-size:11px}.catalog-url-form .button .icon{display:none}.catalog-results-head{display:flex;flex-wrap:wrap;gap:10px}.catalog-search{width:100%}.catalog-content-layout{grid-template-columns:1fr}.catalog-pages-column{margin-top:18px}.catalog-book-info strong{font-size:12px}.catalog-download-button{padding:8px}.catalog-body{padding-bottom:40px}}
+
+
+/* Bibliothèques et recherche par sciences */
+.catalog-directory{padding:24px 26px 18px;margin:0 0 24px;background:#fff;border:1px solid #e4ede5;border-radius:15px}
+.catalog-directory-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:19px}
+.catalog-directory-head h3{font:500 27px/1.2 Georgia,serif;letter-spacing:-.5px;margin:5px 0 8px}
+.catalog-directory-head p{font-size:12px;color:#809286;line-height:1.5;margin:0;max-width:560px}
+.catalog-directory-search{display:flex;align-items:center;gap:9px;border:1px solid #dce6de;border-radius:9px;background:#fafcf8;padding:11px 12px;min-width:250px;max-width:360px;flex:1}
+.catalog-directory-search .icon{width:16px;height:16px;color:#7e9a88}
+.catalog-directory-search input{border:0;background:transparent;outline:0;min-width:0;flex:1;width:100%;font-size:12px}
+.catalog-source-tabs{display:flex;flex-wrap:wrap;gap:7px;border-bottom:1px solid #ebf0eb;padding-bottom:12px;margin-bottom:14px}
+.catalog-source-tabs button{border:1px solid transparent;border-radius:9px;background:#f4f7f3;color:#688372;padding:10px 13px;font-weight:700;font-size:12px}
+.catalog-source-tabs button.active{background:#214e3b;color:white}
+.catalog-topic-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:13px}
+.catalog-topic-tabs button{border:1px solid #e1e9df;border-radius:20px;background:white;color:#718c76;font-size:11px;padding:7px 10px}
+.catalog-topic-tabs button.active{background:#e5efe5;color:#265b3c;border-color:#b6d5bf;font-weight:720}
+.catalog-language-filter{display:flex;align-items:center;justify-content:space-between;gap:9px;font-size:11px;color:#94a599;margin-bottom:16px}
+.catalog-language-filter select{border:1px solid #dce7df;border-radius:7px;padding:7px 11px;font-size:11px;color:#4b7057;background:white}
+.catalog-source-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:stretch}
+.catalog-source-card{display:flex;flex-direction:column;gap:6px;padding:17px;border:1px solid #e3ece5;border-radius:12px;min-width:0;background:#fbfcfa;transition:border-color .2s,box-shadow .2s}
+.catalog-source-card:hover,.catalog-source-card.active{border-color:#b4d3bc;box-shadow:0 4px 17px #1b4f310c}
+.source-card-top{display:flex;align-items:center;justify-content:space-between;gap:7px}
+.source-emoji{font-size:24px}
+.source-star{border:0;background:transparent;color:#a2b3a7;font-size:23px;line-height:1;padding:4px 5px}
+.source-star.selected{color:#c39a51}
+.catalog-source-card>strong{font-size:14px;line-height:1.32;color:#234b38}
+.catalog-source-card>small{font-size:10px;color:#769480}
+.catalog-source-card p{font-size:11px;line-height:1.55;color:#84998a;margin:5px 0;flex:1}
+.source-tags{display:flex;gap:5px;flex-wrap:wrap}
+.source-tags>span{border-radius:5px;padding:3px 7px;font-size:9px;background:#e9f1e9;color:#537659}
+.source-open{margin-top:8px;background:transparent;border:1px solid #bfd8c4;border-radius:8px;padding:9px 11px;color:#2b6947;font-size:11px;font-weight:750;text-align:center}
+.source-open:hover{background:#e6f4e9}
+.catalog-remote-form{margin-top:15px;background:#eff6ec;border:1px solid #ddebd8;border-radius:11px;padding:13px 15px}
+.catalog-remote-form label{display:block;font-size:11px;font-weight:720;color:#466b52;margin-bottom:7px}
+.catalog-remote-form>div{display:flex;gap:8px}
+.catalog-remote-form input{flex:1;min-width:0;border:1px solid #c8ddc9;border-radius:8px;background:white;padding:9px 12px;color:#1f4935}
+.catalog-remote-form .button{padding:10px 14px;font-size:11px}
+@media(max-width:1000px){.catalog-source-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.catalog-directory-head{align-items:start;flex-wrap:wrap}.catalog-directory-search{max-width:none;width:100%}}
+@media(max-width:620px){.catalog-directory{padding:16px;margin-bottom:18px}.catalog-directory-head h3{font-size:23px}.catalog-source-grid{grid-template-columns:1fr}.catalog-source-card{padding:14px}.catalog-source-tabs button{font-size:11px;padding:9px 10px}.catalog-topic-tabs{flex-wrap:nowrap;overflow:auto;padding:0 1px 6px}.catalog-topic-tabs button{flex:none;white-space:nowrap}.catalog-remote-form>div{flex-wrap:wrap}.catalog-remote-form .button{width:100%}}
