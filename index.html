@@ -127,6 +127,8 @@
       <div class="reader-heading"><strong id="readerTitle">Lecture</strong><small id="readerAuthor"></small></div>
       <button id="readerToneButton" class="reader-control reader-head-action" type="button" title="Teinte et confort visuel" aria-label="Régler la teinte et le confort visuel" aria-expanded="false">☀</button>
       <button id="readerFullscreen" class="reader-control reader-head-action" type="button" aria-label="Activer le plein écran" title="Plein écran">⛶</button>
+      <button id="readerFindButton" class="reader-control reader-head-action" type="button" aria-label="Chercher un mot dans le livre" aria-expanded="false">⌕</button>
+      <button id="readerFontButton" class="reader-control reader-head-action" type="button" aria-label="Choisir la police et la typographie" aria-expanded="false">Aa</button>
       <button id="readerMenu" class="reader-control" type="button" aria-label="Ouvrir le sommaire et les annotations" aria-expanded="false">☰ <span>Sommaire</span></button>
     </div>
     <div class="reader-tools" role="toolbar" aria-label="Outils de lecture">
@@ -147,6 +149,34 @@
       <button id="readerDownload" class="icon-button" type="button" title="Exporter le fichier" aria-label="Exporter le livre"><svg class="icon"><use href="#i-download"/></svg></button>
     </div>
   </header>
+  <section id="readerFindPanel" class="reader-tool-panel" aria-label="Recherche dans le livre" hidden>
+    <div class="reader-tool-panel-heading"><strong>Rechercher dans le livre</strong><button id="readerFindClose" type="button" aria-label="Fermer la recherche">×</button></div>
+    <form id="readerFindForm" class="reader-find-form">
+      <input id="readerFindInput" type="search" minlength="2" maxlength="100" required placeholder="Mot ou expression…" autocomplete="off" aria-label="Mots à chercher">
+      <button type="submit">Chercher</button>
+    </form>
+    <p id="readerFindStatus" role="status" aria-live="polite">Recherchez un passage du PDF ou de l’EPUB. Les PDF numérisés sans texte ne sont pas cherchables.</p>
+    <div id="readerFindResults" class="reader-find-results"></div>
+  </section>
+  <section id="readerFontPanel" class="reader-tool-panel" aria-label="Typographie du livre EPUB" hidden>
+    <div class="reader-tool-panel-heading"><strong>Typographie</strong><button id="readerFontClose" type="button" aria-label="Fermer la typographie">×</button></div>
+    <p id="readerFontNotice">Ces réglages s’appliquent aux livres EPUB. La police d’un PDF est fixée par son auteur.</p>
+    <label class="reader-type-field">Police
+      <select id="readerFontFamily" aria-label="Police du livre">
+        <option value="publisher">D’origine</option>
+        <option value="serif">Classique (Georgia)</option>
+        <option value="sans">Sans empattement (Arial)</option>
+        <option value="readable">Très lisible (Verdana)</option>
+      </select>
+    </label>
+    <label class="reader-type-field">Taille du texte <output id="readerFontSizeLabel">100 %</output>
+      <input id="readerFontSize" type="range" min="80" max="220" step="10" value="100">
+    </label>
+    <label class="reader-type-field">Espacement des lignes <output id="readerLineHeightLabel">1,6</output>
+      <input id="readerLineHeight" type="range" min="1.2" max="2.2" step="0.1" value="1.6">
+    </label>
+    <button id="readerFontReset" class="reader-tone-reset" type="button">Restaurer la typographie</button>
+  </section>
   <section id="readerTonePanel" class="reader-tone-panel" aria-label="Réglages de confort visuel" hidden>
     <div class="reader-tone-header"><strong>Confort de lecture</strong><button id="readerToneClose" type="button" aria-label="Fermer les réglages">×</button></div>
     <p>Choisissez la couleur du papier, puis ajustez sa chaleur et sa luminosité.</p>
@@ -167,9 +197,23 @@
   <div class="reader-stage">
     <aside id="readerSidebar" class="reader-sidepanel" hidden>
       <div class="reader-sidebar-top"><strong>Mon carnet de lecture</strong><button id="readerSideClose" aria-label="Fermer le sommaire">×</button></div>
-      <h3>Chapitres</h3><div id="readerChaptersList"></div><h3>Annotations et signets</h3><div id="readerNotesList"></div>
+      <h3>Chapitres</h3><div id="readerChaptersList"></div>
+      <h3>Surlignage</h3>
+      <div id="readerHighlightPalette" class="reader-highlight-palette" role="group" aria-label="Couleur des surlignages">
+        <button type="button" data-highlight-color="yellow" aria-label="Jaune" title="Jaune">●</button>
+        <button type="button" data-highlight-color="green" aria-label="Vert" title="Vert">●</button>
+        <button type="button" data-highlight-color="blue" aria-label="Bleu" title="Bleu">●</button>
+        <button type="button" data-highlight-color="pink" aria-label="Rose" title="Rose">●</button>
+      </div>
+      <h3>Annotations et signets</h3><div id="readerNotesList"></div>
+      <button id="readerExportNotes" class="reader-export-notes" type="button">Exporter les annotations (.txt)</button>
     </aside>
     <div id="readerContent" class="reader-content" aria-label="Contenu du livre"></div>
+  </div>
+  <div id="readerPositionBar" class="reader-position-bar" aria-label="Navigation rapide">
+    <label for="readerPosition" id="readerPositionLabel">Page 1</label>
+    <input id="readerPosition" type="range" min="0" max="100" step="1" value="0" aria-label="Déplacement rapide dans le livre">
+    <span id="readerPositionMax">100 %</span>
   </div>
   <div class="reader-tip" id="readerTip" aria-live="polite">Glissez horizontalement pour tourner les pages · Pincez pour zoomer · Activez 🖍 pour annoter</div>
   </div>
