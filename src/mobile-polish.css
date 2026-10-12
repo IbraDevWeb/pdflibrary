@@ -370,3 +370,17 @@ button{touch-action:manipulation}
 @media (max-width:375px){
   .reader-exit-fullscreen span{display:none}
 }
+
+/* Boutons plein écran et teinte toujours à portée de pouce (sans faire défiler la barre). */
+.reader-head-row .reader-head-action{
+  flex:none;
+  min-width:44px;
+  min-height:44px;
+  padding:5px;
+  font-size:20px;
+}
+@media(max-width:390px){
+  .reader-head-row{gap:4px}
+  .reader-head-row .reader-head-action{min-width:40px;min-height:40px}
+  .reader-head-row #readerMenu{min-width:40px}
+}
