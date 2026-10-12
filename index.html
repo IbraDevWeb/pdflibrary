@@ -8,12 +8,12 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Folio">
-  <link rel="manifest" href="./manifest.webmanifest">
+  
   <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
   <link rel="stylesheet" href="./styles.css">
   <title>Folio — Ma bibliothèque</title>
-  <script src="./app.js" defer></script>
+  <script type="module" src="./src/main.js"></script>
 </head>
 <body>
   <svg aria-hidden="true" width="0" height="0" style="position:absolute;overflow:hidden">
@@ -59,7 +59,7 @@
         <div class="mobile-brand"><span class="mobile-logo">f.</span> folio</div>
         <label class="search-box"><svg class="icon"><use href="#i-search"/></svg><input id="searchInput" type="search" placeholder="Rechercher un livre, un auteur..." autocomplete="off" aria-label="Rechercher des livres"><kbd>⌘ K</kbd></label>
         <button class="top-settings icon-button" id="settingsTop" aria-label="Paramètres"><svg class="icon"><use href="#i-settings"/></svg></button>
-        <button class="button button-primary top-add" data-open-import><svg class="icon"><use href="#i-plus"/></svg> Ajouter un PDF</button>
+        <button class="button button-primary top-add" data-open-import><svg class="icon"><use href="#i-plus"/></svg> Ajouter un livre</button>
       </header>
 
       <div class="content-wrap">
@@ -84,7 +84,14 @@
           <div class="section-head"><div><span class="section-eyebrow">VOTRE COLLECTION</span><h2 id="sectionTitle">Tous mes livres <span id="resultCount" class="result-count">0</span></h2></div>
             <div class="filters"><label class="sort-select"><span>Trier :</span><select id="sortSelect" aria-label="Trier les livres"><option value="recent">Plus récents</option><option value="title">Titre A–Z</option><option value="author">Auteur A–Z</option><option value="rating">Mieux notés</option></select></label><div class="view-buttons"><button class="icon-button active" data-layout="grid" aria-label="Affichage grille" title="Grille"><svg class="icon"><use href="#i-grid"/></svg></button><button class="icon-button" data-layout="list" aria-label="Affichage liste" title="Liste"><svg class="icon"><use href="#i-list"/></svg></button></div></div>
           </div>
-          <div id="booksGrid" class="books-grid" aria-live="polite"></div>
+          <div class="advanced-filters" aria-label="Filtres de bibliothèque">
+  <label>Auteur <select id="filterAuthor"><option value="">Tous</option></select></label>
+  <label>Thème <select id="filterCategory"><option value="">Tous</option></select></label>
+  <label>Note <select id="filterRating"><option value="">Toutes</option><option value="5">5 ★</option><option value="4">4 ★ et +</option><option value="3">3 ★ et +</option></select></label>
+  <label>Progression <select id="filterProgress"><option value="">Toutes</option><option value="not-started">Non commencés</option><option value="in-progress">En cours</option><option value="completed">Terminés</option></select></label>
+  <label>Format <select id="filterKind"><option value="">PDF + EPUB</option><option value="pdf">PDF</option><option value="epub">EPUB</option></select></label>
+  <button id="resetFilters" class="filter-reset">Réinitialiser</button>
+  </div><div id="booksGrid" class="books-grid" aria-live="polite"></div>
           <div id="emptyState" class="empty-state" hidden><div class="empty-art"><svg class="icon"><use href="#i-book"/></svg></div><h3 id="emptyTitle">Votre bibliothèque vous attend</h3><p id="emptyDescription">Ajoutez votre premier livre PDF pour commencer votre collection.</p><button id="emptyAction" class="button button-primary" data-open-import><svg class="icon"><use href="#i-plus"/></svg> Ajouter mon premier livre</button></div>
         </section>
         <footer class="main-footer">Folio • Vos livres restent sur cet appareil. Pensez à les sauvegarder.</footer>
@@ -96,8 +103,8 @@
 
   <dialog id="importDialog" class="modal"><div class="modal-head"><div><span class="modal-kicker">ENRICHIR MA BIBLIOTHÈQUE</span><h2>Ajouter des livres</h2></div><button class="icon-button close-dialog" aria-label="Fermer"><svg class="icon"><use href="#i-x"/></svg></button></div>
     <div class="tabs"><button id="fileTab" class="tab active" data-import-tab="file">Depuis mon appareil</button><button id="urlTab" class="tab" data-import-tab="url">Depuis un lien</button></div>
-    <div id="filePanel"><label id="dropZone" class="drop-zone" for="pdfFiles"><span class="upload-circle"><svg class="icon"><use href="#i-upload"/></svg></span><strong>Déposez vos fichiers ici</strong><span>ou <u>parcourez votre appareil</u></span><small>Fichiers PDF uniquement • Plusieurs fichiers possibles</small></label><input id="pdfFiles" type="file" accept="application/pdf,.pdf" multiple hidden></div>
-    <form id="urlForm" class="url-form" hidden><label for="pdfUrl">Adresse directe du fichier PDF</label><input id="pdfUrl" type="url" required placeholder="https://exemple.fr/livre.pdf"><p>Le site source doit autoriser le téléchargement depuis un autre site (CORS).</p><button type="submit" class="button button-primary full-width">Importer ce PDF</button></form>
+    <div id="filePanel"><label id="dropZone" class="drop-zone" for="pdfFiles"><span class="upload-circle"><svg class="icon"><use href="#i-upload"/></svg></span><strong>Déposez vos fichiers ici</strong><span>ou <u>parcourez votre appareil</u></span><small>PDF et EPUB • Plusieurs fichiers possibles</small></label><input id="pdfFiles" type="file" accept=".pdf,.epub,application/pdf,application/epub+zip" multiple hidden></div>
+    <form id="urlForm" class="url-form" hidden><label for="pdfUrl">Lien de téléchargement du PDF ou EPUB</label><input id="pdfUrl" type="url" required placeholder="https://exemple.fr/livre.pdf"><p>Le site source doit autoriser le téléchargement depuis un autre site (CORS).</p><button type="submit" class="button button-primary full-width">Importer ce PDF</button></form>
     <div class="modal-note">🔒 Les fichiers sont stockés localement sur cet appareil, pas sur GitHub ni sur un serveur.</div>
   </dialog>
 
@@ -113,7 +120,32 @@
 
   <dialog id="settingsDialog" class="modal"><div class="modal-head"><div><span class="modal-kicker">MON APPLICATION</span><h2>Paramètres</h2></div><button class="icon-button close-dialog" aria-label="Fermer"><svg class="icon"><use href="#i-x"/></svg></button></div><div class="settings-row"><div><strong>Stockage local</strong><p id="storageInfo">Calcul en cours...</p></div><svg class="icon"><use href="#i-library"/></svg></div><button id="persistStorage" class="button button-outline full-width">Protéger le stockage de mon appareil</button><div class="settings-row"><div><strong>Installer Folio</strong><p>Accédez à votre bibliothèque depuis l'écran d'accueil.</p></div></div><button id="installApp" class="button button-primary full-width">Installer l'application</button><div class="settings-row"><div><strong>Sauvegarde</strong><p>Exportez vos livres et leurs fiches dans une archive ZIP pour les retrouver sur un autre appareil.</p></div></div><button id="backupExport" class="button button-outline full-width">Exporter ma bibliothèque (.zip)</button><label class="button button-outline full-width backup-import-label">Restaurer une sauvegarde (.zip)<input id="backupImport" type="file" accept=".zip,application/zip" hidden></label><p class="settings-disclaimer">La lecture hors ligne fonctionne sur cet appareil. Les données ne sont pas synchronisées entre vos appareils. Une suppression des données du navigateur peut effacer votre bibliothèque.</p></dialog>
 
-  <div id="reader" class="reader" hidden><div class="reader-bar"><button id="closeReader" class="icon-button reader-back" aria-label="Fermer la lecture"><svg class="icon"><use href="#i-arrow" style="transform:rotate(180deg)"/></svg></button><div class="reader-heading"><strong id="readerTitle">Lecture</strong><small id="readerAuthor"></small></div><label class="reader-page-label">Page <input id="readerPage" type="number" min="1" step="1" aria-label="Page actuelle"><span id="readerTotal"></span></label><button id="readerEdit" class="icon-button" title="Modifier la fiche" aria-label="Modifier la fiche"><svg class="icon"><use href="#i-edit"/></svg></button><button id="readerDownload" class="icon-button" title="Télécharger" aria-label="Télécharger le PDF"><svg class="icon"><use href="#i-download"/></svg></button></div><div class="reader-frame-wrap"><iframe id="readerFrame" title="Lecteur PDF"></iframe><div class="reader-fallback">Si le PDF ne s'affiche pas, <button id="openExternal">ouvrez-le dans le lecteur de votre navigateur</button>.</div></div></div>
+  <div id="reader" class="reader" hidden>
+  <header class="reader-bar">
+    <button id="closeReader" class="icon-button reader-back" aria-label="Retour à la bibliothèque"><svg class="icon"><use href="#i-arrow" style="transform:rotate(180deg)"/></svg></button>
+    <div class="reader-heading"><strong id="readerTitle">Lecture</strong><small id="readerAuthor"></small></div>
+    <button id="readerMenu" class="reader-control" aria-label="Sommaire et annotations">☰ <span>Sommaire</span></button>
+    <button id="readerPrev" class="reader-control" aria-label="Page précédente">‹</button>
+    <label class="reader-page-label"><input id="readerPage" type="number" min="1" step="1" aria-label="Page actuelle"><span id="readerTotal"></span></label>
+    <button id="readerNext" class="reader-control" aria-label="Page suivante">›</button>
+    <button id="readerBookmark" class="reader-control" title="Ajouter un marque-page" aria-label="Ajouter un marque-page">🔖</button>
+    <button id="readerHighlight" class="reader-control" title="Activer le surlignage" aria-label="Surligner une sélection">🖍</button>
+    <button id="readerTheme" class="reader-control" title="Changer le thème">Jour</button>
+    <button id="readerZoomOut" class="reader-control" aria-label="Réduire le zoom">−</button>
+    <span id="readerZoomValue" class="reader-zoom-value">100 %</span>
+    <button id="readerZoomIn" class="reader-control" aria-label="Augmenter le zoom">+</button>
+    <button id="readerEdit" class="icon-button" title="Fiche du livre" aria-label="Modifier la fiche"><svg class="icon"><use href="#i-edit"/></svg></button>
+    <button id="readerDownload" class="icon-button" title="Exporter le fichier" aria-label="Exporter le livre"><svg class="icon"><use href="#i-download"/></svg></button>
+  </header>
+  <div class="reader-stage">
+    <aside id="readerSidebar" class="reader-sidepanel" hidden>
+      <div class="reader-sidebar-top"><strong>Mon carnet de lecture</strong><button id="readerSideClose" aria-label="Fermer le sommaire">×</button></div>
+      <h3>Chapitres</h3><div id="readerChaptersList"></div><h3>Annotations et signets</h3><div id="readerNotesList"></div>
+    </aside>
+    <div id="readerContent" class="reader-content" aria-label="Contenu du livre"></div>
+  </div>
+  <div class="reader-tip">Sélectionnez du texte après avoir activé 🖍 pour enregistrer un passage et y ajouter une note.</div>
+  </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body>
 </html>
