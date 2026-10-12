@@ -1,6 +1,8 @@
 import './reader.css';
 import { initStorage,allBooks,saveBook,removeBookRecord,storeFile,bookBlob,deleteBookFile,inspectFile,kindOf,idForBook,exportZip,restoreZip,native,saveOrShare } from './storage.js';
 import { Reader,generateCover,epubMetadata } from './reader.js';
+import { setupCatalog,validateExternalUrl } from './catalog.js';
+import { downloadToLibrary } from './direct-download.js';
 
 const $=id=>document.getElementById(id);
 const icon=name=>'<svg class="icon" aria-hidden="true"><use href="#i-'+name+'"/></svg>';
@@ -176,21 +178,53 @@ async function importFiles(files){
   toast(errors.length?errors[0]:added+' livre(s) ajouté(s).',errors.length>0);
   if(added&&navigator.storage?.persist)navigator.storage.persist().catch(()=>{});
 }
+let remoteBusy=false;
+async function importRemoteBook(item,report=()=>{}){
+  if(!loaded)throw new Error('Le stockage local est indisponible.');
+  if(remoteBusy)throw new Error('Un autre téléchargement est déjà en cours.');
+  remoteBusy=true;
+  let data=null;
+  try {
+    const url=validateExternalUrl(item.url);
+    const parsed=new URL(url),kind=item.format==='epub'?'epub':'pdf';
+    const filename=decodeURIComponent(parsed.pathname.split('/').pop()||'Livre');
+    const tentative=String(item.title||filename.replace(/\.(pdf|epub)$/i,'').replace(/[_-]+/g,' ')).trim().slice(0,180)||'Livre';
+    data=await downloadToLibrary({url,format:kind,title:tentative},report);
+    const meta=kind==='epub'?await epubMetadata(data.file):{};
+    const cover=await generateCover(data.file,kind);
+    const now=Date.now();
+    const fromBEQ=/^(?:www\.)?beq\.ebooksgratuits\.com$/i.test(parsed.hostname);
+    const book={
+      id:data.stored.id,title:meta.title||tentative,author:meta.author||'',
+      category:fromBEQ?'Téléchargements/BEQ':'Téléchargements',
+      tags:[],rating:0,favorite:false,status:'to-read',notes:'',page:1,totalPages:null,
+      position:null,progress:0,bookmarks:[],annotations:[],theme:'light',zoom:1,
+      createdAt:now,updatedAt:now,lastReadAt:null,
+      sourceUrl:url,sourceName:parsed.hostname,cover,...data.stored
+    };
+    await saveBook(book);
+    await reload();
+    toast('« '+book.title+' » a été ajouté à Folio.');
+    return book;
+  }catch(e){
+    if(data?.stored?.filePath)await deleteBookFile(data.stored);
+    throw e;
+  }finally{remoteBusy=false;}
+}
 async function importLink(e){
-  e.preventDefault();const url=$('pdfUrl').value.trim();
+  e.preventDefault();
   const button=$('urlForm').querySelector('button[type="submit"]');
-  if(!/^https?:\/\//i.test(url)){toast('URL HTTP(S) requise.',true);return;}
-  button.disabled=true;
-  try{
-    const response=await fetch(url);
-    if(!response.ok)throw new Error('Erreur HTTP '+response.status);
-    const blob=await response.blob();
-    const filename=decodeURIComponent(new URL(url).pathname.split('/').pop()||'livre.pdf');
-    const type=/\.epub$/i.test(filename)?'epub':'pdf';
-    await importFiles([new File([blob],/\.(pdf|epub)$/i.test(filename)?filename:'livre.'+type,{type:blob.type})]);
-    $('pdfUrl').value='';
-  }catch(error){toast('Téléchargement impossible (connexion / CORS) : '+error.message,true);}
-  finally{button.disabled=false;}
+  button.disabled=true;button.textContent='Téléchargement en cours…';
+  try {
+    const url=validateExternalUrl($('pdfUrl').value.trim());
+    const pathname=new URL(url).pathname;
+    const format=/\.epub$/i.test(pathname)?'epub':/\.pdf$/i.test(pathname)?'pdf':null;
+    if(!format)throw new Error('Saisissez un lien direct se terminant par .pdf ou .epub, ou ouvrez « Découvrir » pour explorer un site.');
+    const title=decodeURIComponent(pathname.split('/').pop()).replace(/\.(pdf|epub)$/i,'').replace(/[_-]+/g,' ');
+    await importRemoteBook({url,format,title});
+    $('importDialog').close();$('pdfUrl').value='';
+  }catch(error){toast('Import impossible : '+error.message,true);}
+  finally{button.disabled=false;button.textContent='Importer ce PDF';}
 }
 function openEdit(id){
   const book=findBook(id);if(!book)return;
@@ -274,6 +308,7 @@ async function restore(file){
 }
 function changeView(next){view=next;query='';$('searchInput').value='';render();window.scrollTo({top:0,behavior:'smooth'});}
 function events(){
+  setupCatalog({onImport:importRemoteBook});
   document.addEventListener('click',e=>{
     if(e.target.closest('[data-open-import]')){$('importDialog').showModal();return;}
     const button=e.target.closest('[data-view]');
