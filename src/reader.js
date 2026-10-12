@@ -5,6 +5,9 @@ import ePub from 'epubjs';
 import { bookBlob,kindOf,saveBook } from './storage.js';
 import { attachReadingGestures } from './reading-gestures.js';
 import { nextZoom } from './gesture-math.js';
+import { SystemBars } from '@capacitor/core';
+import { native } from './storage.js';
+import { readingPalette,clampTone } from './reading-appearance.js';
 
 pdfjs.GlobalWorkerOptions.workerSrc=workerUrl;
 const $=id=>document.getElementById(id);
@@ -28,20 +31,70 @@ function scheduleSave(){
   clearTimeout(saveTimer);
   saveTimer=setTimeout(persist,450);
 }
+let barOperation=Promise.resolve();
+function setNativeBarsHidden(hidden){
+  if(!native)return;
+  barOperation=barOperation.catch(()=>{}).then(()=>hidden?SystemBars.hide():SystemBars.show());
+  barOperation.catch(error=>console.warn('Visibilité des barres système',error));
+}
+function setImmersive(enabled){
+  if(!state)return;
+  state.immersive=Boolean(enabled);
+  const reader=$('reader');
+  reader.dataset.immersive=String(state.immersive);
+  $('readerExitFullscreen').hidden=!state.immersive;
+  $('readerFullscreen').textContent=state.immersive?'⛶':'⛶';
+  $('readerFullscreen').setAttribute('aria-label',state.immersive?'Quitter le plein écran':'Activer le plein écran');
+  $('readerFullscreen').setAttribute('aria-pressed',String(state.immersive));
+  if(state.immersive){
+    $('readerTonePanel').hidden=true;
+    $('reader').dataset.toneOpen='false';
+    $('readerToneButton').setAttribute('aria-expanded','false');
+    $('readerSidebar').hidden=true;
+    $('readerMenu').setAttribute('aria-expanded','false');
+  }
+  if(native)setNativeBarsHidden(state.immersive);
+  else if(state.immersive){
+    if(!document.fullscreenElement)document.documentElement.requestFullscreen?.().catch(error=>console.warn('Plein écran navigateur indisponible',error));
+  }else if(document.fullscreenElement){
+    document.exitFullscreen?.().catch(error=>console.warn('Sortie du plein écran',error));
+  }
+}
+function closeTonePanel(){
+  $('readerTonePanel').hidden=true;
+  $('reader').dataset.toneOpen='false';
+  $('readerToneButton').setAttribute('aria-expanded','false');
+}
+function updateToneControls(){
+  if(!state)return;
+  const book=state.book;
+  const warmth=clampTone(book.warmth||0);
+  const dimmer=clampTone(book.dimmer??100,100,60,100);
+  $('readerWarmth').value=String(warmth);
+  $('readerWarmthValue').textContent=warmth+' %';
+  $('readerDimmer').value=String(dimmer);
+  $('readerDimmerValue').textContent=dimmer+' %';
+  document.querySelectorAll('[data-reader-preset]').forEach(button=>{
+    const selected=button.dataset.readerPreset===(book.theme||'light');
+    button.setAttribute('aria-pressed',String(selected));
+  });
+}
 function applyTheme(){
   if(!state)return;
-  $('reader').dataset.theme=state.book.theme||'light';
-  $('readerTheme').textContent=state.book.theme==='dark'?'Nuit':state.book.theme==='sepia'?'Sépia':'Jour';
+  const book=state.book;
+  const theme=book.theme||'light';
+  const reader=$('reader');
+  reader.dataset.theme=theme;
+  $('readerTheme').textContent=theme==='dark'?'Nuit':theme==='sepia'?'Sépia':'Jour';
+  const palette=readingPalette(theme,book.warmth??0,book.dimmer??100);
+  reader.style.setProperty('--reader-warm-alpha',String(palette.pdfTintOpacity));
+  reader.style.setProperty('--reader-dim-alpha',String(palette.pdfDimmerOpacity));
+  $('readerContent').style.backgroundColor=palette.paper;
   if(state.kind==='epub'&&state.rendition){
-    const settings={
-      light:{color:'#2d322e',background:'#ffffff'},
-      sepia:{color:'#503b27',background:'#f3ead7'},
-      dark:{color:'#e3e7e1',background:'#19231f'}
-    };
-    const choice=settings[state.book.theme||'light'];
-    state.rendition.themes.override('color',choice.color);
-    state.rendition.themes.override('background',choice.background);
+    state.rendition.themes.override('color',palette.ink);
+    state.rendition.themes.override('background',palette.paper);
   }
+  updateToneControls();
 }
 function updateFooter(){
   if(!state)return;
@@ -221,6 +274,7 @@ function attachGestures(target){
     },
     onPinch:factor=>setZoom(factor),
     onPinchPreview:previewZoom,
+    onTap:()=>{if(state?.immersive)setImmersive(false);},
     onDoubleTap:()=>{
       if(!state)return;
       setZoom(state.book.zoom>1.35 ? 1/state.book.zoom : 1.75/state.book.zoom);
@@ -234,6 +288,8 @@ function navigatePrevNext(next){
 }
 function closeReader(){
   clearTimeout(saveTimer);
+  if(state?.immersive)setImmersive(false);
+  closeTonePanel();
   if(state){
     const s=state;
     persist().catch(()=>{});
@@ -256,6 +312,8 @@ function closeReader(){
 }
 export function backInReader(){
   if($('reader').hidden)return false;
+  if(!$('readerTonePanel').hidden){closeTonePanel();return true;}
+  if(state?.immersive){setImmersive(false);return true;}
   if(!$('readerSidebar').hidden){
     $('readerSidebar').hidden=true;
     $('readerMenu').setAttribute('aria-expanded','false');
@@ -344,6 +402,8 @@ async function open(book,callbacks={}){
   book.status=book.status==='to-read'?'reading':book.status;
   book.annotations??=[];book.bookmarks??=[];
   book.zoom??=1;book.theme??='light';
+  book.warmth=clampTone(book.warmth??0);
+  book.dimmer=clampTone(book.dimmer??100,100,60,100);
   // Le sens peut être sélectionné manuellement pour les livres PDF en arabe.
   if(kind==='pdf')book.readingDirection??='ltr';
   state={book,kind,pdf:null,epub:null,rendition:null,chapters:[],ticket:0,highlightMode:false,gestureCleanup:[],onUpdate:callbacks.onUpdate,onEdit:callbacks.onEdit,onDownload:callbacks.onDownload};
@@ -351,6 +411,9 @@ async function open(book,callbacks={}){
   $('readerTitle').textContent=book.title;
   $('readerAuthor').textContent=book.author||'';
   $('reader').hidden=false;document.body.style.overflow='hidden';
+  $('reader').dataset.immersive='false';
+  $('readerExitFullscreen').hidden=true;
+  closeTonePanel();
   $('readerSidebar').hidden=true;
   $('readerMenu').setAttribute('aria-expanded','false');
   $('readerContent').replaceChildren();
@@ -434,6 +497,37 @@ function setup(){
     if(state.kind==='epub'&&typeof state.rendition?.direction==='function')
       state.rendition.direction(state.book.readingDirection);
     scheduleSave();
+  });
+  $('readerFullscreen').addEventListener('click',()=>{if(state)setImmersive(!state.immersive);});
+  $('readerExitFullscreen').addEventListener('click',()=>{if(state)setImmersive(false);});
+  $('readerToneButton').addEventListener('click',()=>{
+    if(!state)return;
+    const visible=$('readerTonePanel').hidden;
+    $('readerTonePanel').hidden=!visible;
+    $('reader').dataset.toneOpen=String(visible);
+    $('readerToneButton').setAttribute('aria-expanded',String(visible));
+    if(visible)updateToneControls();
+  });
+  $('readerToneClose').addEventListener('click',closeTonePanel);
+  document.querySelectorAll('[data-reader-preset]').forEach(button=>button.addEventListener('click',()=>{
+    if(!state)return;
+    state.book.theme=button.dataset.readerPreset;
+    applyTheme();scheduleSave();
+  }));
+  for(const [control,field,min,max] of [['readerWarmth','warmth',0,100],['readerDimmer','dimmer',60,100]]){
+    $(control).addEventListener('input',event=>{
+      if(!state)return;
+      state.book[field]=clampTone(event.target.value,field==='dimmer'?100:0,min,max);
+      applyTheme();scheduleSave();
+    });
+  }
+  $('readerToneReset').addEventListener('click',()=>{
+    if(!state)return;
+    state.book.theme='light';state.book.warmth=0;state.book.dimmer=100;
+    applyTheme();scheduleSave();
+  });
+  document.addEventListener('fullscreenchange',()=>{
+    if(!native&&state?.immersive&&!document.fullscreenElement)setImmersive(false);
   });
   $('readerTheme').addEventListener('click',()=>{
     if(!state)return;
