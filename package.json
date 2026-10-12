@@ -16,7 +16,8 @@
     "epubjs": "^0.3.93",
     "jszip": "^3.10.1",
     "pdfjs-dist": "^5.4.296",
-    "@capacitor/share": "^8.0.0"
+    "@capacitor/share": "^8.0.0",
+    "@capacitor/file-transfer": "^2.0.6"
   },
   "devDependencies": {
     "@capacitor/android": "^8.2.0",
