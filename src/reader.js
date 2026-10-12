@@ -336,7 +336,7 @@ async function open(book,callbacks={}){
   book.annotations??=[];book.bookmarks??=[];
   book.zoom??=1;book.theme??='light';
   // Le sens peut être sélectionné manuellement pour les livres PDF en arabe.
-  book.readingDirection??='ltr';
+  if(kind==='pdf')book.readingDirection??='ltr';
   state={book,kind,pdf:null,epub:null,rendition:null,chapters:[],ticket:0,highlightMode:false,gestureCleanup:[],onUpdate:callbacks.onUpdate,onEdit:callbacks.onEdit,onDownload:callbacks.onDownload};
   const s=state;
   $('readerTitle').textContent=book.title;
