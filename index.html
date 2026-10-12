@@ -135,6 +135,8 @@
       <button id="readerBookmark" class="reader-control" type="button" title="Ajouter un marque-page" aria-label="Ajouter un marque-page">🔖</button>
       <button id="readerHighlight" class="reader-control" type="button" title="Activer le surlignage" aria-label="Surligner une sélection" aria-pressed="false">🖍</button>
       <button id="readerTheme" class="reader-control" type="button" title="Changer le thème" aria-label="Changer le thème">Jour</button>
+      <button id="readerToneButton" class="reader-control" type="button" title="Teinte et confort visuel" aria-label="Régler la teinte et le confort visuel" aria-expanded="false">☀ Teinte</button>
+      <button id="readerFullscreen" class="reader-control" type="button" aria-label="Activer le plein écran" title="Plein écran">⛶</button>
       <button id="readerDirection" class="reader-control" type="button" title="Sens de lecture (LTR/RTL)" aria-label="Inverser le sens des gestes de lecture">LTR</button>
       <span class="reader-tool-separator" aria-hidden="true"></span>
       <button id="readerZoomOut" class="reader-control reader-zoom" type="button" aria-label="Réduire le zoom">−</button>
@@ -145,6 +147,23 @@
       <button id="readerDownload" class="icon-button" type="button" title="Exporter le fichier" aria-label="Exporter le livre"><svg class="icon"><use href="#i-download"/></svg></button>
     </div>
   </header>
+  <section id="readerTonePanel" class="reader-tone-panel" aria-label="Réglages de confort visuel" hidden>
+    <div class="reader-tone-header"><strong>Confort de lecture</strong><button id="readerToneClose" type="button" aria-label="Fermer les réglages">×</button></div>
+    <p>Choisissez la couleur du papier, puis ajustez sa chaleur et sa luminosité.</p>
+    <div class="reader-tone-presets" role="group" aria-label="Couleur du papier">
+      <button type="button" data-reader-preset="light">Blanc</button>
+      <button type="button" data-reader-preset="sepia">Sépia</button>
+      <button type="button" data-reader-preset="dark">Nuit</button>
+    </div>
+    <label class="reader-tone-label" for="readerWarmth">Teinte chaude <output id="readerWarmthValue" for="readerWarmth">0 %</output></label>
+    <input id="readerWarmth" class="reader-tone-range" type="range" min="0" max="100" step="5" value="0" aria-label="Chaleur du papier">
+    <div class="reader-tone-ends"><span>Neutre</span><span>Ambré</span></div>
+    <label class="reader-tone-label" for="readerDimmer">Luminosité du livre <output id="readerDimmerValue" for="readerDimmer">100 %</output></label>
+    <input id="readerDimmer" class="reader-tone-range" type="range" min="60" max="100" step="5" value="100" aria-label="Luminosité du livre">
+    <div class="reader-tone-ends"><span>Tamisée</span><span>Normale</span></div>
+    <button id="readerToneReset" type="button" class="reader-tone-reset">Réinitialiser les réglages</button>
+  </section>
+  <button id="readerExitFullscreen" class="reader-exit-fullscreen" type="button" aria-label="Quitter le plein écran" title="Quitter le plein écran" hidden>⛶ <span>Afficher les commandes</span></button>
   <div class="reader-stage">
     <aside id="readerSidebar" class="reader-sidepanel" hidden>
       <div class="reader-sidebar-top"><strong>Mon carnet de lecture</strong><button id="readerSideClose" aria-label="Fermer le sommaire">×</button></div>
