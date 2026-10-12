@@ -186,9 +186,9 @@
         </form>
         <form id="catalogRemoteForm" class="catalog-remote-form" hidden>
           <label for="catalogRemoteQuery">Rechercher sur Project Gutenberg (titre ou auteur)</label>
-          <div><input id="catalogRemoteQuery" type="search" placeholder="Victor Hugo, philosophie, histoire…" autocomplete="off"><button class="button button-primary" type="submit">Rechercher</button></div>
+          <div><select id="catalogRemoteLanguage" aria-label="Langue des livres"><option value="fr">Français</option><option value="en">Anglais</option><option value="ar">Arabe</option><option value="es">Espagnol</option></select><input id="catalogRemoteQuery" type="search" placeholder="Titre, auteur…" autocomplete="off"><button class="button button-primary" type="submit">Rechercher</button></div>
         </form>
-        <div class="catalog-location"><button id="catalogBack" type="button" aria-label="Page précédente">← Retour</button><span id="catalogLocation">Bibliothèque électronique du Québec</span></div>
+        <div class="catalog-location"><button id="catalogBack" type="button" aria-label="Page précédente">← Retour</button><span id="catalogLocation">Bibliothèque électronique du Québec</span><button id="catalogExternal" type="button" class="catalog-external" title="Consulter la page sur son site d'origine">Site officiel ↗</button></div>
         <div id="catalogFeedback" class="catalog-feedback" role="status" aria-live="polite">Sélectionnez une collection ou ouvrez une adresse HTTPS.</div>
         <div id="catalogLoaded" hidden>
           <div class="catalog-results-head">
