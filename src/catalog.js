@@ -1,12 +1,16 @@
 import { CapacitorHttp } from '@capacitor/core';
 import { native } from './storage.js';
 import './catalog.css';
+import { SOURCES, TOPICS } from './catalog-sources.js';
+import { loadGutenberg, loadOPDS } from './catalog-providers.js';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const HOME = 'https://beq.ebooksgratuits.com/';
+const HOME = 'https://islamhouse.com/fr/books/fr/1?sort=date';
 const BLOCKED = /^(?:127|10|0|169\.254|192\.168)\.|^172\.(?:1[6-9]|2\d|3[01])\./;
 let current=HOME,history=[],page=null,bookLimit=70,pageLimit=35,requestId=0,importBook;
+let activeTab='islam',activeTopic='Tous',activeSource=null;
+const favorites=new Set((()=>{try{return JSON.parse(localStorage.getItem('folio-catalog-favorites')||'[]');}catch{return [];}})());
 export function validateExternalUrl(input) {
   const url=new URL(input),host=url.hostname.toLowerCase();
   if(url.protocol!=='https:'||url.username||url.password||!host.includes('.')||host==='localhost'||host.endsWith('.local')||host.endsWith('.internal')||BLOCKED.test(host)||host==='[::1]')
@@ -59,6 +63,53 @@ async function fetchCatalog(url){
   if(text.length>4000000)throw new Error('Page trop volumineuse.');
   return text;
 }
+
+function filteredSources() {
+  const q=$('catalogSourceSearch').value.trim().toLocaleLowerCase();
+  const language=$('catalogSourceLanguage').value;
+  return SOURCES.filter(source=>{
+    if(activeTab==='favorites'&&!favorites.has(source.id))return false;
+    if(['islam','general'].includes(activeTab)&&source.group!==activeTab)return false;
+    if(language==='fr'&&!source.language.toLowerCase().includes('fran'))return false;
+    if(language==='ar'&&!source.language.toLowerCase().includes('arabe'))return false;
+    if(language==='multi'&&!source.language.toLowerCase().includes('multi'))return false;
+    if(activeTopic!=='Tous'&&!source.topics.some(t=>t.toLocaleLowerCase().includes(activeTopic.toLocaleLowerCase())))return false;
+    return [source.label,source.desc,source.language,...source.topics].join(' ').toLocaleLowerCase().includes(q);
+  });
+}
+function renderSources() {
+  document.querySelectorAll('[data-source-tab]').forEach(button=>{
+    const isActive=button.dataset.sourceTab===activeTab;
+    button.classList.toggle('active',isActive);button.setAttribute('aria-pressed',String(isActive));
+  });
+  $('catalogTopicTabs').innerHTML=TOPICS.map(t=>'<button class="'+(t===activeTopic?'active':'')+'" type="button" data-source-topic="'+esc(t)+'">'+esc(t)+'</button>').join('');
+  const matched=filteredSources();
+  $('catalogSourceCount').textContent=matched.length+' source(s)';
+  $('catalogDirectory').innerHTML=matched.length?matched.map(source=>{
+    const selected=source.id===activeSource?.id,star=favorites.has(source.id);
+    const badge=source.mode==='browse'?'Consultation':source.mode==='opds'?'OPDS · téléchargement':source.mode==='gutendex'?'Recherche EPUB':'PDF / EPUB selon le site';
+    return '<article class="catalog-source-card'+(selected?' active':'')+'"><div class="source-card-top"><span class="source-emoji">'+esc(source.icon)+'</span>'+
+      '<button type="button" class="source-star'+(star?' selected':'')+'" data-source-star="'+esc(source.id)+'" aria-label="'+(star?'Retirer des favoris':'Ajouter aux favoris')+'" aria-pressed="'+star+'">'+(star?'★':'☆')+'</button></div>'+
+      '<strong>'+esc(source.label)+'</strong><small>'+esc(source.language)+' · '+esc(badge)+'</small>'+
+      '<p>'+esc(source.desc)+'</p><div class="source-tags">'+source.topics.slice(0,3).map(tag=>'<span>'+esc(tag)+'</span>').join('')+'</div>'+
+      '<button type="button" class="source-open" data-source-open="'+esc(source.id)+'">'+(source.mode==='browse'?'Consulter le site ↗':'Parcourir la bibliothèque →')+'</button></article>';
+  }).join(''):'<p class="catalog-nothing">Aucune source pour ce filtre. Essayez une autre discipline ou la vue « Toutes les sources ».</p>';
+}
+function openSource(id){
+  const source=SOURCES.find(item=>item.id===id);if(!source)return;
+  activeSource=source;
+  renderSources();
+  if(source.mode==='browse'){
+    try{window.open(validateExternalUrl(source.url),'_blank','noopener,noreferrer');}
+    catch(e){feedback(e.message,true);}
+    return;
+  }
+  history=[];
+  $('catalogRemoteForm').hidden=source.mode!=='gutendex';
+  navigate(source.url);
+  $('catalogPageTitle').scrollIntoView?.({behavior:'smooth',block:'start'});
+}
+
 function feedback(message,error=false){
   const el=$('catalogFeedback');el.textContent=message;el.hidden=!message;el.classList.toggle('catalog-error',error);
 }
@@ -84,7 +135,7 @@ async function download(item){
   feedback('Téléchargement de « '+item.title+' »…');
   document.querySelectorAll('[data-catalog-file]').forEach(b=>b.disabled=true);
   try{
-    await importBook(item,p=>feedback('Téléchargement de « '+item.title+' »'+(p===null?'…':' : '+p+' %')));
+    await importBook({...item,sourceGroup:item.sourceGroup||activeSource?.group,source:item.source||activeSource?.label},p=>feedback('Téléchargement de « '+item.title+' »'+(p===null?'…':' : '+p+' %')));
     feedback('« '+item.title+' » est dans votre bibliothèque. Lecture hors ligne disponible.');
   }catch(e){feedback('Téléchargement impossible : '+e.message,true);}
   finally{document.querySelectorAll('[data-catalog-file]').forEach(b=>b.disabled=false);}
@@ -96,9 +147,20 @@ async function navigate(input,back=false){
   const id=++requestId;
   $('catalogLoaded').hidden=true;feedback('Chargement du catalogue…');
   try{
-    const html=await fetchCatalog(url);
+    let parsed;
+    const location=new URL(url);
+    if(location.hostname==='gutendex.com'&&location.pathname.startsWith('/books')){
+      parsed=await loadGutenberg(url);
+      $('catalogRemoteForm').hidden=false;
+    }else if(['www.ebooksgratuits.com','ebooksgratuits.com'].includes(location.hostname)&&location.pathname.startsWith('/opds/')){
+      parsed=await loadOPDS(url);
+      $('catalogRemoteForm').hidden=true;
+    }else{
+      const html=await fetchCatalog(url);
+      parsed=parseCatalog(html,url);
+      $('catalogRemoteForm').hidden=true;
+    }
     if(id!==requestId)return;
-    const parsed=parseCatalog(html,url);
     if(!back&&url!==current)history.push(current);
     current=url;page=parsed;bookLimit=70;pageLimit=35;
     $('catalogUrlInput').value=url;$('catalogLocation').textContent=new URL(url).hostname+' · '+new URL(url).pathname;
@@ -110,22 +172,56 @@ async function navigate(input,back=false){
 }
 function open(){
   $('catalog').hidden=false;document.body.style.overflow='hidden';
+  renderSources();
   if(!page)navigate(HOME);else render();
 }
 function close(){requestId++;$('catalog').hidden=true;document.body.style.overflow='';}
 export function setupCatalog({onImport}){
   importBook=onImport;
+  renderSources();
   $('catalogOpen').addEventListener('click',open);
   $('catalogSide').addEventListener('click',open);
   $('catalogClose').addEventListener('click',close);
-  $('catalogUrlForm').addEventListener('submit',e=>{e.preventDefault();navigate($('catalogUrlInput').value);});
+  $('catalogSourceSearch').addEventListener('input',renderSources);
+  $('catalogSourceLanguage').addEventListener('change',renderSources);
+  $('catalogSourceTabs').addEventListener('click',e=>{
+    const button=e.target.closest('[data-source-tab]');
+    if(!button)return;
+    activeTab=button.dataset.sourceTab;
+    activeTopic='Tous';renderSources();
+  });
+  $('catalogTopicTabs').addEventListener('click',e=>{
+    const button=e.target.closest('[data-source-topic]');
+    if(!button)return;activeTopic=button.dataset.sourceTopic;renderSources();
+  });
+  $('catalogDirectory').addEventListener('click',e=>{
+    const star=e.target.closest('[data-source-star]');
+    if(star){
+      const id=star.dataset.sourceStar;
+      if(favorites.has(id))favorites.delete(id);else favorites.add(id);
+      localStorage.setItem('folio-catalog-favorites',JSON.stringify([...favorites]));
+      renderSources();return;
+    }
+    const button=e.target.closest('[data-source-open]');
+    if(button)openSource(button.dataset.sourceOpen);
+  });
+  $('catalogRemoteForm').addEventListener('submit',e=>{
+    e.preventDefault();
+    const search=$('catalogRemoteQuery').value.trim();
+    const url=new URL('https://gutendex.com/books/');
+    url.searchParams.set('languages','fr');
+    url.searchParams.set('copyright','false');
+    if(search)url.searchParams.set('search',search);
+    navigate(url.href);
+  });
+  $('catalogUrlForm').addEventListener('submit',e=>{e.preventDefault();activeSource=null;renderSources();navigate($('catalogUrlInput').value);});
   $('catalogSearch').addEventListener('input',()=>{bookLimit=70;pageLimit=35;render();});
   $('catalogMore').addEventListener('click',()=>{bookLimit+=70;render();});
   $('catalogMorePages').addEventListener('click',()=>{pageLimit+=35;render();});
   $('catalogBack').addEventListener('click',()=>{if(history.length)navigate(history.pop(),true);});
   $('catalog').addEventListener('click',e=>{
     const quick=e.target.closest('[data-catalog-url]');
-    if(quick){history=[];navigate(quick.dataset.catalogUrl);return;}
+    if(quick){history=[];activeSource=null;renderSources();navigate(quick.dataset.catalogUrl);return;}
     const book=e.target.closest('[data-catalog-file]');
     if(book&&page){const item=filtered().files[Number(book.dataset.catalogFile)];if(item)download(item);return;}
     const link=e.target.closest('[data-catalog-page]');
