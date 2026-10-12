@@ -2,12 +2,13 @@ import * as pdfjs from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import 'pdfjs-dist/web/pdf_viewer.css';
 import ePub from 'epubjs';
-import { bookBlob,kindOf,saveBook } from './storage.js';
+import { bookBlob,kindOf,saveBook,saveOrShare } from './storage.js';
 import { attachReadingGestures } from './reading-gestures.js';
 import { nextZoom } from './gesture-math.js';
 import { SystemBars } from '@capacitor/core';
 import { native } from './storage.js';
 import { readingPalette,clampTone } from './reading-appearance.js';
+import { FONT_OPTIONS,HIGHLIGHT_COLORS,safeHighlightColor,normalizeTypography,searchPDFPages,searchEPUBSections } from './reader-features.js';
 
 pdfjs.GlobalWorkerOptions.workerSrc=workerUrl;
 const $=id=>document.getElementById(id);
@@ -52,6 +53,7 @@ function setImmersive(enabled){
     $('readerToneButton').setAttribute('aria-expanded','false');
     $('readerSidebar').hidden=true;
     $('readerMenu').setAttribute('aria-expanded','false');
+    closeAdvancedPanels();
   }
   if(native)setNativeBarsHidden(state.immersive);
   else if(state.immersive){
@@ -59,6 +61,10 @@ function setImmersive(enabled){
   }else if(document.fullscreenElement){
     document.exitFullscreen?.().catch(error=>console.warn('Sortie du plein écran',error));
   }
+}
+function closeAdvancedPanels(){
+  $('readerFindPanel').hidden=true;$('readerFontPanel').hidden=true;
+  $('readerFindButton').setAttribute('aria-expanded','false');$('readerFontButton').setAttribute('aria-expanded','false');
 }
 function closeTonePanel(){
   $('readerTonePanel').hidden=true;
@@ -103,6 +109,46 @@ function updateFooter(){
   $('readerPage').hidden=state.kind==='epub';
   $('readerTotal').textContent=state.kind==='pdf'?' / '+(book.totalPages||'?') : Math.round(book.progress||0)+' %';
   if(state.kind==='pdf')$('readerPage').value=book.page||1;
+  updatePositionBar();
+}
+function updatePositionBar(){
+ if(!state)return;
+ const pdf=state.kind==='pdf',book=state.book,input=$('readerPosition');
+ input.min=pdf?'1':'0';input.max=String(pdf?Math.max(1,book.totalPages||1):100);input.step='1';
+ input.value=String(pdf?Math.max(1,book.page||1):Math.round(book.progress||0));
+ $('readerPositionLabel').textContent=pdf?'Page '+(book.page||1):Math.round(book.progress||0)+' %';
+ $('readerPositionMax').textContent=pdf?String(book.totalPages||'?')+' p.':'100 %';
+}
+function updateFontControls(){
+ if(!state)return;
+ const {fontFamily,lineHeight}=normalizeTypography(state.book);
+ $('readerFontFamily').value=fontFamily;
+ $('readerLineHeight').value=String(lineHeight);
+ $('readerLineHeightLabel').textContent=lineHeight.toFixed(1).replace('.',',');
+ $('readerFontSize').value=String(Math.max(80,Math.min(220,Math.round((state.book.zoom||1)*10)*10)));
+ $('readerFontSizeLabel').textContent=Math.round((state.book.zoom||1)*100)+' %';
+ const enabled=state.kind==='epub';
+ for(const id of ['readerFontFamily','readerLineHeight','readerFontSize','readerFontReset'])$(id).disabled=!enabled;
+ $('readerFontNotice').textContent=enabled?'Choisissez une police, sa taille et un interligne confortable. Certains EPUB imposent des styles particuliers.':'Un PDF conserve sa mise en page et ses polices d’origine. Utilisez les boutons de zoom + et −.';
+}
+function applyTypography(){
+ if(!state)return;
+ updateFontControls();
+ if(state.kind!=='epub'||!state.rendition)return;
+ const {fontFamily,lineHeight}=normalizeTypography(state.book);
+ state.rendition.themes.fontSize(Math.round((state.book.zoom||1)*100)+'%');
+ state.rendition.themes.override('font-family',fontFamily==='publisher'?'':FONT_OPTIONS[fontFamily]);
+ state.rendition.themes.override('line-height',lineHeight.toFixed(1));
+}
+function updateHighlightPalette(){
+ if(!state)return;
+ document.querySelectorAll('[data-highlight-color]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.highlightColor===safeHighlightColor(state.book.highlightColor))));
+}
+function applyEPUBHighlight(annotation){
+ if(!state?.rendition||!annotation?.cfi)return;
+ try{
+  state.rendition.annotations.highlight(annotation.cfi,{},()=>{},'folio-epub-highlight',{fill:HIGHLIGHT_COLORS[safeHighlightColor(annotation.color)],'fill-opacity':'0.45'});
+ }catch(e){console.warn('Surlignage EPUB indisponible',e);}
 }
 function bookmarkLabel(book){
   return state.kind==='pdf'?'Page '+(book.page||1):'Emplacement EPUB';
@@ -119,7 +165,7 @@ function drawPanel(){
     '<div class="reader-side-heading">Signets ('+bookmarks.length+')</div>',
     ...bookmarks.map(b=>'<button class="reader-side-item" data-go-bookmark="'+esc(b.id)+'"><span>🔖 '+esc(b.label||'Marque-page')+'</span><small>'+esc(b.kind==='pdf'?'Page '+b.position:'EPUB')+'</small></button>'),
     '<div class="reader-side-heading">Surlignages & notes ('+annotations.length+')</div>',
-    ...annotations.map(a=>'<button class="reader-side-item" data-go-annotation="'+esc(a.id)+'"><span>'+esc((a.text||'Surlignage').slice(0,130))+'</span><small>'+esc(a.note||'Appuyer pour consulter / supprimer')+'</small></button>')
+    ...annotations.map(a=>'<button class="reader-side-item" data-go-annotation="'+esc(a.id)+'"><span><i class="reader-annotation-color" style="--annotation-color:'+HIGHLIGHT_COLORS[safeHighlightColor(a.color)]+'"></i>'+esc((a.text||'Surlignage').slice(0,130))+'</span><small>'+esc(a.note||'Appuyer pour consulter / modifier')+'</small></button>')
   ];
   $('readerNotesList').innerHTML=list.join('');
   const contents=state.chapters||[];
@@ -149,7 +195,7 @@ function drawPDFMarks(){
     for(const r of ann.rects||[]){
       const box=document.createElement('div');
       box.className='pdf-highlight-rect';
-      box.style.cssText='left:'+r.x*100+'%;top:'+r.y*100+'%;width:'+r.w*100+'%;height:'+r.h*100+'%';
+      box.style.cssText='left:'+r.x*100+'%;top:'+r.y*100+'%;width:'+r.w*100+'%;height:'+r.h*100+'%;--annotation-color:'+HIGHLIGHT_COLORS[safeHighlightColor(ann.color)];
       target.append(box);
     }
   }
@@ -230,11 +276,11 @@ function addHighlight(partial){
   if(!state)return;
   const note=window.prompt('Note liée à ce passage (facultatif) :','');
   if(note===null)return;
-  const annotation={id:crypto.randomUUID(),note:note.slice(0,10000),createdAt:Date.now(),...partial};
+  const annotation={id:crypto.randomUUID(),note:note.slice(0,10000),createdAt:Date.now(),color:safeHighlightColor(state.book.highlightColor),...partial};
   state.book.annotations??=[];
   state.book.annotations.push(annotation);
   if(partial.kind==='pdf')drawPDFMarks();
-  else state.rendition.annotations.highlight(partial.cfi,{},()=>{},'folio-epub-highlight');
+  else applyEPUBHighlight(annotation);
   drawPanel();scheduleSave();
 }
 function setZoom(factor){
@@ -244,7 +290,7 @@ function setZoom(factor){
   $('reader').classList.toggle('pdf-zoomed',current.kind==='pdf'&&current.book.zoom>1.08);
   $('readerZoomValue').textContent=Math.round(current.book.zoom*100)+' %';
   if(current.kind==='pdf')renderPDFPage({keepScroll:true}).catch(e=>console.warn('Zoom PDF',e));
-  else current.rendition?.themes.fontSize(Math.round(current.book.zoom*100)+'%');
+  else applyTypography();
   scheduleSave();
 }
 function previewZoom(factor){
@@ -290,10 +336,12 @@ function closeReader(){
   clearTimeout(saveTimer);
   if(state?.immersive)setImmersive(false);
   closeTonePanel();
+  closeAdvancedPanels();
   if(state){
     const s=state;
     persist().catch(()=>{});
     s.ticket++;
+    s.searchToken++;
     s.resizeObserver?.disconnect();
     clearTimeout(s.resizeTimer);
     for(const dispose of s.gestureCleanup||[])try{dispose();}catch(e){}
@@ -313,6 +361,7 @@ function closeReader(){
 export function backInReader(){
   if($('reader').hidden)return false;
   if(!$('readerTonePanel').hidden){closeTonePanel();return true;}
+  if(!$('readerFindPanel').hidden||!$('readerFontPanel').hidden){closeAdvancedPanels();return true;}
   if(state?.immersive){setImmersive(false);return true;}
   if(!$('readerSidebar').hidden){
     $('readerSidebar').hidden=true;
@@ -360,13 +409,13 @@ async function readEPUB(s,blob){
       s.gestureCleanup.push(attachGestures(document.documentElement));
     }
     for(const ann of s.book.annotations||[])if(ann.kind==='epub'&&ann.cfi){
-      try{rendition.annotations.highlight(ann.cfi,{},()=>{},'folio-epub-highlight');}catch(e){}
+      applyEPUBHighlight(ann);
     }
   });
   s.chapters=flatten(epub.navigation.toc||[]).map(t=>({label:t.label,href:t.href}));
   drawPanel();
   applyTheme();
-  rendition.themes.fontSize(Math.round((s.book.zoom||1)*100)+'%');
+  applyTypography();
   await rendition.display(s.book.position||undefined);
   epub.locations.generate(1200).then(()=>{
     if(s===state){const location=rendition.currentLocation();if(location)onEPUBLocation(location);}
@@ -403,10 +452,12 @@ async function open(book,callbacks={}){
   book.annotations??=[];book.bookmarks??=[];
   book.zoom??=1;book.theme??='light';
   book.warmth=clampTone(book.warmth??0);
+  Object.assign(book,normalizeTypography(book));
+  book.highlightColor=safeHighlightColor(book.highlightColor);
   book.dimmer=clampTone(book.dimmer??100,100,60,100);
   // Le sens peut être sélectionné manuellement pour les livres PDF en arabe.
   if(kind==='pdf')book.readingDirection??='ltr';
-  state={book,kind,pdf:null,epub:null,rendition:null,chapters:[],ticket:0,highlightMode:false,gestureCleanup:[],onUpdate:callbacks.onUpdate,onEdit:callbacks.onEdit,onDownload:callbacks.onDownload};
+  state={book,kind,pdf:null,epub:null,rendition:null,chapters:[],ticket:0,searchToken:0,searchResults:[],highlightMode:false,gestureCleanup:[],onUpdate:callbacks.onUpdate,onEdit:callbacks.onEdit,onDownload:callbacks.onDownload};
   const s=state;
   $('readerTitle').textContent=book.title;
   $('readerAuthor').textContent=book.author||'';
@@ -414,6 +465,12 @@ async function open(book,callbacks={}){
   $('reader').dataset.immersive='false';
   $('readerExitFullscreen').hidden=true;
   closeTonePanel();
+  closeAdvancedPanels();
+  $('readerFindInput').value='';
+  $('readerFindResults').replaceChildren();
+  $('readerFindStatus').textContent='Cherchez un mot ou une expression dans le livre.';
+  updateFontControls();
+  updateHighlightPalette();
   $('readerSidebar').hidden=true;
   $('readerMenu').setAttribute('aria-expanded','false');
   $('readerContent').replaceChildren();
