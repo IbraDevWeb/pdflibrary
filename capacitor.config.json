@@ -1,0 +1,11 @@
+{
+  "appId": "fr.folio.private.reader",
+  "appName": "Folio",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
