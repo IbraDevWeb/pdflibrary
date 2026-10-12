@@ -46,6 +46,7 @@ function applyTheme(){
 function updateFooter(){
   if(!state)return;
   const book=state.book;
+  $('reader').classList.toggle('pdf-zoomed',state.kind==='pdf'&&Number(book.zoom)>1.08);
   $('readerPage').hidden=state.kind==='epub';
   $('readerTotal').textContent=state.kind==='pdf'?' / '+(book.totalPages||'?') : Math.round(book.progress||0)+' %';
   if(state.kind==='pdf')$('readerPage').value=book.page||1;
@@ -187,6 +188,7 @@ function setZoom(factor){
   const current=state;
   if(!current||!Number.isFinite(factor)||factor<=0)return;
   current.book.zoom=nextZoom(current.book.zoom,factor);
+  $('reader').classList.toggle('pdf-zoomed',current.kind==='pdf'&&current.book.zoom>1.08);
   $('readerZoomValue').textContent=Math.round(current.book.zoom*100)+' %';
   if(current.kind==='pdf')renderPDFPage({keepScroll:true}).catch(e=>console.warn('Zoom PDF',e));
   else current.rendition?.themes.fontSize(Math.round(current.book.zoom*100)+'%');
@@ -208,6 +210,12 @@ function attachGestures(target){
   return attachReadingGestures(target,{
     disabled:()=>!state||state.highlightMode||!$('readerSidebar').hidden||!!document.querySelector('dialog[open]'),
     onSwipe:direction=>{
+      // Quand la page PDF déborde après zoom, un balayage sert à explorer
+      // horizontalement le document (pas à perdre sa page actuelle).
+      if(state?.kind==='pdf'&&state.book.zoom>1.08){
+        const host=$('readerContent');
+        if(host.scrollWidth>host.clientWidth+6)return;
+      }
       const isRtl=state?.book?.readingDirection==='rtl';
       navigatePrevNext(isRtl?direction==='previous':direction==='next');
     },
@@ -242,6 +250,7 @@ function closeReader(){
   $('readerSidebar').hidden=true;
   $('readerMenu').setAttribute('aria-expanded','false');
   $('reader').hidden=true;
+  $('reader').classList.remove('pdf-zoomed');
   document.body.style.overflow='';
   $('readerContent').replaceChildren();
 }
