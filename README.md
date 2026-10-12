@@ -97,6 +97,47 @@ Publier uniquement le dossier `dist/` sur un hébergement HTTPS statique (ou Git
 
 La PWA stocke les PDF/EPUB dans **IndexedDB**, propriété du navigateur. L'APK Android stocke les **fichiers** dans `Directory.Data` de Capacitor (stockage privé de l'application) et les **fiches** en IndexedDB dans la WebView. Le stockage reste local dans les deux cas.
 
+## Folio 2.1 — Ergonomie Android et gestes de lecture
+
+- **Barres de notifications Android** : intégration Capacitor 8 SystemBars avec `insetsHandling: native` et marges CSS `safe-area-inset-top/bottom` ; les en-têtes, fenêtres et barres basses sont adaptés aux encoches, barres de navigation et orientations du téléphone.
+- **Retour Android** : geste de retour natif depuis le bord de l'écran (ou touche Retour) : ferme d'abord une fenêtre de dialogue, retourne à la page précédente du catalogue, ferme le sommaire, ferme la liseuse, ou revient à « Tous les livres ». Au niveau principal, réduit l'application. Sur PWA, un glissement depuis le bord gauche est prévu.
+- **PDF et EPUB** : balayage vers la gauche pour la page suivante, vers la droite pour revenir, *sauf* lorsque le sens **RTL** est sélectionné (lectures arabes), dans ce cas les directions s'inversent. Les bords extrêmes restent réservés aux gestes du système Android.
+- **Zoom tactile** : pincer deux doigts pour augmenter/réduire le zoom, double-taper pour agrandir/revenir, ou utiliser les boutons +/- ; zoom sauvegardé pour chaque livre. Pour EPUB, cela ajuste la taille du texte, pour PDF cela agrandit la page.
+- **Annotations sans conflits** : lorsqu'on active 🖍 pour sélectionner des passages, les balayages de pagination sont suspendus. Désactiver 🖍 pour retrouver la navigation gestuelle.
+- **Mise en page** : outils sur une barre horizontalement défilante, grandes zones tactiles, adaptation portrait/paysage, sommaire et boutons accessibles ; le document garde son espace de lecture.
+- **Continuité** : lecture sauvegardée en arrière-plan, au changement de page et quand la liseuse se ferme ; réajustement automatique en cas de rotation.
+
+### Tests à faire sur le téléphone Android
+
+Les contrôles automatisés valident les décisions de gestes, les boutons existants, la compilation et la génération de l'APK. Les versions matérielles diffèrent : effectuer une validation sur votre appareil avant d'importer une grosse bibliothèque.
+
+1. Téléphone **en portrait**, puis **en paysage** : le titre de la liseuse ne passe ni sous les notifications ni sous la barre Android du bas.
+2. **Retour depuis les bords** : retourner du lecteur à la bibliothèque, fermer le sommaire, revenir dans les pages de catalogue et fermer les dialogues.
+3. PDF : balayer depuis le **milieu** de l'écran vers la gauche/droite, pincer pour zoomer, faire défiler une grande page agrandie, double-taper.
+4. EPUB : tourner les pages, faire varier la taille des caractères, activer RTL sur un EPUB arabe et tester les gestes inversés.
+5. Sélectionner une phrase, l'annoter avec 🖍, fermer/réouvrir : vérifier la persistance.
+6. Exporter un ZIP, fermer et rouvrir l'application, vérifier la progression. Tester la restauration du ZIP sur une **bibliothèque de test** avant toute réinstallation.
+
+### Mises à jour APK sans désinstallation (recommandé)
+
+Les APK `debug` de GitHub Actions sont signés avec une **clé temporaire différente à chaque exécution** : ce n'est pas un canal durable de mise à jour. Pour éviter la réinstallation et donc les pertes de données, le workflow sait produire un **APK release avec une clé personnelle stable**, **uniquement si vous créez les quatre secrets GitHub** suivants. Ne mettez jamais la clé ni le mot de passe dans le dépôt (il est public).
+
+1. Sur votre ordinateur personnel avec Java/JDK, créez une clé conservée **hors du dépôt** :
+   ```bash
+   keytool -genkeypair -v -keystore folio-release.jks -storetype PKCS12 -alias folio -keyalg RSA -keysize 3072 -validity 10000
+   ```
+   Choisissez les mots de passe et conservez en lieu sûr le fichier `folio-release.jks`.
+2. Encodez-le en Base64 sur Linux/macOS : `base64 -w 0 folio-release.jks` (sur macOS : `base64 -i folio-release.jks | tr -d '\\n'`). Sur Windows PowerShell : `[Convert]::ToBase64String([IO.File]::ReadAllBytes('folio-release.jks'))`.
+3. Dans **GitHub → Settings → Secrets and variables → Actions → New repository secret**, créez :
+   - `FOLIO_KEYSTORE_BASE64` : contenu Base64 du fichier.
+   - `FOLIO_KEYSTORE_PASSWORD` : mot de passe du magasin de clés.
+   - `FOLIO_KEY_ALIAS` : `folio`.
+   - `FOLIO_KEY_PASSWORD` : mot de passe de la clé (souvent identique à celui du magasin PKCS12).
+4. Lancez le workflow **Construire l'APK personnel Android** depuis Actions. Une archive `folio-android-signed-apk` apparaît en plus du debug. Installez **toujours cette version signée** pour les mises à jour ultérieures.
+5. Si vous aviez installé la version debug précédente, sauvegardez la bibliothèque en ZIP, désinstallez l'ancienne **une seule fois**, installez la version signée, restaurez le ZIP. Pour les mises à jour suivantes, gardez **exactement la même clé** et le même identifiant d'application.
+
+La procédure optionnelle de signature n'est pas activée tant que ces secrets ne sont pas configurés. La clé ne doit jamais être publiée, et sa perte empêcherait les futures mises à jour de l'application installée avec elle.
+
 ## Sauvegarde et réinstallation
 
 1. Paramètres → **Exporter ma bibliothèque (.zip)**.
