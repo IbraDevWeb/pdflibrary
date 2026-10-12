@@ -9,6 +9,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    env:
+      FOLIO_KEYSTORE_BASE64: ${{ secrets.FOLIO_KEYSTORE_BASE64 }}
+      FOLIO_KEYSTORE_PASSWORD: ${{ secrets.FOLIO_KEYSTORE_PASSWORD }}
+      FOLIO_KEY_ALIAS: ${{ secrets.FOLIO_KEY_ALIAS }}
+      FOLIO_KEY_PASSWORD: ${{ secrets.FOLIO_KEY_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,4 +31,29 @@ jobs:
         with:
           name: folio-android-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7
+      - name: Construire et signer la version personnelle stable (facultatif)
+        if: ${{ env.FOLIO_KEYSTORE_BASE64 != '' && env.FOLIO_KEYSTORE_PASSWORD != '' && env.FOLIO_KEY_ALIAS != '' && env.FOLIO_KEY_PASSWORD != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s' "$FOLIO_KEYSTORE_BASE64" | base64 -d > android/app/folio-release.jks
+          (cd android && ./gradlew assembleRelease --no-daemon)
+          TOOLS="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)"
+          "$TOOLS/zipalign" -p -f 4 android/app/build/outputs/apk/release/app-release-unsigned.apk android/app/folio-aligned.apk
+          "$TOOLS/apksigner" sign \
+            --ks android/app/folio-release.jks \
+            --ks-key-alias "$FOLIO_KEY_ALIAS" \
+            --ks-pass env:FOLIO_KEYSTORE_PASSWORD \
+            --key-pass env:FOLIO_KEY_PASSWORD \
+            --out android/app/folio-signed.apk \
+            android/app/folio-aligned.apk
+          "$TOOLS/apksigner" verify --verbose android/app/folio-signed.apk
+          rm -f android/app/folio-release.jks
+      - name: Publier l'APK signé
+        if: ${{ env.FOLIO_KEYSTORE_BASE64 != '' && env.FOLIO_KEYSTORE_PASSWORD != '' && env.FOLIO_KEY_ALIAS != '' && env.FOLIO_KEY_PASSWORD != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: folio-android-signed-apk
+          path: android/app/folio-signed.apk
           retention-days: 7
