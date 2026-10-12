@@ -1,0 +1,70 @@
+/* Folio 2 : lecture, couvertures, filtres, panneau de notes */
+.book-cover.with-cover:before,.book-cover.with-cover:after,.book-cover.with-cover .cover-inner{display:none}
+.book-progress{height:4px;background:#e9eee9;border-radius:6px;margin-top:10px;overflow:hidden}
+.book-progress>span{height:100%;background:#648a70;display:block;border-radius:6px}
+.advanced-filters{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 22px}
+.advanced-filters label{display:flex;align-items:center;gap:7px;font-size:11px;color:#738779;background:#fff;border:1px solid #e5ede6;padding:5px 10px;border-radius:9px}
+.advanced-filters select{border:0;max-width:140px;color:#294d3a;font-size:11px;background:transparent;outline:none}
+.filter-reset{border:0;background:transparent;color:#527e60;font-size:11px;text-decoration:underline}
+.reader{background:#e2e7e1}
+.reader-bar{position:relative;z-index:5;gap:5px;flex-wrap:nowrap}
+.reader-heading{margin-right:auto;max-width:220px}
+.reader-control{border:1px solid transparent;border-radius:8px;background:transparent;display:inline-grid;place-items:center;min-height:34px;padding:5px 9px;white-space:nowrap;color:#355846;font-size:13px;font-weight:650}
+.reader-control:hover,.reader-control.active{border-color:#bad3be;background:#e1f1e4}
+.reader-control.active{color:#0f6d3f}
+.reader-control[title="Activer le surlignage"].active{background:#f8e7aa}
+.reader-zoom-value{font-size:10px;color:#789085;white-space:nowrap}
+.reader-stage{flex:1;display:flex;min-height:0;min-width:0;position:relative}
+.reader-content{flex:1;min-width:0;min-height:0;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:20px 12px 60px;position:relative;background:#e5e9e5}
+.reader[data-kind="epub"] .reader-content{display:block;padding:16px 22px 8px;background:#fff}
+.reader[data-theme="sepia"] .reader-content{background:#e9e0cb}
+.reader[data-theme="dark"] .reader-content{background:#19231f;color:#e3e7e1}
+.reader[data-theme="dark"] .pdf-page canvas{filter:invert(.86) hue-rotate(170deg)}
+.reader[data-theme="sepia"] .pdf-page canvas{filter:sepia(.6)}
+.reader[data-theme="dark"] .pdf-text-layer{filter:invert(.9)}
+.reader[data-theme="sepia"] .pdf-text-layer{filter:sepia(.7)}
+.pdf-page{background:white;position:relative;margin:0 auto;flex:none;box-shadow:0 15px 30px #263b3225}
+.pdf-page canvas{display:block}
+.pdf-marks{position:absolute;inset:0;pointer-events:none;z-index:2}
+.pdf-highlight-rect{position:absolute;background:#f2cc3b60;mix-blend-mode:multiply}
+.pdf-text-layer{position:absolute!important;inset:0!important;z-index:3;user-select:text}
+.reader-sidepanel{width:min(360px,90vw);background:#fff;box-shadow:5px 0 22px #1112;overflow:auto;padding:16px;flex:none;z-index:5;border-right:1px solid #e1e9e1}
+.reader-sidepanel[hidden]{display:none!important}
+.reader-sidepanel h3{font:600 11px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:1px;color:#7c957e;text-transform:uppercase;margin:24px 0 10px}
+.reader-sidebar-top{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.reader-sidebar-top strong{font-family:Georgia,serif;font-size:18px}
+.reader-sidebar-top button{background:transparent;border:0;font-size:24px}
+.reader-side-heading{font-size:12px;color:#7b937c;font-weight:800;margin:15px 0 8px}
+.reader-side-item{display:block;width:100%;border:0;border-bottom:1px solid #edf1ed;padding:12px 6px;background:transparent;text-align:left;color:#29493b}
+.reader-side-item:hover{background:#f2f7f2}
+.reader-side-item span{display:block;overflow-wrap:anywhere;font-size:12px;line-height:1.4}
+.reader-side-item small{display:block;color:#94a096;margin-top:4px}
+.reader-side-muted{font-size:12px;color:#82928a}
+.reader-tip{min-height:24px;background:#f6f9f6;color:#819285;text-align:center;font-size:10px;padding:4px}
+.reader-page-label{display:flex;align-items:center;gap:4px}
+.reader-page-label input[hidden]{display:none}
+.reader-page-label input{max-width:48px}
+.reader[data-kind="epub"] #readerPage{display:none}
+.reader[data-kind="epub"] #readerTotal{min-width:36px}
+.folio-epub-highlight{fill:rgba(245,209,67,.45)!important;fill-opacity:.45!important}
+@media(max-width:1000px){
+ .reader-heading{max-width:150px}
+ .reader-control{min-height:33px;padding:5px 6px}
+ .reader-bar{gap:2px;padding:0 8px}
+}
+@media(max-width:730px){
+ .advanced-filters{gap:6px}
+ .advanced-filters label{flex:1 1 42%;justify-content:space-between}
+ .advanced-filters select{max-width:115px}
+ .reader-bar{height:auto;min-height:60px;flex-wrap:wrap;padding:6px;justify-content:space-between}
+ .reader-heading{flex:1;max-width:none;min-width:48%;order:0}
+ .reader-back{order:0}
+ #readerMenu{order:0}
+ #readerPrev,#readerNext,.reader-page-label,#readerBookmark,#readerHighlight,#readerTheme,#readerZoomOut,#readerZoomValue,#readerZoomIn{order:2}
+ #readerEdit,#readerDownload{order:1}
+ #readerMenu span{display:none}
+ .reader-control{min-height:30px;font-size:12px}
+ .reader-tip{font-size:9px}
+ .reader-sidepanel{position:absolute;top:0;bottom:0;left:0}
+ .reader[data-kind="epub"] .reader-content{padding:7px 9px}
+}
