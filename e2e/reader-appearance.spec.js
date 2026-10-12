@@ -41,6 +41,26 @@ test('lecture : teinte persistante, luminosité et plein écran réversible',asy
   await page.locator('[data-action="read"][data-id="e2e-reading-appearance"]').click();
   await expect(page.locator('#reader')).toBeVisible();
   await expect(page.locator('#readerContent canvas')).toBeVisible();
+  // Recherche textuelle dans le vrai PDF de test, sans moteur distant.
+  await page.locator('#readerFindButton').click();
+  await page.locator('#readerFindInput').fill('Bonjour');
+  await page.locator('#readerFindForm button[type="submit"]').click();
+  await expect(page.locator('#readerFindResults .reader-find-result')).toHaveCount(1);
+  await expect(page.locator('#readerFindStatus')).toContainText('1 résultat');
+  await page.locator('#readerFindResults .reader-find-result').first().click();
+  await expect(page.locator('#readerFindPanel')).toBeHidden();
+  // Barre de progression intégrée et typographie PDF clairement indisponible.
+  await expect(page.locator('#readerPosition')).toHaveValue('1');
+  await page.locator('#readerFontButton').click();
+  await expect(page.locator('#readerFontPanel')).toBeVisible();
+  await expect(page.locator('#readerFontFamily')).toBeDisabled();
+  await page.locator('#readerFontClose').click();
+  // Couleur des futurs surlignages conservée avec le livre.
+  await page.locator('#readerMenu').click();
+  await page.locator('[data-highlight-color="green"]').click();
+  await expect(page.locator('[data-highlight-color="green"]')).toHaveAttribute('aria-pressed','true');
+  await page.locator('#readerSideClose').click();
+
   await page.locator('#readerToneButton').click();
   await expect(page.locator('#readerTonePanel')).toBeVisible();
   await page.locator('#readerWarmth').evaluate(node=>{
@@ -68,4 +88,9 @@ test('lecture : teinte persistante, luminosité et plein écran réversible',asy
     db.close();
     return [saved.warmth,saved.dimmer,saved.theme].join(':');
   })).toBe('70:85:sepia');
+  await expect.poll(()=>page.evaluate(async()=>{
+    const db=await new Promise(resolve=>{const r=indexedDB.open('folio-library',1);r.onsuccess=()=>resolve(r.result);});
+    const b=await new Promise(resolve=>{const r=db.transaction('books','readonly').objectStore('books').get('e2e-reading-appearance');r.onsuccess=()=>resolve(r.result);});
+    db.close();return b.highlightColor;
+  })).toBe('green');
 });
