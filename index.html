@@ -158,6 +158,21 @@
         <h2>Votre prochaine <em>découverte.</em></h2>
         <p>Parcourez un site de livres numériques, choisissez un PDF ou EPUB et ajoutez-le directement à votre bibliothèque Folio.</p>
       </div>
+      <section class="catalog-directory" aria-label="Annuaire de bibliothèques numériques">
+        <div class="catalog-directory-head">
+          <div><span class="section-eyebrow">SOURCES VÉRIFIÉES</span><h3>Les bibliothèques à explorer</h3><p>Sciences islamiques en français et en arabe, littérature et patrimoine : un accès organisé aux sites éditeurs.</p></div>
+          <label class="catalog-directory-search"><svg class="icon"><use href="#i-search"/></svg><input id="catalogSourceSearch" type="search" placeholder="Une bibliothèque, une discipline…" aria-label="Rechercher dans les bibliothèques"></label>
+        </div>
+        <div id="catalogSourceTabs" class="catalog-source-tabs" role="group" aria-label="Type de bibliothèque">
+          <button class="active" type="button" data-source-tab="islam">Sciences islamiques</button>
+          <button type="button" data-source-tab="general">Littérature & recherche</button>
+          <button type="button" data-source-tab="all">Toutes les sources</button>
+          <button type="button" data-source-tab="favorites">Mes sources favorites</button>
+        </div>
+        <div id="catalogTopicTabs" class="catalog-topic-tabs" role="group" aria-label="Discipline"></div>
+        <div class="catalog-language-filter"><label>Langue <select id="catalogSourceLanguage"><option value="">Toutes</option><option value="fr">Français</option><option value="ar">Arabe</option><option value="multi">Multilingue</option></select></label><span id="catalogSourceCount"></span></div>
+        <div id="catalogDirectory" class="catalog-source-grid"></div>
+      </section>
       <div class="catalog-panel">
         <div class="catalog-shortcuts" role="group" aria-label="Sites et collections recommandés">
           <button data-catalog-url="https://beq.ebooksgratuits.com/">BEQ · Accueil</button>
@@ -168,6 +183,10 @@
         <form id="catalogUrlForm" class="catalog-url-form">
           <label for="catalogUrlInput">Adresse d'un catalogue ou d'un livre PDF/EPUB</label>
           <div><input id="catalogUrlInput" type="url" required value="https://beq.ebooksgratuits.com/" placeholder="https://exemple.com/livres" autocomplete="url"><button type="submit" class="button button-primary">Explorer <svg class="icon"><use href="#i-arrow"/></svg></button></div>
+        </form>
+        <form id="catalogRemoteForm" class="catalog-remote-form" hidden>
+          <label for="catalogRemoteQuery">Rechercher sur Project Gutenberg (titre ou auteur)</label>
+          <div><input id="catalogRemoteQuery" type="search" placeholder="Victor Hugo, philosophie, histoire…" autocomplete="off"><button class="button button-primary" type="submit">Rechercher</button></div>
         </form>
         <div class="catalog-location"><button id="catalogBack" type="button" aria-label="Page précédente">← Retour</button><span id="catalogLocation">Bibliothèque électronique du Québec</span></div>
         <div id="catalogFeedback" class="catalog-feedback" role="status" aria-live="polite">Sélectionnez une collection ou ouvrez une adresse HTTPS.</div>
