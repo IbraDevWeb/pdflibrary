@@ -78,3 +78,7 @@
 .catalog-remote-form .button{padding:10px 14px;font-size:11px}
 @media(max-width:1000px){.catalog-source-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.catalog-directory-head{align-items:start;flex-wrap:wrap}.catalog-directory-search{max-width:none;width:100%}}
 @media(max-width:620px){.catalog-directory{padding:16px;margin-bottom:18px}.catalog-directory-head h3{font-size:23px}.catalog-source-grid{grid-template-columns:1fr}.catalog-source-card{padding:14px}.catalog-source-tabs button{font-size:11px;padding:9px 10px}.catalog-topic-tabs{flex-wrap:nowrap;overflow:auto;padding:0 1px 6px}.catalog-topic-tabs button{flex:none;white-space:nowrap}.catalog-remote-form>div{flex-wrap:wrap}.catalog-remote-form .button{width:100%}}
+
+.catalog-location .catalog-external{margin-left:auto;background:#e6f0e9;color:#2b5c41;flex:none}
+.catalog-remote-form select{background:#fff;border:1px solid #c8ddc9;color:#325741;border-radius:8px;padding:9px 8px;max-width:120px;font-size:12px}
+@media(max-width:620px){.catalog-location .catalog-external{font-size:10px;padding:6px}.catalog-remote-form select{max-width:100%}}
