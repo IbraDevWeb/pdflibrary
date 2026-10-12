@@ -122,20 +122,27 @@
 
   <div id="reader" class="reader" hidden>
   <header class="reader-bar">
-    <button id="closeReader" class="icon-button reader-back" aria-label="Retour à la bibliothèque"><svg class="icon"><use href="#i-arrow" style="transform:rotate(180deg)"/></svg></button>
-    <div class="reader-heading"><strong id="readerTitle">Lecture</strong><small id="readerAuthor"></small></div>
-    <button id="readerMenu" class="reader-control" aria-label="Sommaire et annotations">☰ <span>Sommaire</span></button>
-    <button id="readerPrev" class="reader-control" aria-label="Page précédente">‹</button>
-    <label class="reader-page-label"><input id="readerPage" type="number" min="1" step="1" aria-label="Page actuelle"><span id="readerTotal"></span></label>
-    <button id="readerNext" class="reader-control" aria-label="Page suivante">›</button>
-    <button id="readerBookmark" class="reader-control" title="Ajouter un marque-page" aria-label="Ajouter un marque-page">🔖</button>
-    <button id="readerHighlight" class="reader-control" title="Activer le surlignage" aria-label="Surligner une sélection">🖍</button>
-    <button id="readerTheme" class="reader-control" title="Changer le thème">Jour</button>
-    <button id="readerZoomOut" class="reader-control" aria-label="Réduire le zoom">−</button>
-    <span id="readerZoomValue" class="reader-zoom-value">100 %</span>
-    <button id="readerZoomIn" class="reader-control" aria-label="Augmenter le zoom">+</button>
-    <button id="readerEdit" class="icon-button" title="Fiche du livre" aria-label="Modifier la fiche"><svg class="icon"><use href="#i-edit"/></svg></button>
-    <button id="readerDownload" class="icon-button" title="Exporter le fichier" aria-label="Exporter le livre"><svg class="icon"><use href="#i-download"/></svg></button>
+    <div class="reader-head-row">
+      <button id="closeReader" class="icon-button reader-back" type="button" aria-label="Retour à la bibliothèque"><svg class="icon"><use href="#i-arrow" style="transform:rotate(180deg)"/></svg></button>
+      <div class="reader-heading"><strong id="readerTitle">Lecture</strong><small id="readerAuthor"></small></div>
+      <button id="readerMenu" class="reader-control" type="button" aria-label="Ouvrir le sommaire et les annotations" aria-expanded="false">☰ <span>Sommaire</span></button>
+    </div>
+    <div class="reader-tools" role="toolbar" aria-label="Outils de lecture">
+      <button id="readerPrev" class="reader-control reader-nav-arrow" type="button" aria-label="Page précédente">‹</button>
+      <label class="reader-page-label"><input id="readerPage" type="number" min="1" step="1" aria-label="Page actuelle"><span id="readerTotal"></span></label>
+      <button id="readerNext" class="reader-control reader-nav-arrow" type="button" aria-label="Page suivante">›</button>
+      <span class="reader-tool-separator" aria-hidden="true"></span>
+      <button id="readerBookmark" class="reader-control" type="button" title="Ajouter un marque-page" aria-label="Ajouter un marque-page">🔖</button>
+      <button id="readerHighlight" class="reader-control" type="button" title="Activer le surlignage" aria-label="Surligner une sélection" aria-pressed="false">🖍</button>
+      <button id="readerTheme" class="reader-control" type="button" title="Changer le thème" aria-label="Changer le thème">Jour</button>
+      <span class="reader-tool-separator" aria-hidden="true"></span>
+      <button id="readerZoomOut" class="reader-control reader-zoom" type="button" aria-label="Réduire le zoom">−</button>
+      <span id="readerZoomValue" class="reader-zoom-value">100 %</span>
+      <button id="readerZoomIn" class="reader-control reader-zoom" type="button" aria-label="Augmenter le zoom">+</button>
+      <span class="reader-tool-separator" aria-hidden="true"></span>
+      <button id="readerEdit" class="icon-button" type="button" title="Fiche du livre" aria-label="Modifier la fiche"><svg class="icon"><use href="#i-edit"/></svg></button>
+      <button id="readerDownload" class="icon-button" type="button" title="Exporter le fichier" aria-label="Exporter le livre"><svg class="icon"><use href="#i-download"/></svg></button>
+    </div>
   </header>
   <div class="reader-stage">
     <aside id="readerSidebar" class="reader-sidepanel" hidden>
@@ -144,7 +151,7 @@
     </aside>
     <div id="readerContent" class="reader-content" aria-label="Contenu du livre"></div>
   </div>
-  <div class="reader-tip">Sélectionnez du texte après avoir activé 🖍 pour enregistrer un passage et y ajouter une note.</div>
+  <div class="reader-tip" id="readerTip" aria-live="polite">Glissez horizontalement pour tourner les pages · Pincez pour zoomer · Activez 🖍 pour annoter</div>
   </div>
   <section id="catalog" class="catalog-overlay" hidden aria-label="Explorer et télécharger des livres">
     <header class="catalog-header">
