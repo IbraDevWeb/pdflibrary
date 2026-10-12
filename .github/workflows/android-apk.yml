@@ -1,6 +1,8 @@
 name: Construire l'APK personnel Android
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
 permissions:
   contents: read
 jobs:
