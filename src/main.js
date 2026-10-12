@@ -311,7 +311,7 @@ async function restore(file){
     $('settingsDialog').close();await reload();toast(result.added+' livre(s) restauré(s), '+result.skipped+' déjà présent(s).');
   }catch(e){toast('Import ZIP impossible : '+e.message,true);}
 }
-function changeView(next){view=next;query='';$('searchInput').value='';render();window.scrollTo({top:0,behavior:'smooth'});}
+function changeView(next){view=next;query='';$('searchInput').value='';render();const viewport=document.querySelector('.app-shell > .main');if(viewport&&getComputedStyle(viewport).overflowY!=='visible')viewport.scrollTo({top:0,behavior:'smooth'});else window.scrollTo({top:0,behavior:'smooth'});}
 function events(){
   setupCatalog({onImport:importRemoteBook});
   document.addEventListener('click',e=>{
