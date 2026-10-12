@@ -97,6 +97,18 @@ Publier uniquement le dossier `dist/` sur un hébergement HTTPS statique (ou Git
 
 La PWA stocke les PDF/EPUB dans **IndexedDB**, propriété du navigateur. L'APK Android stocke les **fichiers** dans `Directory.Data` de Capacitor (stockage privé de l'application) et les **fiches** en IndexedDB dans la WebView. Le stockage reste local dans les deux cas.
 
+## Folio 2.2 — Mode lecture plein écran et teinte personnalisée
+
+Depuis la liseuse PDF ou EPUB, les boutons **⛶** et **☀ Teinte** ouvrent deux nouveaux réglages :
+
+- **⛶ Plein écran** : la barre de commandes de Folio et le pied de page disparaissent. Dans l'APK Android, Folio masque aussi temporairement les barres de statut et de navigation à l'aide de Capacitor SystemBars. Appuyer au centre du livre ou sur **Afficher les commandes** pour retrouver le mode normal. Un geste système Android peut également faire réapparaître temporairement les barres.
+- **☀ Teinte** : trois modes **Blanc / Sépia / Nuit**, un curseur **Teinte chaude (0–100 %)** et un curseur **Luminosité du livre (60–100 %)**. Ces réglages affectent le rendu du livre, **pas** la luminosité physique du téléphone. Leurs valeurs sont sauvegardées par livre et comprises dans le ZIP de sauvegarde.
+- **PDF** : la teinte est un filtre de lecture superposé au rendu, sans changer le PDF d'origine ni ses annotations. Le résultat dépend des couleurs du PDF.
+- **EPUB** : Folio adapte les couleurs du texte et du fond de lecture. Les livres ayant des règles de style imposées peuvent rendre les réglages moins homogènes.
+- Les commandes restent accessibles sur Android, dans le navigateur et en PWA ; si un navigateur refuse la véritable API plein écran, Folio peut tout de même masquer ses propres barres.
+
+Les tests automatisés contrôlent la plage de couleur, le stockage des valeurs, et les transitions plein écran dans un navigateur mobile simulé. Les barres Android natives restent à vérifier sur un appareil physique.
+
 ## Folio 2.1 — Ergonomie Android et gestes de lecture
 
 - **Barres de notifications Android** : intégration Capacitor 8 SystemBars avec `insetsHandling: native` et marges CSS `safe-area-inset-top/bottom` ; les en-têtes, fenêtres et barres basses sont adaptés aux encoches, barres de navigation et orientations du téléphone.
