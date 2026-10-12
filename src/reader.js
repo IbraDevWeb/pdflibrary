@@ -115,6 +115,7 @@ function updatePositionBar(){
  if(!state)return;
  const pdf=state.kind==='pdf',book=state.book,input=$('readerPosition');
  input.min=pdf?'1':'0';input.max=String(pdf?Math.max(1,book.totalPages||1):100);input.step='1';
+ input.disabled=!pdf&&!state.epub?.locations?.length?.();
  input.value=String(pdf?Math.max(1,book.page||1):Math.round(book.progress||0));
  $('readerPositionLabel').textContent=pdf?'Page '+(book.page||1):Math.round(book.progress||0)+' %';
  $('readerPositionMax').textContent=pdf?String(book.totalPages||'?')+' p.':'100 %';
@@ -418,7 +419,7 @@ async function readEPUB(s,blob){
   applyTypography();
   await rendition.display(s.book.position||undefined);
   epub.locations.generate(1200).then(()=>{
-    if(s===state){const location=rendition.currentLocation();if(location)onEPUBLocation(location);}
+    if(s===state){const location=rendition.currentLocation();if(location)onEPUBLocation(location);updatePositionBar();}
   }).catch(()=>{});
 }
 function flatten(items){return items.flatMap(item=>[item,...flatten(item.subitems||[])]);}
@@ -524,12 +525,147 @@ function removeAnnotation(id){
   }else ann.note=edit.slice(0,10000);
   drawPanel();scheduleSave();
 }
+
+async function runBookSearch(query){
+ const s=state;
+ if(!s)return;
+ const q=String(query||'').trim();
+ if(q.length<2){$('readerFindStatus').textContent='Saisissez au moins 2 caractères.';return;}
+ if(s.kind==='pdf'&&!s.pdf||s.kind==='epub'&&!s.epub){
+   $('readerFindStatus').textContent='Le livre est encore en cours de chargement.';return;
+ }
+ const token=++s.searchToken;
+ const action=$('readerFindForm').querySelector('button[type="submit"]');
+ action.disabled=true;
+ s.searchResults=[];
+ $('readerFindResults').replaceChildren();
+ $('readerFindStatus').textContent='Recherche en cours : les pages sont analysées sur cet appareil…';
+ const report=(done,total,count)=>{
+  if(s!==state||token!==s.searchToken)return;
+  $('readerFindStatus').textContent=done+' / '+total+' '+(s.kind==='pdf'?'pages':'chapitres')+' · '+count+' résultats';
+ };
+ try{
+  const result=s.kind==='pdf'
+   ?await searchPDFPages(s.pdf,q,{cancelled:()=>s!==state||token!==s.searchToken,onProgress:report,limit:100})
+   :await searchEPUBSections(s.epub,q,{cancelled:()=>s!==state||token!==s.searchToken,onProgress:report,limit:100});
+  if(s!==state||token!==s.searchToken)return;
+  s.searchResults=result.matches;
+  $('readerFindStatus').textContent=result.matches.length
+   ?result.matches.length+' résultat(s)'+(result.truncated?' (limite 100)':'')+' · '+result.scanned+' / '+result.total+' analysés'
+   :'Aucune occurrence trouvée. Les PDF scannés sans texte nécessitent un OCR.';
+  const container=$('readerFindResults');
+  container.replaceChildren();
+  for(let i=0;i<result.matches.length;i++){
+   const hit=result.matches[i];
+   const button=document.createElement('button');button.type='button';
+   button.className='reader-find-result';button.dataset.searchIndex=String(i);
+   const heading=document.createElement('strong');heading.textContent=hit.title;
+   const snippet=document.createElement('span');snippet.textContent=hit.snippet;
+   button.append(heading,snippet);container.append(button);
+  }
+ }catch(e){
+  if(s===state&&token===s.searchToken)$('readerFindStatus').textContent='Recherche impossible : '+e.message;
+ }finally{
+  if(s===state&&token===s.searchToken)action.disabled=false;
+ }
+}
+async function exportReaderNotes(){
+ if(!state)return;
+ const annotations=state.book.annotations||[],marks=state.book.bookmarks||[];
+ if(!annotations.length&&!marks.length){window.alert('Aucun signet ni annotation à exporter.');return;}
+ const text=[
+  'Folio — '+state.book.title,
+  'Auteur : '+(state.book.author||'Inconnu'),'',
+  'SIGNETS',
+  ...marks.map(m=>'- '+(m.label||'Signet')+' ('+(m.kind==='pdf'?'page '+m.position:'EPUB')+')'),
+  '','SURLIGNAGES ET NOTES',
+  ...annotations.map((a,i)=>[
+   (i+1)+'. '+(a.kind==='pdf'?'Page '+a.page:'Emplacement EPUB')+' — '+safeHighlightColor(a.color),
+   a.text||'Passage sans texte',
+   a.note?'Note : '+a.note:''
+  ].filter(Boolean).join('\n')),
+  '','Exporté depuis Folio le '+new Date().toLocaleDateString('fr-FR')
+ ].join('\n');
+ try{
+  const blob=new Blob([text],{type:'text/plain;charset=utf-8'});
+  await saveOrShare(blob,'Folio-annotations-'+state.book.id.slice(0,12)+'.txt');
+ }catch(e){window.alert('Export impossible : '+e.message);}
+}
+
 function setup(){
   initializePDFSelection();
   $('closeReader').addEventListener('click',closeReader);
   $('readerPrev').addEventListener('click',()=>navigatePrevNext(false));
   $('readerNext').addEventListener('click',()=>navigatePrevNext(true));
   $('readerPage').addEventListener('change',e=>showPosition(e.target.value));
+  $('readerPosition').addEventListener('input',e=>{
+    if(!state)return;
+    $('readerPositionLabel').textContent=state.kind==='pdf'?'Page '+e.target.value:e.target.value+' %';
+  });
+  $('readerPosition').addEventListener('change',async e=>{
+    if(!state)return;
+    const value=Number(e.target.value);
+    if(state.kind==='pdf')await showPosition(value);
+    else if(state.epub?.locations?.length?.()){
+      const cfi=state.epub.locations.cfiFromPercentage(Math.max(0,Math.min(1,value/100)));
+      if(cfi)await showPosition(cfi);
+    }
+    updatePositionBar();
+  });
+  $('readerFindButton').addEventListener('click',()=>{
+    if(!state)return;
+    const open=$('readerFindPanel').hidden;
+    closeAdvancedPanels();closeTonePanel();
+    $('readerFindPanel').hidden=!open;
+    $('readerFindButton').setAttribute('aria-expanded',String(open));
+    if(open)$('readerFindInput').focus();
+  });
+  $('readerFontButton').addEventListener('click',()=>{
+    if(!state)return;
+    const open=$('readerFontPanel').hidden;
+    closeAdvancedPanels();closeTonePanel();
+    $('readerFontPanel').hidden=!open;
+    $('readerFontButton').setAttribute('aria-expanded',String(open));
+    if(open)updateFontControls();
+  });
+  $('readerFindClose').addEventListener('click',closeAdvancedPanels);
+  $('readerFontClose').addEventListener('click',closeAdvancedPanels);
+  $('readerFindForm').addEventListener('submit',e=>{e.preventDefault();runBookSearch($('readerFindInput').value);});
+  $('readerFindResults').addEventListener('click',e=>{
+    const b=e.target.closest('[data-search-index]');
+    if(!b||!state)return;
+    const hit=state.searchResults[Number(b.dataset.searchIndex)];
+    if(!hit)return;
+    showPosition(hit.position).then(closeAdvancedPanels).catch(console.error);
+  });
+  $('readerFontFamily').addEventListener('change',e=>{
+    if(state?.kind!=='epub')return;
+    state.book.fontFamily=e.target.value;
+    applyTypography();scheduleSave();
+  });
+  $('readerLineHeight').addEventListener('input',e=>{
+    if(state?.kind!=='epub')return;
+    state.book.lineHeight=Number(e.target.value);
+    applyTypography();scheduleSave();
+  });
+  $('readerFontSize').addEventListener('input',e=>{
+    if(state?.kind!=='epub')return;
+    state.book.zoom=Number(e.target.value)/100;
+    $('readerZoomValue').textContent=Math.round(state.book.zoom*100)+' %';
+    applyTypography();scheduleSave();
+  });
+  $('readerFontReset').addEventListener('click',()=>{
+    if(state?.kind!=='epub')return;
+    state.book.fontFamily='publisher';state.book.lineHeight=1.6;state.book.zoom=1;
+    $('readerZoomValue').textContent='100 %';
+    applyTypography();scheduleSave();
+  });
+  document.querySelectorAll('[data-highlight-color]').forEach(b=>b.addEventListener('click',()=>{
+    if(!state)return;
+    state.book.highlightColor=safeHighlightColor(b.dataset.highlightColor);
+    updateHighlightPalette();scheduleSave();
+  }));
+  $('readerExportNotes').addEventListener('click',exportReaderNotes);
   $('readerHighlight').addEventListener('click',()=>{
     if(!state)return;
     state.highlightMode=!state.highlightMode;
@@ -559,6 +695,7 @@ function setup(){
   $('readerExitFullscreen').addEventListener('click',()=>{if(state)setImmersive(false);});
   $('readerToneButton').addEventListener('click',()=>{
     if(!state)return;
+    closeAdvancedPanels();
     const visible=$('readerTonePanel').hidden;
     $('readerTonePanel').hidden=!visible;
     $('reader').dataset.toneOpen=String(visible);
@@ -596,6 +733,7 @@ function setup(){
     $(id).addEventListener('click',()=>setZoom(multiplier));
   }
   $('readerMenu').addEventListener('click',()=>{
+    closeAdvancedPanels();closeTonePanel();
     const side=$('readerSidebar');
     side.hidden=!side.hidden;
     $('readerMenu').setAttribute('aria-expanded',String(!side.hidden));
@@ -639,7 +777,10 @@ function setup(){
     if(e.target instanceof HTMLInputElement||e.target instanceof HTMLTextAreaElement)return;
     if(e.key==='ArrowRight')navigatePrevNext(true);
     if(e.key==='ArrowLeft')navigatePrevNext(false);
-    if(e.key==='Escape')closeReader();
+    if(e.key==='Escape'){backInReader();return;}
+    if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='f'){
+      e.preventDefault();$('readerFindButton').click();return;
+    }
   });
 }
 setup();
