@@ -46,7 +46,7 @@
 .reader-page-label input{max-width:48px}
 .reader[data-kind="epub"] #readerPage{display:none}
 .reader[data-kind="epub"] #readerTotal{min-width:36px}
-.folio-epub-highlight{fill:rgba(245,209,67,.45)!important;fill-opacity:.45!important}
+.folio-epub-highlight{fill:rgba(245,209,67,.45);fill-opacity:.45}
 @media(max-width:1000px){
  .reader-heading{max-width:150px}
  .reader-control{min-height:33px;padding:5px 6px}
