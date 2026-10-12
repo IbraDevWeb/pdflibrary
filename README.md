@@ -14,6 +14,24 @@ Folio est une bibliothèque personnelle en français qui lit des livres **PDF** 
 - Sauvegarde ZIP complète (PDF, EPUB, métadonnées, couvertures, notes et signets), et restauration des anciennes archives Folio v1.
 - Navigation hors ligne après installation ; le JavaScript, ses dépendances et les icônes sont compilés dans l'application.
 
+## Découvrir des livres sans les télécharger préalablement
+
+Sur Android, Folio dispose désormais d'un espace **Découvrir**, accessible depuis la bibliothèque. Il présente les pages de collections de la [Bibliothèque électronique du Québec](https://beq.ebooksgratuits.com/) et permet de consulter les liens PDF/EPUB, puis de toucher **Ajouter ↓** : le fichier est téléchargé directement dans le stockage privé de Folio.
+
+1. Ouvrir Folio puis **Découvrir**.
+2. Choisir **BEQ · Accueil**, **Classiques du monde**, **Littérature québécoise** ou **Incontournables**.
+3. Ouvrir une collection, chercher un titre avec le champ de recherche (recherche dans la page affichée).
+4. Toucher **Ajouter ↓** à côté du PDF ou de l'EPUB.
+5. Retourner à la bibliothèque : le document est conservé localement sous `Téléchargements/BEQ`.
+
+L'explorateur accepte également une **adresse HTTPS publique** de catalogue ou un lien direct vers un fichier se terminant par `.pdf` ou `.epub`. Le catalogue distant est lu comme texte et les liens sont extraits sans exécuter ses scripts. L'application ne contourne pas les protections d'accès et ne fournit aucun catalogue hébergé par Folio.
+
+- **APK Android :** `CapacitorHttp` charge les pages HTML ; `@capacitor/file-transfer` télécharge les livres sur le disque privé. Le navigateur ne sert pas d'intermédiaire et les restrictions CORS ordinaires de la WebView ne s'appliquent pas à ces requêtes natives.
+- **PWA web :** les téléchargements depuis les domaines tiers restent soumis aux restrictions **CORS**. Préférez l'APK pour les sites anciens comme BEQ.
+- **Hors connexion :** une connexion est nécessaire pour consulter et télécharger les livres depuis un site tiers, mais pas pour lire les livres déjà importés.
+- **Limites :** seules les URL directes `.pdf` / `.epub` sont reconnues automatiquement ; les boutons de téléchargement en JavaScript, formulaires nécessitant une session, DRM, captchas et certains sites dynamiques ne sont pas pris en charge. Les gros fichiers sont limités à 120 Mo pour protéger la mémoire du téléphone. Les sites tiers peuvent changer de structure.
+- **Droits d'auteur :** vérifiez le domaine public ou la licence du livre dans votre pays avant de le conserver. La mention « domaine public » sur un site ne garantit pas la situation juridique de chaque œuvre dans tous les pays.
+
 ## Installation PERSONNELLE sur Android, sans Play Store
 
 ### Méthode GitHub Actions (APK, sans Android Studio)
