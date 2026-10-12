@@ -182,6 +182,7 @@ let remoteBusy=false;
 async function importRemoteBook(item,report=()=>{}){
   if(!loaded)throw new Error('Le stockage local est indisponible.');
   if(remoteBusy)throw new Error('Un autre téléchargement est déjà en cours.');
+  if(books.some(book=>book.sourceUrl===item.url))throw new Error('Ce livre a déjà été téléchargé dans Folio.');
   remoteBusy=true;
   let data=null;
   try {
@@ -224,7 +225,7 @@ async function importLink(e){
     await importRemoteBook({url,format,title});
     $('importDialog').close();$('pdfUrl').value='';
   }catch(error){toast('Import impossible : '+error.message,true);}
-  finally{button.disabled=false;button.textContent='Importer ce PDF';}
+  finally{button.disabled=false;button.textContent='Importer le livre';}
 }
 function openEdit(id){
   const book=findBook(id);if(!book)return;

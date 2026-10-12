@@ -107,7 +107,9 @@ function normalize(info){
     theme:['light','sepia','dark'].includes(info.theme)?info.theme:'light',
     zoom:Math.min(3,Math.max(.6,Number(info.zoom)||1)),
     createdAt:Number(info.createdAt)||Date.now(),updatedAt:Date.now(),
-    lastReadAt:Number(info.lastReadAt)||null
+    lastReadAt:Number(info.lastReadAt)||null,
+    sourceUrl:typeof info.sourceUrl==='string'?info.sourceUrl.slice(0,2000):null,
+    sourceName:typeof info.sourceName==='string'?info.sourceName.slice(0,200):null
   };
 }
 export async function exportZip(books){
