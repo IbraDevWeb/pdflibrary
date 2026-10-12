@@ -105,6 +105,8 @@ function normalize(info){
     bookmarks:Array.isArray(info.bookmarks)?info.bookmarks.slice(0,300):[],
     annotations:Array.isArray(info.annotations)?info.annotations.slice(0,3000):[],
     theme:['light','sepia','dark'].includes(info.theme)?info.theme:'light',
+    warmth:Math.min(100,Math.max(0,Number(info.warmth)||0)),
+    dimmer:Math.min(100,Math.max(60,Number(info.dimmer??100)||100)),
     zoom:Math.min(3,Math.max(.6,Number(info.zoom)||1)),
     readingDirection:info.readingDirection==='rtl'?'rtl':'ltr',
     createdAt:Number(info.createdAt)||Date.now(),updatedAt:Date.now(),
