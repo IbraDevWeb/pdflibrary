@@ -195,13 +195,15 @@ async function importRemoteBook(item,report=()=>{}){
     const cover=await generateCover(data.file,kind);
     const now=Date.now();
     const fromBEQ=/^(?:www\.)?beq\.ebooksgratuits\.com$/i.test(parsed.hostname);
+    const sourceFolder=String(item.source||parsed.hostname).replace(/[\\/]+/g,'-').slice(0,60);
+    const localCategory=item.sourceGroup==='islam'?'Sciences islamiques/'+sourceFolder:(fromBEQ?'Téléchargements/BEQ':'Téléchargements/'+sourceFolder);
     const book={
-      id:data.stored.id,title:meta.title||tentative,author:meta.author||'',
-      category:fromBEQ?'Téléchargements/BEQ':'Téléchargements',
+      id:data.stored.id,title:meta.title||tentative,author:meta.author||item.author||'',
+      category:localCategory,
       tags:[],rating:0,favorite:false,status:'to-read',notes:'',page:1,totalPages:null,
       position:null,progress:0,bookmarks:[],annotations:[],theme:'light',zoom:1,
       createdAt:now,updatedAt:now,lastReadAt:null,
-      sourceUrl:url,sourceName:parsed.hostname,cover,...data.stored
+      sourceUrl:url,sourceName:item.source||parsed.hostname,cover,...data.stored
     };
     await saveBook(book);
     await reload();
