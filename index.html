@@ -40,6 +40,7 @@
     <aside class="sidebar">
       <div class="brand"><span class="brand-mark"><svg class="icon"><use href="#i-book"/></svg></span><div><strong>folio<span class="brand-dot">.</span></strong><small>MA BIBLIOTHÈQUE</small></div></div>
       <button id="catalogSide" class="button button-outline catalog-side" type="button"><svg class="icon"><use href="#i-search"/></svg> Explorer des livres</button><button class="button button-cream sidebar-add" data-open-import><svg class="icon"><use href="#i-plus"/></svg> Ajouter un livre</button>
+      <button id="islamicSide" class="button islamic-side-launch" type="button"><svg class="icon"><use href="#i-book"/></svg> Sciences islamiques</button>
       <p class="sidebar-label">BIBLIOTHÈQUE</p>
       <nav class="side-nav" aria-label="Navigation principale">
         <button class="nav-link active" data-view="all"><svg class="icon"><use href="#i-library"/></svg> Tous les livres <span id="count-all" class="nav-count">0</span></button>
@@ -59,6 +60,7 @@
         <div class="mobile-brand"><span class="mobile-logo">f.</span> folio</div>
         <label class="search-box"><svg class="icon"><use href="#i-search"/></svg><input id="searchInput" type="search" placeholder="Rechercher un livre, un auteur..." autocomplete="off" aria-label="Rechercher des livres"><kbd>⌘ K</kbd></label>
         <button class="top-settings icon-button" id="settingsTop" aria-label="Paramètres"><svg class="icon"><use href="#i-settings"/></svg></button>
+        <button id="islamicOpen" class="button islamic-top-launch" type="button" aria-label="Ouvrir la bibliothèque des sciences islamiques">Sciences islamiques</button>
         <button id="catalogOpen" class="button button-outline catalog-launch" aria-label="Découvrir des livres"><svg class="icon"><use href="#i-search"/></svg><span>Découvrir</span></button><button class="button button-primary top-add" data-open-import><svg class="icon"><use href="#i-plus"/></svg> Ajouter un livre</button>
       </header>
 
@@ -99,7 +101,7 @@
     </main>
   </div>
 
-  <nav class="mobile-nav" aria-label="Navigation mobile"><button data-view="all" class="active"><svg class="icon"><use href="#i-library"/></svg><span>Livres</span></button><button data-view="reading"><svg class="icon"><use href="#i-clock"/></svg><span>En cours</span></button><button class="mobile-add" data-open-import aria-label="Ajouter un PDF"><svg class="icon"><use href="#i-plus"/></svg></button><button data-view="favorites"><svg class="icon"><use href="#i-heart"/></svg><span>Favoris</span></button><button data-view="finished"><svg class="icon"><use href="#i-check"/></svg><span>Terminés</span></button></nav>
+  <nav class="mobile-nav" aria-label="Navigation mobile"><button id="islamicMobile" type="button" class="islamic-mobile-launch" aria-label="Bibliothèque des sciences islamiques"><svg class="icon"><use href="#i-book"/></svg><span>Sciences</span></button><button data-view="all" class="active"><svg class="icon"><use href="#i-library"/></svg><span>Livres</span></button><button data-view="reading"><svg class="icon"><use href="#i-clock"/></svg><span>En cours</span></button><button class="mobile-add" data-open-import aria-label="Ajouter un PDF"><svg class="icon"><use href="#i-plus"/></svg></button><button data-view="favorites"><svg class="icon"><use href="#i-heart"/></svg><span>Favoris</span></button><button data-view="finished"><svg class="icon"><use href="#i-check"/></svg><span>Terminés</span></button></nav>
 
   <dialog id="importDialog" class="modal"><div class="modal-head"><div><span class="modal-kicker">ENRICHIR MA BIBLIOTHÈQUE</span><h2>Ajouter des livres</h2></div><button class="icon-button close-dialog" aria-label="Fermer"><svg class="icon"><use href="#i-x"/></svg></button></div>
     <div class="tabs"><button id="fileTab" class="tab active" data-import-tab="file">Depuis mon appareil</button><button id="urlTab" class="tab" data-import-tab="url">Depuis un lien</button></div>
@@ -115,10 +117,80 @@
       <label class="field">Étiquettes <small>(séparées par des virgules)</small><input id="editTags" maxlength="400" placeholder="Essai, philosophie, favori..."></label>
       <div class="field-row"><div class="field"><span>Ma note</span><div class="rating-editor" id="editRating" role="group" aria-label="Note sur cinq étoiles"></div></div><label class="field">Page actuelle<input type="number" id="editPage" min="1" step="1" placeholder="—"></label><label class="field">Pages au total<input type="number" id="editTotal" min="1" step="1" placeholder="—"></label></div>
       <label class="field">Mes notes personnelles<textarea id="editNotes" rows="4" maxlength="20000" placeholder="Une citation, une idée à retenir, votre avis..."></textarea></label>
+      <details id="editIslamicDetails" class="islamic-edit-details">
+        <summary>Sciences islamiques — fiche bibliographique</summary>
+        <p>Renseignez uniquement les informations vérifiées. Aucune affiliation doctrinale, date ou biographie n'est déduite automatiquement du titre.</p>
+        <label class="field islamic-check"><input id="editIslamicEnabled" type="checkbox"> Classer ce livre dans la bibliothèque des sciences islamiques</label>
+        <div class="islamic-edit-fields" id="editIslamicFields">
+          <div class="field-row">
+            <label class="field">Discipline<select id="editIslamicDiscipline"><option value="">À classer</option></select></label>
+            <label class="field">École juridique<select id="editIslamicMadhhab"><option value="">Non précisée</option></select></label>
+          </div>
+          <label class="field">Sous-discipline<input id="editIslamicSubdiscipline" maxlength="100" placeholder="Ex. ʿUlûm al-Qur’ân, qawâʿid fiqhiyya…"></label>
+          <div class="field-row">
+            <label class="field">Langue<select id="editIslamicLanguage"><option value="">Non précisée</option></select></label>
+            <label class="field">Volume<input id="editIslamicVolume" maxlength="40" placeholder="Tome 1 / 3"></label>
+          </div>
+          <label class="field">Titre original arabe<input id="editIslamicOriginalTitle" dir="auto" maxlength="240" placeholder="العنوان الأصلي"></label>
+          <label class="field">Nom de l'auteur en arabe<input id="editIslamicAuthorArabic" dir="auto" maxlength="180" placeholder="اسم المؤلف"></label>
+          <div class="field-row">
+            <label class="field">Époque / période<input id="editIslamicAuthorEra" maxlength="90" placeholder="Ex. IVe siècle H."></label>
+            <label class="field">Décès (H)<input id="editIslamicAuthorDeathHijri" maxlength="40" placeholder="Date vérifiée"></label>
+          </div>
+          <label class="field">Décès (calendrier grégorien)<input id="editIslamicAuthorDeathGregorian" maxlength="40" placeholder="Date vérifiée"></label>
+          <label class="field">Traducteur / traductrice<input id="editIslamicTranslator" maxlength="160"></label>
+          <div class="field-row">
+            <label class="field">Éditeur<input id="editIslamicPublisher" maxlength="160"></label>
+            <label class="field">Édition<input id="editIslamicEdition" maxlength="120"></label>
+          </div>
+          <label class="field">Année de publication<input id="editIslamicPublicationYear" maxlength="40"></label>
+          <label class="field">Référence et provenance<textarea id="editIslamicSourceNotes" maxlength="500" rows="2" placeholder="Source fiable, cote ou référence bibliographique"></textarea></label>
+        </div>
+      </details>
       <div class="modal-actions"><button type="button" id="deleteBook" class="button button-danger"><svg class="icon"><use href="#i-trash"/></svg> Supprimer</button><button type="submit" class="button button-primary"><svg class="icon"><use href="#i-check"/></svg> Enregistrer</button></div>
     </form></dialog>
 
   <dialog id="settingsDialog" class="modal"><div class="modal-head"><div><span class="modal-kicker">MON APPLICATION</span><h2>Paramètres</h2></div><button class="icon-button close-dialog" aria-label="Fermer"><svg class="icon"><use href="#i-x"/></svg></button></div><div class="settings-row"><div><strong>Stockage local</strong><p id="storageInfo">Calcul en cours...</p></div><svg class="icon"><use href="#i-library"/></svg></div><button id="persistStorage" class="button button-outline full-width">Protéger le stockage de mon appareil</button><div class="settings-row"><div><strong>Installer Folio</strong><p>Accédez à votre bibliothèque depuis l'écran d'accueil.</p></div></div><button id="installApp" class="button button-primary full-width">Installer l'application</button><div class="settings-row"><div><strong>Sauvegarde</strong><p>Exportez vos livres et leurs fiches dans une archive ZIP pour les retrouver sur un autre appareil.</p></div></div><button id="backupExport" class="button button-outline full-width">Exporter ma bibliothèque (.zip)</button><label class="button button-outline full-width backup-import-label">Restaurer une sauvegarde (.zip)<input id="backupImport" type="file" accept=".zip,application/zip" hidden></label><p class="settings-disclaimer">La lecture hors ligne fonctionne sur cet appareil. Les données ne sont pas synchronisées entre vos appareils. Une suppression des données du navigateur peut effacer votre bibliothèque.</p></dialog>
+
+
+  <section id="islamicLibrary" class="islamic-overlay" hidden aria-label="Bibliothèque personnelle des sciences islamiques">
+    <header class="islamic-header">
+      <button id="islamicClose" class="icon-button" type="button" aria-label="Fermer la bibliothèque islamique"><svg class="icon"><use href="#i-arrow" style="transform:rotate(180deg)"/></svg></button>
+      <div class="islamic-header-title"><strong>Sciences islamiques</strong><small>Bibliothèque de recherche personnelle</small></div>
+      <button id="islamicCatalog" class="button button-outline" type="button">Explorer les sources ↗</button>
+    </header>
+    <div class="islamic-content">
+      <section class="islamic-hero">
+        <div><span class="section-eyebrow">FOLIO · SAVOIRS</span><h2>Explorer, étudier, transmettre.</h2><p>Organisez vos ouvrages par science, école juridique, auteur et langue. Les informations bibliographiques restent sur votre appareil.</p></div>
+        <div class="islamic-stats" aria-label="Statistiques des sciences islamiques">
+          <div><strong id="islamicCountBooks">0</strong><small>ouvrages</small></div>
+          <div><strong id="islamicCountAuthors">0</strong><small>auteurs</small></div>
+          <div><strong id="islamicCountClassified">0</strong><small>classés</small></div>
+        </div>
+      </section>
+      <section class="islamic-section">
+        <div class="islamic-section-title"><h3>Les disciplines</h3><button type="button" id="islamicClear" class="filter-reset">Tout afficher</button></div>
+        <div id="islamicDisciplines" class="islamic-discipline-grid" role="group" aria-label="Filtrer par science"></div>
+      </section>
+      <section class="islamic-section">
+        <div class="islamic-section-title"><h3>Recherche bibliographique</h3><span id="islamicResultCount">0 ouvrage</span></div>
+        <div class="islamic-searchbar">
+          <label><svg class="icon"><use href="#i-search"/></svg><input id="islamicSearch" type="search" aria-label="Rechercher dans les sciences islamiques" placeholder="Titre, auteur, nom arabe, notes, annotation…"></label>
+          <select id="islamicSchool" aria-label="Filtrer par école juridique"><option value="">Toutes les écoles</option></select>
+          <select id="islamicLanguage" aria-label="Filtrer par langue"><option value="">Toutes les langues</option></select>
+          <select id="islamicAuthor" aria-label="Filtrer par auteur"><option value="">Tous les auteurs</option></select>
+        </div>
+        <p class="islamic-search-help">Recherche locale dans les titres, métadonnées, notes, signets et annotations, y compris en arabe sans voyelles. Pour chercher dans tout le texte, choisissez « Dans le texte » sur un livre.</p>
+        <div id="islamicResults" class="islamic-results" aria-live="polite"></div>
+        <div id="islamicEmpty" class="islamic-empty" hidden>Aucun ouvrage ici. Ajoutez vos PDF ou EPUB, puis ouvrez la fiche d'un livre pour le classer dans les sciences islamiques.</div>
+      </section>
+      <section class="islamic-section">
+        <div class="islamic-section-title"><h3>Index des auteurs</h3><span id="islamicAuthorCount">0 auteur</span></div>
+        <div id="islamicAuthorCards" class="islamic-author-grid"></div>
+      </section>
+      <p class="islamic-footer">Les champs non renseignés restent inconnus ; Folio ne fabrique ni attribution, ni date historique, ni affiliation juridique.</p>
+    </div>
+  </section>
 
   <div id="reader" class="reader" hidden>
   <header class="reader-bar">
