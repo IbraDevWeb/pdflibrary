@@ -32,11 +32,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Créer l'icône Windows à partir du logo Folio
+      - name: Générer la nouvelle identité Folio Windows
         shell: pwsh
         run: |
           python -m pip install --quiet pillow
-          python -c "from PIL import Image; Image.open('public/icons/icon-512.png').save('desktop/icon.ico',format='ICO',sizes=[(16,16),(32,32),(48,48),(64,64),(128,128),(256,256)])"
+          python desktop/generate-icon.py
+          if (!(Test-Path 'desktop/icon.ico')) { throw 'Nouvelle icône manquante' }
+          if (!(Test-Path 'dist/icons/folio-mark.svg')) { throw 'Logo SVG non empaqueté' }
+          if (!(Test-Path 'dist/art/folio-library-hero.svg')) { throw 'Illustration de l’accueil absente' }
       - name: Fabriquer l'installateur Windows EXE
         run: npx electron-builder --win nsis --x64 --publish never
       - name: Vérifier le fichier d'installation
