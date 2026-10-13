@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#18352f">
+  <meta name="theme-color" content="#16392d">
+  <script>if(location.protocol==="folio:")document.documentElement.dataset.folioDesktop="true";</script>
   <meta name="description" content="Votre bibliothèque personnelle de livres PDF, disponible même hors connexion.">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -38,7 +39,7 @@
 
   <div class="app-shell">
     <aside class="sidebar">
-      <div class="brand"><span class="brand-mark"><svg class="icon"><use href="#i-book"/></svg></span><div><strong>folio<span class="brand-dot">.</span></strong><small>MA BIBLIOTHÈQUE</small></div></div>
+      <div class="brand"><span class="brand-mark"><img class="brand-emblem" src="./icons/folio-mark.svg" alt=""><svg class="icon brand-legacy"><use href="#i-book"/></svg></span><div><strong>Folio<span class="brand-dot">.</span></strong><small>BIBLIOTHÈQUE PERSONNELLE</small></div></div>
       <button id="catalogSide" class="button button-outline catalog-side" type="button"><svg class="icon"><use href="#i-search"/></svg> Explorer des livres</button><button class="button button-cream sidebar-add" data-open-import><svg class="icon"><use href="#i-plus"/></svg> Ajouter un livre</button>
       <button id="islamicSide" class="button islamic-side-launch" type="button"><svg class="icon"><use href="#i-book"/></svg> Sciences islamiques</button>
       <p class="sidebar-label">BIBLIOTHÈQUE</p>
@@ -57,8 +58,8 @@
 
     <main class="main">
       <header class="topbar">
-        <div class="mobile-brand"><span class="mobile-logo">f.</span> folio</div>
-        <label class="search-box"><svg class="icon"><use href="#i-search"/></svg><input id="searchInput" type="search" placeholder="Rechercher un livre, un auteur..." autocomplete="off" aria-label="Rechercher des livres"><kbd>⌘ K</kbd></label>
+        <div class="mobile-brand"><span class="mobile-logo">f.</span> folio</div><div class="desktop-top-context"><small>FOLIO / LECTURE</small><strong>Votre espace personnel</strong></div>
+        <label class="search-box"><svg class="icon"><use href="#i-search"/></svg><input id="searchInput" type="search" placeholder="Rechercher un livre, un auteur..." autocomplete="off" aria-label="Rechercher des livres"><kbd id="searchShortcut">⌘ K</kbd></label>
         <button class="top-settings icon-button" id="settingsTop" aria-label="Paramètres"><svg class="icon"><use href="#i-settings"/></svg></button>
         <button id="islamicOpen" class="button islamic-top-launch" type="button" aria-label="Ouvrir la bibliothèque des sciences islamiques">Sciences islamiques</button>
         <button id="catalogOpen" class="button button-outline catalog-launch" aria-label="Découvrir des livres"><svg class="icon"><use href="#i-search"/></svg><span>Découvrir</span></button><button class="button button-primary top-add" data-open-import><svg class="icon"><use href="#i-plus"/></svg> Ajouter un livre</button>
@@ -66,7 +67,7 @@
 
       <div class="content-wrap">
         <section class="intro">
-          <div><div class="eyebrow"><span class="eyebrow-dash"></span> VOTRE ESPACE DE LECTURE</div><h1>Chaque livre,<br><em>à sa place.</em></h1><p>Vos histoires, vos découvertes, vos idées. Une bibliothèque rien qu'à vous, toujours à portée de main.</p></div>
+          <div class="intro-copy"><div class="eyebrow"><span class="eyebrow-dash"></span> VOTRE BIBLIOTHÈQUE, VOTRE UNIVERS</div><h1>Le plaisir de lire.<br><em>Le savoir à portée de main.</em></h1><p>Retrouvez vos livres, reprenez vos lectures et donnez à chaque découverte la place qu'elle mérite.</p><div class="intro-actions"><button class="button intro-import" data-open-import><svg class="icon"><use href="#i-plus"/></svg> Ajouter un livre</button><button class="button intro-browse" id="desktopBrowseBooks" type="button">Explorer les collections <svg class="icon"><use href="#i-arrow"/></svg></button></div></div>
           <div class="intro-illustration" aria-hidden="true"><span class="ill-circle"></span><span class="ill-book ill-one"></span><span class="ill-book ill-two"></span><span class="ill-book ill-three"></span><span class="ill-spark">✦</span></div>
         </section>
 
@@ -111,7 +112,7 @@
   </div><div id="booksGrid" class="books-grid" aria-live="polite"></div>
           <div id="emptyState" class="empty-state" hidden><div class="empty-art"><svg class="icon"><use href="#i-book"/></svg></div><h3 id="emptyTitle">Votre bibliothèque vous attend</h3><p id="emptyDescription">Ajoutez votre premier livre PDF pour commencer votre collection.</p><button id="emptyAction" class="button button-primary" data-open-import><svg class="icon"><use href="#i-plus"/></svg> Ajouter mon premier livre</button></div>
         </section>
-        <footer class="main-footer">Folio • Vos livres restent sur cet appareil. Pensez à les sauvegarder.</footer>
+        <footer class="main-footer"><span><img src="./icons/folio-mark.svg" alt="" width="21" height="21"> Folio · Votre bibliothèque personnelle</span><span>Vos ouvrages restent sur cet appareil. Pensez à les sauvegarder.</span></footer>
       </div>
     </main>
   </div>
