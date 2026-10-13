@@ -787,7 +787,16 @@ function setup(){
   });
 }
 setup();
-export const Reader={open,close:closeReader,back:backInReader,isOpen:()=>!$('reader').hidden,persistNow:persistReaderNow};
+export async function findInReader(query){
+ if($('reader').hidden||!state)return;
+ closeAdvancedPanels();closeTonePanel();
+ $('readerFindPanel').hidden=false;
+ $('readerFindButton').setAttribute('aria-expanded','true');
+ $('readerFindInput').value=String(query||'').slice(0,100);
+ if(String(query||'').trim().length>=2)await runBookSearch(query);
+ else $('readerFindInput').focus();
+}
+export const Reader={open,close:closeReader,back:backInReader,isOpen:()=>!$('reader').hidden,persistNow:persistReaderNow,find:findInReader};
 export async function generateCover(file,kind){
   try{
     if(kind==='pdf'){
