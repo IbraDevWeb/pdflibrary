@@ -301,6 +301,31 @@
         <h2>Votre prochaine <em>découverte.</em></h2>
         <p>Parcourez un site de livres numériques, choisissez un PDF ou EPUB et ajoutez-le directement à votre bibliothèque Folio.</p>
       </div>
+      <section id="islamhouseSearchSection" class="ih-discovery" aria-label="Rechercher des livres islamiques en ligne">
+        <div class="ih-topline"><span class="section-eyebrow">RECHERCHE DE LIVRES · ISLAMHOUSE</span><span class="ih-api-label">Catalogue de livres, pas de liens techniques</span></div>
+        <h3>Trouver un livre à télécharger</h3>
+        <p>Saisissez le titre ou le nom de l’auteur. Folio affiche les ouvrages identifiés par IslamHouse, puis leurs vrais fichiers PDF ou EPUB.</p>
+        <form id="ihSearchForm" class="ih-search-form">
+          <input id="ihQuery" type="search" placeholder="Ex. 40 hadiths, tafsir, فقه, Ibn Rushd…" aria-label="Titre ou auteur d’un livre islamique" maxlength="130" autocomplete="off">
+          <select id="ihLanguage" aria-label="Langue des ouvrages"><option value="fr">Français</option><option value="ar">العربية — Arabe</option></select>
+          <button id="ihSearchSubmit" class="button button-primary" type="submit">Rechercher</button>
+        </form>
+        <div class="ih-examples">Exemples :
+          <button type="button" data-ih-query="hadith">Hadith</button>
+          <button type="button" data-ih-query="Coran">Coran</button>
+          <button type="button" data-ih-query="السيرة" data-ih-lang="ar">السيرة</button>
+          <button type="button" id="ihLatest">Voir les livres récents</button>
+        </div>
+        <p id="ihHelp" class="ih-help">Commencez par une recherche. Aucun livre n’est téléchargé tant que vous n’avez pas choisi son format.</p>
+        <div id="ihStatus" class="ih-status" role="status" aria-live="polite"></div>
+        <div id="ihBooks" class="ih-books" aria-live="polite"></div>
+        <button id="ihContinue" class="ih-continue" type="button" hidden>Explorer davantage de livres →</button>
+        <div id="ihSourceHelp" class="ih-source-help">
+          <strong>Vous ne trouvez pas le titre recherché ?</strong>
+          <span>IslamHouse est consultable ici, mais ne couvre pas tous les livres de fiqh, tafsîr ou hadith.</span>
+          <button type="button" id="ihOpenSite">Ouvrir IslamHouse ↗</button>
+        </div>
+      </section>
       <section class="catalog-directory" aria-label="Annuaire de bibliothèques numériques">
         <div class="catalog-directory-head">
           <div><span class="section-eyebrow">SOURCES VÉRIFIÉES</span><h3>Les bibliothèques à explorer</h3><p>Sciences islamiques en français et en arabe, littérature et patrimoine : un accès organisé aux sites éditeurs.</p></div>
