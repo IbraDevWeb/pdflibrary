@@ -81,6 +81,9 @@ function filteredSources() {
   });
 }
 function renderSources() {
+  // Les pages HTML techniques sont réservées aux catalogues généraux.
+  // Le parcours islamique utilise l'explorateur de vrais ouvrages ci-dessus.
+  $('catalogPanel').hidden=activeTab==='islam'||activeSource?.group==='islam';
   document.querySelectorAll('[data-source-tab]').forEach(button=>{
     const isActive=button.dataset.sourceTab===activeTab;
     button.classList.toggle('active',isActive);button.setAttribute('aria-pressed',String(isActive));
@@ -160,6 +163,8 @@ async function navigate(input,back=false){
   const target=new URL(url);
   if((target.hostname==='islamhouse.com'||target.hostname==='www.islamhouse.com')&&!formatOf(url)){
     const isArabic=target.pathname.startsWith('/ar/');
+    $('catalogPanel').hidden=true;
+    $('catalogLoaded').hidden=true;
     showIslamhouseSearch({lang:isArabic?'ar':'fr',loadLatest:true});
     feedback('Pour IslamHouse, utilisez la recherche de livres en haut de la page : les liens du site ne sont plus affichés comme des ouvrages.');
     return;
@@ -221,6 +226,7 @@ export function setupCatalog({onImport}){
     const button=e.target.closest('[data-source-tab]');
     if(!button)return;
     activeTab=button.dataset.sourceTab;
+    activeSource=null;
     activeTopic='Tous';renderSources();
   });
   $('catalogTopicTabs').addEventListener('click',e=>{
