@@ -1,7 +1,7 @@
 import './reader.css';
 import { initStorage,allBooks,saveBook,removeBookRecord,storeFile,bookBlob,deleteBookFile,inspectFile,kindOf,idForBook,exportZip,restoreZip,native,saveOrShare } from './storage.js';
 import { Reader,generateCover,epubMetadata } from './reader.js';
-import { setupCatalog,validateExternalUrl } from './catalog.js';
+import { setupCatalog,validateExternalUrl,openUsulCatalog } from './catalog.js';
 import { downloadToLibrary } from './direct-download.js';
 import { installNavigation } from './navigation.js';
 import './mobile-polish.css';
@@ -346,7 +346,7 @@ function changeView(next){view=next;query='';$('searchInput').value='';render();
 function events(){
   initIslamicMetadataForm();
   setupCatalog({onImport:importRemoteBook});
-  setupIslamicLibrary({books:()=>books,read:id=>openBook(id),edit:openEdit,find:(id,term)=>openBook(id,term),browse:()=>$('catalogOpen').click()});
+  setupIslamicLibrary({books:()=>books,read:id=>openBook(id),edit:openEdit,find:(id,term)=>openBook(id,term),browse:()=>$('catalogOpen').click(),browseUsul:openUsulCatalog});
   document.addEventListener('click',e=>{
     if(e.target.closest('[data-open-import]')){$('importDialog').showModal();return;}
     const button=e.target.closest('[data-view]');
