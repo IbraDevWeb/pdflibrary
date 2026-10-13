@@ -1,0 +1,35 @@
+/* Navigation réelle par pages : le tableau de bord reste sur l'accueil. */
+.library-subpage{min-height:calc(100dvh - 120px);animation:folioPageIn .22s ease both}
+.library-subpage[hidden]{display:none!important}
+.library-subpage-back{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid #d7e4d7;border-radius:10px;min-height:44px;background:#fff;color:#366747;font-size:12px;font-weight:750;padding:11px 16px;margin:2px 0 19px}
+.library-subpage-hero{padding:clamp(24px,4vw,46px);border:1px solid #cbdcce;border-radius:18px;background:linear-gradient(125deg,#e9f2e8,#f8faf5 75%);margin-bottom:29px}
+.library-subpage-hero h1{font:500 clamp(30px,5vw,49px)/1.1 Georgia,serif;letter-spacing:-.9px;color:#1e4938;margin:12px 0 11px;overflow-wrap:anywhere}
+.library-subpage-hero p{max-width:550px;font-size:13px;line-height:1.65;color:#72887a;margin:0 0 21px}
+.library-subpage-number{display:inline-flex;align-items:baseline;gap:8px;background:#fff;border:1px solid #dce9dc;border-radius:11px;padding:10px 15px;color:#72907c;font-size:12px}
+.library-subpage-number strong{font:600 22px Georgia,serif;color:#285c40}
+.collection-active .library-section{background:transparent}
+.collection-active #homeBookSlot:empty{display:none}
+.collection-active .library-section .section-head h2{font-size:21px}
+@keyframes folioPageIn{from{opacity:.45;transform:translateY(13px)}to{opacity:1;transform:none}}
+@media(max-width:610px){.library-subpage{min-height:calc(100dvh - 190px)}.library-subpage-hero{padding:23px 19px;margin-bottom:21px}.library-subpage-hero h1{font-size:34px}.library-subpage-back{margin-bottom:13px}.library-subpage-hero p{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.library-subpage{animation:none}}
+/* En lecture immersive, outils flottants masqués jusqu'à toucher simple. */
+.reader-immersive-controls{
+ position:absolute;top:calc(9px + var(--safe-top));left:50%;transform:translateX(-50%);z-index:19;
+ display:flex;justify-content:space-between;align-items:center;gap:7px;
+ width:min(95vw,460px);min-height:50px;padding:5px 7px;
+ border:1px solid rgba(255,255,255,.25);border-radius:14px;
+ background:rgba(28,53,40,.91);color:#fff;
+ box-shadow:0 4px 18px #172c2050;backdrop-filter:blur(12px);
+}
+.reader-immersive-controls[hidden]{display:none!important}
+.reader-immersive-controls button{flex:none;min-height:42px;min-width:44px;padding:7px 11px;border:1px solid rgba(255,255,255,.22);color:#fff;background:rgba(255,255,255,.14);border-radius:9px;font-size:15px}
+.reader-immersive-controls #readerImmersivePrev,.reader-immersive-controls #readerImmersiveNext{font-size:29px;line-height:1}
+.reader-immersive-controls #readerExitFullscreen{font-size:12px;font-weight:700;min-width:80px}
+.reader-immersive-controls span{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;text-align:center}
+.reader[data-immersive="true"] .reader-tip{display:none!important}
+.reader[data-immersive="true"] .reader-content{padding-bottom:max(5px,var(--safe-bottom))}
+.reader[data-kind="pdf"].pdf-zoomed .reader-content,
+.reader[data-kind="pdf"].pdf-zoomed .pdf-page,
+.reader[data-kind="pdf"].pdf-zoomed .pdf-text-layer{touch-action:pan-x pan-y}
+@media(max-width:410px){.reader-immersive-controls{width:calc(100vw - 16px);gap:4px}.reader-immersive-controls button{min-width:39px;padding:6px}.reader-immersive-controls #readerExitFullscreen{min-width:70px;padding:5px 8px}}
