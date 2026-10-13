@@ -112,6 +112,11 @@ function makeCollections(){
     bits.forEach((_,i)=>categories.add(bits.slice(0,i+1).join('/')));
   }
   const sorted=[...categories].sort((a,b)=>a.localeCompare(b,'fr'));
+  const roots=sorted.filter(c=>!c.includes('/'));
+  $('homeCollections').hidden=view!=='all'||roots.length===0;
+  $('homeCollectionLinks').innerHTML=roots.map(c=>
+    '<button type="button" data-view="category:'+escape(c)+'" class="home-collection-card"><span>'+icon('library')+'</span><strong>'+escape(c)+'</strong><small>'+books.filter(b=>categoryMatch(b.category,c)).length+' livre(s) →</small></button>'
+  ).join('');
   $('collectionNav').innerHTML=sorted.map(c=>{
     const depth=c.split('/').length-1,selected=view==='category:'+c;
     return '<button class="nav-link'+(selected?' active':'')+'" style="padding-left:'+(13+Math.min(depth,3)*10)+'px" data-view="category:'+escape(c)+'"><span class="collection-dot"></span>'+
@@ -361,6 +366,7 @@ function changeView(next){
   // Le tableau de bord appartient exclusivement à l'accueil.
   document.querySelector('.intro').hidden=subpage;
   document.querySelector('.stats').hidden=subpage;
+  $('homeCollections').hidden=subpage;
   if(subpage)$('resumeSection').hidden=true;
   document.querySelector('.content-wrap').classList.toggle('collection-active',subpage);
   render();
