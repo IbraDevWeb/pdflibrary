@@ -4,7 +4,7 @@ import 'pdfjs-dist/web/pdf_viewer.css';
 import ePub from 'epubjs';
 import { bookBlob,kindOf,saveBook,saveOrShare } from './storage.js';
 import { attachReadingGestures } from './reading-gestures.js';
-import { nextZoom } from './gesture-math.js';
+import { nextZoom,zoomedSwipeAction } from './gesture-math.js';
 import { SystemBars } from '@capacitor/core';
 import { native } from './storage.js';
 import { readingPalette,clampTone } from './reading-appearance.js';
@@ -38,29 +38,41 @@ function setNativeBarsHidden(hidden){
   barOperation=barOperation.catch(()=>{}).then(()=>hidden?SystemBars.hide():SystemBars.show());
   barOperation.catch(error=>console.warn('Visibilité des barres système',error));
 }
+function showImmersiveControls(visible,{autoHide=false}={}){
+ if(!state?.immersive)return;
+ clearTimeout(state.immersiveTimer);
+ $('readerImmersiveControls').hidden=!visible;
+ if(visible&&autoHide){
+   const current=state;
+   current.immersiveTimer=setTimeout(()=>{
+     if(state===current&&current.immersive)$('readerImmersiveControls').hidden=true;
+   },3400);
+ }
+}
 function setImmersive(enabled){
-  if(!state)return;
-  state.immersive=Boolean(enabled);
-  const reader=$('reader');
-  reader.dataset.immersive=String(state.immersive);
-  $('readerExitFullscreen').hidden=!state.immersive;
-  $('readerFullscreen').textContent=state.immersive?'⛶':'⛶';
-  $('readerFullscreen').setAttribute('aria-label',state.immersive?'Quitter le plein écran':'Activer le plein écran');
-  $('readerFullscreen').setAttribute('aria-pressed',String(state.immersive));
-  if(state.immersive){
-    $('readerTonePanel').hidden=true;
-    $('reader').dataset.toneOpen='false';
-    $('readerToneButton').setAttribute('aria-expanded','false');
-    $('readerSidebar').hidden=true;
-    $('readerMenu').setAttribute('aria-expanded','false');
-    closeAdvancedPanels();
-  }
-  if(native)setNativeBarsHidden(state.immersive);
-  else if(state.immersive){
-    if(!document.fullscreenElement)document.documentElement.requestFullscreen?.().catch(error=>console.warn('Plein écran navigateur indisponible',error));
-  }else if(document.fullscreenElement){
-    document.exitFullscreen?.().catch(error=>console.warn('Sortie du plein écran',error));
-  }
+ if(!state)return;
+ const current=state;
+ current.immersive=Boolean(enabled);
+ clearTimeout(current.immersiveTimer);
+ const reader=$('reader');
+ reader.dataset.immersive=String(current.immersive);
+ $('readerFullscreen').setAttribute('aria-label',current.immersive?'Quitter le plein écran':'Activer le plein écran');
+ $('readerFullscreen').setAttribute('aria-pressed',String(current.immersive));
+ if(current.immersive){
+   closeTonePanel();
+   closeAdvancedPanels();
+   $('readerSidebar').hidden=true;
+   $('readerMenu').setAttribute('aria-expanded','false');
+   showImmersiveControls(true,{autoHide:true});
+ }else{
+   $('readerImmersiveControls').hidden=true;
+ }
+ if(native)setNativeBarsHidden(current.immersive);
+ else if(current.immersive){
+   if(!document.fullscreenElement)document.documentElement.requestFullscreen?.().catch(error=>console.warn('Plein écran navigateur indisponible',error));
+ }else if(document.fullscreenElement){
+   document.exitFullscreen?.().catch(error=>console.warn('Sortie du plein écran',error));
+ }
 }
 function closeAdvancedPanels(){
   if(state)state.searchToken++;
@@ -113,6 +125,7 @@ function updateFooter(){
   $('readerTotal').textContent=state.kind==='pdf'?' / '+(book.totalPages||'?') : Math.round(book.progress||0)+' %';
   if(state.kind==='pdf')$('readerPage').value=book.page||1;
   updatePositionBar();
+  $('readerImmersivePosition').textContent=state.kind==='pdf'?'Page '+(book.page||1)+' / '+(book.totalPages||'?'):Math.round(book.progress||0)+' %';
 }
 function updatePositionBar(){
  if(!state)return;
@@ -175,7 +188,7 @@ function drawPanel(){
   const contents=state.chapters||[];
   $('readerChaptersList').innerHTML=contents.length?contents.map((item,i)=>'<button class="reader-side-item" data-chapter="'+i+'">'+esc(item.label||'Chapitre')+'</button>').join(''):'<p class="reader-side-muted">Sommaire non disponible pour ce document.</p>';
 }
-async function showPosition(position){
+async function showPosition(position,{initialHorizontalEdge='start'}={}){
   if(!state)return;
   if(state.kind==='pdf'){
     let page=Number(position);
@@ -183,7 +196,7 @@ async function showPosition(position){
     page=Math.max(1,Math.min(state.book.totalPages||1,Math.floor(page)));
     state.book.page=page;
     state.book.progress=Math.round(page/(state.book.totalPages||1)*100);
-    await renderPDFPage();
+    await renderPDFPage({initialHorizontalEdge});
   }else if(position){
     try{await state.rendition.display(position);}catch(e){console.warn('Emplacement EPUB introuvable',e);}
   }
@@ -204,7 +217,7 @@ function drawPDFMarks(){
     }
   }
 }
-async function renderPDFPage({keepScroll=false}={}){
+async function renderPDFPage({keepScroll=false,initialHorizontalEdge='start'}={}){
   const s=state;
   if(!s||s.kind!=='pdf')return;
   const ticket=++s.ticket;
@@ -251,7 +264,7 @@ async function renderPDFPage({keepScroll=false}={}){
   if(oldScroll){
     host.scrollLeft=Math.max(0,oldScroll.x*host.scrollWidth-host.clientWidth/2);
     host.scrollTop=Math.max(0,oldScroll.y*host.scrollHeight-host.clientHeight/2);
-  }else{host.scrollTop=0;host.scrollLeft=0;}
+  }else{host.scrollTop=0;host.scrollLeft=initialHorizontalEdge==='end'?Math.max(0,host.scrollWidth-host.clientWidth):0;}
 }
 function initializePDFSelection(){
   const host=$('readerContent');
@@ -311,34 +324,38 @@ function previewZoom(factor){
 }
 function attachGestures(target){
   return attachReadingGestures(target,{
-    disabled:()=>!state||state.highlightMode||!$('readerSidebar').hidden||!!document.querySelector('dialog[open]'),
-    onSwipe:direction=>{
-      // Quand la page PDF déborde après zoom, un balayage sert à explorer
-      // horizontalement le document (pas à perdre sa page actuelle).
-      if(state?.kind==='pdf'&&state.book.zoom>1.08){
-        const host=$('readerContent');
-        if(host.scrollWidth>host.clientWidth+6)return;
-      }
+    disabled:()=>!state||state.highlightMode||!$('readerSidebar').hidden||!$('readerTonePanel').hidden||!$('readerFindPanel').hidden||!$('readerFontPanel').hidden||!!document.querySelector('dialog[open]'),
+    getGestureContext:()=>{
+      const host=$('readerContent');
+      return {zoom:state?.book.zoom||1,scrollWidth:host.scrollWidth,clientWidth:host.clientWidth,scrollLeft:host.scrollLeft};
+    },
+    onSwipe:(direction,context)=>{
+      if(state?.kind==='pdf'&&zoomedSwipeAction({...context,direction})==='pan')return;
       const isRtl=state?.book?.readingDirection==='rtl';
-      navigatePrevNext(isRtl?direction==='previous':direction==='next');
+      navigatePrevNext(isRtl?direction==='previous':direction==='next',direction);
     },
     onPinch:factor=>setZoom(factor),
     onPinchPreview:previewZoom,
-    onTap:()=>{if(state?.immersive)setImmersive(false);},
+    onTap:()=>{if(state?.immersive)showImmersiveControls($('readerImmersiveControls').hidden,{autoHide:true});},
     onDoubleTap:()=>{
       if(!state)return;
-      setZoom(state.book.zoom>1.35 ? 1/state.book.zoom : 1.75/state.book.zoom);
+      setZoom(state.book.zoom>1.35?1/state.book.zoom:1.75/state.book.zoom);
     }
   });
 }
-function navigatePrevNext(next){
+function navigatePrevNext(next,physicalDirection=null){
   if(!state)return;
-  if(state.kind==='pdf')showPosition((state.book.page||1)+(next?1:-1));
-  else state.rendition?.[next?'next':'prev']?.();
+  if(state.kind==='pdf'){
+    const current=state.book.page||1,target=current+(next?1:-1);
+    if(target<1||target>state.book.totalPages)return;
+    showPosition(target,{initialHorizontalEdge:physicalDirection==='previous'?'end':'start'});
+  }else state.rendition?.[next?'next':'prev']?.();
 }
 function closeReader(){
   clearTimeout(saveTimer);
   if(state?.immersive)setImmersive(false);
+  if(state)clearTimeout(state.immersiveTimer);
+  $('readerImmersiveControls').hidden=true;
   closeTonePanel();
   closeAdvancedPanels();
   if(state){
@@ -467,7 +484,7 @@ async function open(book,callbacks={}){
   $('readerAuthor').textContent=book.author||'';
   $('reader').hidden=false;document.body.style.overflow='hidden';
   $('reader').dataset.immersive='false';
-  $('readerExitFullscreen').hidden=true;
+  $('readerImmersiveControls').hidden=true;
   closeTonePanel();
   closeAdvancedPanels();
   $('readerFindInput').value='';
@@ -696,6 +713,8 @@ function setup(){
   });
   $('readerFullscreen').addEventListener('click',()=>{if(state)setImmersive(!state.immersive);});
   $('readerExitFullscreen').addEventListener('click',()=>{if(state)setImmersive(false);});
+  $('readerImmersivePrev').addEventListener('click',()=>{navigatePrevNext(false);showImmersiveControls(true,{autoHide:true});});
+  $('readerImmersiveNext').addEventListener('click',()=>{navigatePrevNext(true);showImmersiveControls(true,{autoHide:true});});
   $('readerToneButton').addEventListener('click',()=>{
     if(!state)return;
     closeAdvancedPanels();
