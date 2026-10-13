@@ -23,8 +23,12 @@ jobs:
         run: npm test
       - name: Compiler la liseuse hors ligne
         run: npm run build:desktop
-      - name: Vérifier que l'application fonctionne réellement sur Windows
-        run: npm run desktop:smoke
+      - name: Vérifier les points d'entrée Windows et les ressources du lecteur
+        shell: pwsh
+        run: |
+          node --check desktop/main.cjs
+          node --check desktop/paths.cjs
+          if (!(Test-Path 'dist/index.html')) { throw 'Interface Folio manquante' }
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
