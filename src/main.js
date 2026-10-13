@@ -6,6 +6,9 @@ import { downloadToLibrary } from './direct-download.js';
 import { installNavigation } from './navigation.js';
 import './mobile-polish.css';
 import './reader-advanced.css';
+import './islamic-library.css';
+import { DISCIPLINES,MADHAHIB,LANGUAGES,isIslamicBook,islamicMetadata,normalizeIslamicMetadata } from './islamic-library.js';
+import { setupIslamicLibrary,refreshIslamicLibrary } from './islamic-ui.js';
 
 const $=id=>document.getElementById(id);
 const icon=name=>'<svg class="icon" aria-hidden="true"><use href="#i-'+name+'"/></svg>';
@@ -143,7 +146,7 @@ function render(){
 async function reload(){
   for(const url of coverURLs.values())URL.revokeObjectURL(url);
   coverURLs.clear();
-  books=await allBooks();loaded=true;render();updateStorage();
+  books=await allBooks();loaded=true;render();refreshIslamicLibrary();updateStorage();
 }
 function progressRefresh(){ render(); }
 async function createCoverMissing(){
@@ -203,6 +206,7 @@ async function importRemoteBook(item,report=()=>{}){
     const book={
       id:data.stored.id,title:meta.title||tentative,author:meta.author||item.author||'',
       category:localCategory,
+      ...(item.sourceGroup==='islam'?{islamic:normalizeIslamicMetadata({enabled:true})}:{}),
       tags:[],rating:0,favorite:false,status:'to-read',notes:'',page:1,totalPages:null,
       position:null,progress:0,bookmarks:[],annotations:[],theme:'light',zoom:1,
       createdAt:now,updatedAt:now,lastReadAt:null,
@@ -232,11 +236,33 @@ async function importLink(e){
   }catch(error){toast('Import impossible : '+error.message,true);}
   finally{button.disabled=false;button.textContent='Importer le livre';}
 }
+const ISLAMIC_EDIT_FIELDS={
+  discipline:'editIslamicDiscipline',subdiscipline:'editIslamicSubdiscipline',
+  madhhab:'editIslamicMadhhab',language:'editIslamicLanguage',originalTitle:'editIslamicOriginalTitle',
+  authorArabic:'editIslamicAuthorArabic',authorEra:'editIslamicAuthorEra',
+  authorDeathHijri:'editIslamicAuthorDeathHijri',authorDeathGregorian:'editIslamicAuthorDeathGregorian',
+  translator:'editIslamicTranslator',publisher:'editIslamicPublisher',
+  edition:'editIslamicEdition',publicationYear:'editIslamicPublicationYear',
+  volume:'editIslamicVolume',sourceNotes:'editIslamicSourceNotes'
+};
+function initIslamicMetadataForm(){
+  for(const [id,data] of [['editIslamicDiscipline',DISCIPLINES],['editIslamicMadhhab',MADHAHIB],['editIslamicLanguage',LANGUAGES]]){
+    const select=$(id);select.innerHTML=select.options[0].outerHTML+data.map(x=>'<option value="'+escape(x.id)+'">'+escape(x.label)+'</option>').join('');
+  }
+  $('editIslamicEnabled').addEventListener('change',()=>{
+    $('editIslamicFields').hidden=!$('editIslamicEnabled').checked;
+  });
+}
 function openEdit(id){
   const book=findBook(id);if(!book)return;
   editingId=id;editingRating=Number(book.rating)||0;
   const fields={editTitle:book.title,editAuthor:book.author||'',editCategory:book.category||'',editTags:(book.tags||[]).join(', '),editNotes:book.notes||'',editStatus:book.status||'to-read',editPage:book.page||'',editTotal:book.totalPages||''};
   for(const [name,value] of Object.entries(fields))$(name).value=value;
+  const islamic=islamicMetadata(book);
+  $('editIslamicEnabled').checked=islamic.enabled;
+  $('editIslamicFields').hidden=!islamic.enabled;
+  $('editIslamicDetails').open=islamic.enabled;
+  for(const [key,id] of Object.entries(ISLAMIC_EDIT_FIELDS))$(id).value=islamic[key]||'';
   drawRating();
   $('editDialog').showModal();
 }
@@ -255,6 +281,7 @@ async function saveEdit(e){
     page:Math.max(1,Math.floor(Number($('editPage').value)||1)),
     totalPages:Math.max(0,Math.floor(Number($('editTotal').value)||0))||null,updatedAt:Date.now()
   });
+  book.islamic=normalizeIslamicMetadata({enabled:$('editIslamicEnabled').checked,...Object.fromEntries(Object.entries(ISLAMIC_EDIT_FIELDS).map(([key,id])=>[key,$(id).value]))});
   if(book.status==='finished')book.progress=100;
   await saveBook(book);$('editDialog').close();await reload();toast('Fiche enregistrée.');
   if(!$('reader').hidden){$('readerTitle').textContent=book.title;$('readerAuthor').textContent=book.author||'';}
@@ -278,10 +305,13 @@ async function download(id){
     await saveOrShare(file,filename);
   } catch(e){toast('Export impossible : '+e.message,true);}
 }
-async function openBook(id){
+async function openBook(id,findQuery=''){
   const book=findBook(id);
   if(!book)return;
-  Reader.open(book,{onUpdate:progressRefresh,onEdit:openEdit,onDownload:download});
+  try{
+    await Reader.open(book,{onUpdate:progressRefresh,onEdit:openEdit,onDownload:download});
+    if(findQuery&&Reader.isOpen())await Reader.find(findQuery);
+  }catch(e){console.error('Lecture non disponible',e);toast('Impossible d’ouvrir le livre : '+e.message,true);}
 }
 async function updateStorage(){
   if(native){
@@ -314,7 +344,9 @@ async function restore(file){
 }
 function changeView(next){view=next;query='';$('searchInput').value='';render();const viewport=document.querySelector('.app-shell > .main');if(viewport&&getComputedStyle(viewport).overflowY!=='visible')viewport.scrollTo({top:0,behavior:'smooth'});else window.scrollTo({top:0,behavior:'smooth'});}
 function events(){
+  initIslamicMetadataForm();
   setupCatalog({onImport:importRemoteBook});
+  setupIslamicLibrary({books:()=>books,read:id=>openBook(id),edit:openEdit,find:(id,term)=>openBook(id,term),browse:()=>$('catalogOpen').click()});
   document.addEventListener('click',e=>{
     if(e.target.closest('[data-open-import]')){$('importDialog').showModal();return;}
     const button=e.target.closest('[data-view]');
