@@ -50,7 +50,24 @@ async function snapshot(page,label){
    readerBox:reader?.getBoundingClientRect().toJSON(),barDisplay:bar?getComputedStyle(bar).display:null,
    bookText:host?.innerText?.slice(0,200),
    pdfCanvas:host?.querySelector('canvas')?.getBoundingClientRect().toJSON(),
-   epubIframe:host?.querySelector('iframe')?.getBoundingClientRect().toJSON()
+   pdfInkPixels:(()=>{
+     const canvas=host?.querySelector('canvas');
+     if(!canvas)return null;
+     const context=canvas.getContext('2d',{willReadFrequently:true});
+     const w=Math.min(canvas.width,1200),h=Math.min(canvas.height,800);
+     if(!w||!h)return 0;
+     const pixels=context.getImageData(0,0,w,h).data;
+     let dark=0;
+     for(let y=0;y<h;y+=3){
+       for(let x=0;x<w;x+=3){
+         const index=(y*w+x)*4;
+         if(pixels[index+3]>180&&pixels[index]<130&&pixels[index+1]<130&&pixels[index+2]<130)dark++;
+       }
+     }
+     return dark;
+   })(),
+   epubIframe:host?.querySelector('iframe')?.getBoundingClientRect().toJSON(),
+   epubText:host?.querySelector('iframe')?.contentDocument?.body?.innerText?.slice(0,200)
   };
  }).catch(error=>({error:String(error),url:page.url()}));
  console.log(label,JSON.stringify(data));
@@ -94,6 +111,8 @@ async function main(){
    assert.notEqual(result.barDisplay,'none','La barre de navigation doit rester visible');
    assert.ok(type==='pdf'?result.pdfCanvas?.width>10:result.epubIframe?.width>10,
      'Le livre '+type+' doit afficher une page visible');
+   if(type==='pdf')assert.ok(result.pdfInkPixels>10,'PDF rendu blanc : aucun texte dessiné dans le canvas ('+result.pdfInkPixels+')');
+   else assert.ok(result.epubText?.includes('Folio Windows'),'EPUB affiché sans contenu lisible');
    await page.locator('#closeReader').click();
    assert.equal((await snapshot(page,'after-close-'+type)).readerHidden,true);
   }
