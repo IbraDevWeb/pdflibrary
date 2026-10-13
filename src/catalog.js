@@ -287,5 +287,5 @@ export function setupCatalog({onImport}){
     const link=e.target.closest('[data-catalog-page]');
     if(link&&page){const item=filtered().links[Number(link.dataset.catalogPage)];if(item)navigate(item.url);}
   });
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('catalog').hidden&&!document.querySelector('dialog[open]'))close();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('catalog').hidden&&$('reader').hidden&&!document.querySelector('dialog[open]'))close();});
 }
