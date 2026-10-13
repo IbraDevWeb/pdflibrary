@@ -47,7 +47,8 @@
     },
     "files": [
       "dist/**/*",
-      "desktop/*.cjs",
+      "desktop/main.cjs",
+      "desktop/paths.cjs",
       "package.json",
       "!**/*.map"
     ],
