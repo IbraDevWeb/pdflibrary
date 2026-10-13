@@ -26,3 +26,11 @@ jobs:
         run: xvfb-run -a node desktop/diagnose.cjs
         env:
           ELECTRON_DISABLE_GPU: '1'
+      - name: Publier les aperçus visuels Windows
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: folio-windows-design-previews
+          path: desktop-previews/*.png
+          if-no-files-found: ignore
+          retention-days: 7
