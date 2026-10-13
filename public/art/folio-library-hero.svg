@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="420" viewBox="0 0 680 420" role="img" aria-labelledby="title"><title id="title">Illustration d'une collection de livres</title>
+<defs>
+ <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fcf2d9"/><stop offset="1" stop-color="#bfa87d"/></linearGradient>
+ <linearGradient id="dark" x1="0" y1="0" x2=".9" y2="1"><stop stop-color="#416c58"/><stop offset="1" stop-color="#122f26"/></linearGradient>
+ <linearGradient id="cream" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff7e7"/><stop offset="1" stop-color="#d9c8a9"/></linearGradient>
+ <filter id="shadow"><feDropShadow dx="0" dy="15" stdDeviation="13" flood-color="#061a14" flood-opacity=".2"/></filter>
+</defs>
+<circle cx="405" cy="208" r="177" fill="none" stroke="#efdcb7" stroke-opacity=".23"/>
+<circle cx="405" cy="208" r="130" fill="none" stroke="#efdcb7" stroke-opacity=".22"/>
+<circle cx="405" cy="208" r="81" fill="none" stroke="#efdcb7" stroke-opacity=".19"/>
+<path d="M147 326c63-22 135-33 217-25l-2 24-198 25Z" fill="#102b23" opacity=".45"/>
+<g filter="url(#shadow)">
+ <g transform="translate(174 86) rotate(-10 68 132)">
+  <rect x="0" y="0" width="130" height="250" rx="8" fill="#e1d1b1"/>
+  <rect x="13" y="9" width="111" height="230" rx="4" fill="url(#cream)"/>
+  <path d="M28 73h80M28 80h80" stroke="#b4a47e" stroke-width="1.5"/>
+  <text x="68" y="130" font-family="Georgia,serif" font-size="18" text-anchor="middle" fill="#405744" letter-spacing="2">THE</text>
+  <text x="68" y="156" font-family="Georgia,serif" font-size="19" text-anchor="middle" fill="#405744" font-weight="bold">LIBRARY</text>
+  <path d="M22 202h90M22 207h90" stroke="#e0ccb0"/>
+ </g>
+ <g transform="translate(281 62) rotate(7 71 143)">
+  <rect width="147" height="284" rx="8" fill="#203f31"/>
+  <rect x="9" y="9" width="129" height="265" rx="4" fill="url(#dark)" stroke="#8c987b" stroke-width="1"/>
+  <rect x="19" y="20" width="109" height="243" rx="2" fill="none" stroke="#c8b389" stroke-opacity=".8" stroke-width="1.2"/>
+  <path d="M40 58h67M40 219h67" stroke="#e9d09a" stroke-width="2"/>
+  <text x="73" y="139" font-family="Georgia,serif" font-size="25" font-weight="bold" text-anchor="middle" fill="#eddbb4">FOLIO</text>
+  <text x="73" y="164" font-family="Georgia,serif" font-size="12" text-anchor="middle" letter-spacing="2" fill="#f8ebcf">ÉDITION</text>
+  <text x="73" y="179" font-family="Georgia,serif" font-size="12" text-anchor="middle" letter-spacing="2" fill="#f8ebcf">PERSONNELLE</text>
+ </g>
+ <g transform="translate(425 127) rotate(18 47 99)">
+  <rect width="102" height="207" rx="6" fill="#b78e64"/>
+  <rect x="8" y="8" width="86" height="190" rx="3" fill="#d6b28b" stroke="#e7d6b2"/>
+  <path d="M17 28h66M17 169h66" stroke="#7c5e47" stroke-opacity=".6"/>
+  <text x="51" y="102" font-family="Georgia,serif" font-size="13" text-anchor="middle" fill="#473e30">NOTES</text>
+  <text x="51" y="119" font-family="Georgia,serif" font-size="13" text-anchor="middle" fill="#473e30">&amp; IDÉES</text>
+ </g>
+</g>
+<path d="M95 104l5 15 15 5-15 5-5 15-5-15-15-5 15-5Z" fill="#e5cb98"/>
+<path d="M552 71l4 12 12 4-12 4-4 12-4-12-12-4 12-4Z" fill="#d5b980" opacity=".8"/>
+<circle cx="572" cy="309" r="4" fill="#e8d6b4"/>
+</svg>
