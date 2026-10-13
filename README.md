@@ -10,13 +10,30 @@ Une vérification automatique lance une vraie fenêtre Electron sous affichage L
 
 Pour la mise à jour Windows, **installer Folio 2.8.1 sur la version existante**, sans désinstaller et sans effacer les données. L'identifiant et le profil local Electron restent identiques ; livres, progression et annotations devraient donc être conservés. Il reste prudent d'**exporter la bibliothèque en ZIP avant la mise à jour**. En cas de page blanche persistante, conserver cette sauvegarde et signaler le format (PDF ou EPUB) et le titre/fichier concerné.
 
+## Folio Windows 2.9 — Identité visuelle et expérience de lecture
+
+L'édition **Windows 2.9.0** modernise la présentation de l'application sans changer le format de stockage des livres. Elle conserve les sauvegardes ZIP existantes et le profil utilisateur `folio://app`.
+
+- **Identité Folio** : monogramme vectoriel `public/icons/folio-mark.svg` (vert forêt, livre ivoire, détails or), icône de l'application Windows et de son installateur générée par `desktop/generate-icon.py`. L'icône de l'APK Android n'est pas modifiée dans cette version.
+- **Navigation bureau** : nouveau menu latéral, collections accessibles, états actifs et survols lisibles, repères de bibliothèque et raccourci `Ctrl+K` pour la recherche.
+- **Accueil éditorial** : bannière, illustration de livres, actions principales, cartes statistiques, reprise de lecture, grille de couvertures et collections harmonisées.
+- **Liseuse** : barre d'outils, panneaux de sommaire/annotations, contrôle de progression et mode immersif visuellement unifiés avec le reste de Folio ; comportement PDF et EPUB inchangé.
+- **Rythme et accessibilité** : espacements et contrastes affinés, navigation clavier et focus visible, écrans Windows réduits, respect de `prefers-reduced-motion`.
+- **Autres écrans** : formulaires, découverte de livres, sciences islamiques et dialogues cohérents avec la nouvelle palette.
+
+Le thème est limité à la fenêtre Windows grâce à l'attribut `data-folio-desktop` activé par l'origine `folio://app`. Les règles spécifiques sont dans `src/windows-polish.css`, appliquées uniquement à la version Electron pour préserver les interfaces Android/PWA.
+
+Un contrôle automatisé ouvre Folio dans Electron, inspecte le thème, la présence du logo et de l'illustration, puis ouvre un PDF et un EPUB avec des assertions sur leur rendu réel. Les captures de test de l'accueil et du lecteur sont publiées comme artefact `folio-windows-design-previews` du workflow **Diagnostic de lecture Folio Desktop**. Le logiciel reste à examiner sur une installation Windows physique pour les variantes de résolution et mise à l'échelle.
+
+**Mise à jour sans perte :** fermer Folio, conserver une sauvegarde ZIP de ses livres, puis installer `Folio-Setup-2.9.0-x64.exe` par-dessus la version antérieure sans désinstaller. Le même identifiant d'application est conservé.
+
 ## Installer Folio sur Windows 10/11
 
 Folio possède une version **Windows 64 bits** empaquetée avec Electron (installateur NSIS `.exe`). Elle contient son interface, PDF.js et EPUB.js : **les livres déjà importés sont lisibles sans connexion**, et la bibliothèque est conservée dans le profil local de Folio entre les ouvertures. Aucune base de données distante n'est créée. Une connexion n'est nécessaire que pour la découverte des ouvrages sur les sites tiers.
 
 1. Ouvrir l'onglet **Actions** du dépôt puis le workflow **Construire Folio pour Windows**.
 2. Ouvrir la dernière exécution **réussie** et télécharger l'artifact **folio-windows-setup-x64**.
-3. Extraire le ZIP de l'artifact, puis lancer `Folio-Setup-2.8.1-x64.exe` et suivre l'installation ; un raccourci Bureau et un raccourci du menu Démarrer sont créés.
+3. Extraire le ZIP de l'artifact, puis lancer `Folio-Setup-2.9.0-x64.exe` et suivre l'installation ; un raccourci Bureau et un raccourci du menu Démarrer sont créés.
 4. Lancer Folio, puis choisir **Ajouter un livre** pour sélectionner des fichiers PDF/EPUB ou les déposer sur la fenêtre.
 
 **Édition non signée :** l'installateur est généré par GitHub Actions sans certificat de signature Windows. Microsoft Defender SmartScreen peut afficher un avertissement. Vérifier que le téléchargement provient bien des Actions de ce dépôt avant de poursuivre. La version Windows n'est pas une application Microsoft Store.
