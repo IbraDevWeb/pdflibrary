@@ -215,6 +215,7 @@ function open(){
   // Ne pas ouvrir un site tiers par défaut : l’annuaire reste utilisable hors ligne.
   if(page)render();
 }
+export function openUsulCatalog(){open();activateUsulSearch();}
 function close(){requestId++;$('catalog').hidden=true;document.body.style.overflow='';}
 export function backInCatalog(){
   if($('catalog').hidden)return false;
