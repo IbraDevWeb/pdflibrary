@@ -122,11 +122,10 @@ test('navigation mobile : Favoris, En cours, Terminés et Collections sont de vr
  await expect(page.locator('#librarySubpageTitle')).toHaveText('Livres terminés');
  await expect(page.locator('#librarySubpageSlot')).toContainText('Livre terminé');
  // Les collections utilisent le même écran secondaire, sans revenir au tableau de bord.
- await page.locator('.side-nav [data-view="category:Fiqh/Malikite"]').count().then(async count=>{
-   if(count)await page.locator('.side-nav [data-view="category:Fiqh/Malikite"]').click();
-   else await page.locator('[data-view="category:Fiqh/Malikite"]').first().click();
- });
- await expect(page.locator('#librarySubpageTitle')).toHaveText('Malikite');
+ await page.locator('#librarySubpageBack').click();
+ await expect(page.locator('#homeCollectionLinks [data-view="category:Fiqh"]')).toBeVisible();
+ await page.locator('#homeCollectionLinks [data-view="category:Fiqh"]').click();
+ await expect(page.locator('#librarySubpageTitle')).toHaveText('Fiqh');
  await expect(page.locator('#librarySubpageSlot .book-card')).toHaveCount(2);
  await page.locator('#librarySubpageBack').click();
  await expect(page.locator('#librarySubpage')).toBeHidden();
