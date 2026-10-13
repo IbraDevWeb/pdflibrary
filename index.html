@@ -301,6 +301,42 @@
         <h2>Votre prochaine <em>découverte.</em></h2>
         <p>Parcourez un site de livres numériques, choisissez un PDF ou EPUB et ajoutez-le directement à votre bibliothèque Folio.</p>
       </div>
+      <nav id="catalogProviderTabs" class="catalog-provider-tabs" aria-label="Rechercher dans une bibliothèque islamique">
+        <button type="button" data-provider="islamhouse" aria-pressed="true">IslamHouse <small>PDF/EPUB à télécharger</small></button>
+        <button type="button" data-provider="usul" aria-pressed="false">Usul.ai <small>Notices et lecture sur Usul</small></button>
+      </nav>
+      <section id="usulSearchSection" class="usul-discovery" aria-label="Recherche bibliographique Usul.ai" hidden>
+        <div class="ih-topline"><span class="section-eyebrow">USUL.AI · RECHERCHE BIBLIOGRAPHIQUE</span><span class="ih-api-label">Lecture sur Usul</span></div>
+        <h3>Retrouver un ouvrage islamique</h3>
+        <p>Recherchez des titres arabes, translittérés ou des noms d’auteurs. Les notices indiquent les disciplines et éditions publiées par Usul.</p>
+        <form id="usulSearchForm" class="ih-search-form">
+          <input id="usulQuery" type="search" placeholder="Ex. Mālik, al-Muwaṭṭaʾ, المدونة…" aria-label="Chercher un titre ou auteur sur Usul" minlength="2" maxlength="140" required autocomplete="off">
+          <select id="usulLanguage" aria-label="Langue de l'interface de recherche Usul">
+            <option value="en">Translittération</option>
+            <option value="ar">Arabe</option>
+            <option value="fr">Français</option>
+          </select>
+          <button id="usulSubmit" class="button button-primary" type="submit">Rechercher</button>
+        </form>
+        <div class="ih-examples">Exemples :
+          <button type="button" data-usul-example="مالك" data-usul-locale="ar">مالك</button>
+          <button type="button" data-usul-example="Malik" data-usul-locale="en">Malik</button>
+          <button type="button" data-usul-example="المدونة" data-usul-locale="ar">المدونة</button>
+          <button type="button" data-usul-example="Tafsir">Tafsîr</button>
+        </div>
+        <p class="usul-caveat">Catalogue externe : Folio présente seulement les notices de livres. Aucun PDF/EPUB n’est téléchargé depuis Usul. La lecture et les éventuels droits d’accès dépendent du site et de votre abonnement.</p>
+        <div id="usulStatus" class="ih-status" role="status" aria-live="polite">Recherchez un livre, puis touchez « Lire sur Usul ↗ ».</div>
+        <div id="usulResults" class="usul-results" aria-live="polite"></div>
+        <div class="usul-pager">
+          <button id="usulPrev" type="button" hidden>← Page précédente</button>
+          <span id="usulPage"></span>
+          <button id="usulNext" type="button" hidden>Page suivante →</button>
+        </div>
+        <div class="ih-source-help"><strong>Accès à Usul.ai</strong>
+          <span>Si la recherche intégrée est indisponible (droits API ou navigateur), vous pouvez utiliser le catalogue officiel.</span>
+          <button type="button" id="usulVisit">Ouvrir Usul.ai ↗</button>
+        </div>
+      </section>
       <section id="islamhouseSearchSection" class="ih-discovery" aria-label="Rechercher des livres islamiques en ligne">
         <div class="ih-topline"><span class="section-eyebrow">RECHERCHE DE LIVRES · ISLAMHOUSE</span><span class="ih-api-label">Catalogue de livres, pas de liens techniques</span></div>
         <h3>Trouver un livre à télécharger</h3>
