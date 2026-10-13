@@ -2,6 +2,7 @@ import { App } from '@capacitor/app';
 import { native } from './storage.js';
 import { Reader } from './reader.js';
 import { backInCatalog } from './catalog.js';
+import { backInIslamicLibrary } from './islamic-ui.js';
 
 let backBusy=false;
 
@@ -14,6 +15,7 @@ export function installNavigation({getView,changeView}){
       if(dialog){dialog.close();return;}
       if(backInCatalog())return;
       if(Reader.back())return;
+      if(backInIslamicLibrary())return;
       if(getView()!=='all'){
         changeView('all');return;
       }
