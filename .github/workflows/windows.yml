@@ -39,7 +39,7 @@ jobs:
           python desktop/generate-icon.py
           if (!(Test-Path 'desktop/icon.ico')) { throw 'Nouvelle icône manquante' }
           if (!(Test-Path 'dist/icons/folio-mark.svg')) { throw 'Logo SVG non empaqueté' }
-          if (!(Test-Path 'dist/art/folio-library-hero.svg')) { throw 'Illustration de l’accueil absente' }
+          if (!(Test-Path 'dist/art/folio-library-hero.svg')) { throw 'Illustration accueil absente' }
       - name: Fabriquer l'installateur Windows EXE
         run: npx electron-builder --win nsis --x64 --publish never
       - name: Vérifier le fichier d'installation
