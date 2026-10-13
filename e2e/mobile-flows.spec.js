@@ -88,3 +88,49 @@ test('IslamHouse : l’ancienne URL ne montre plus les 505 liens de navigation',
  await expect(page.locator('[data-source-open="waqfeya"]')).toHaveCount(0);
  await expect(page.locator('[data-source-visit="waqfeya"]')).toBeVisible();
 });
+
+test('navigation mobile : Favoris, En cours, Terminés et Collections sont de vraies pages',async({page})=>{
+ await page.goto('/');
+ await page.evaluate(async()=>{
+  const db=await new Promise((resolve,reject)=>{
+    const req=indexedDB.open('folio-library',1);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+  });
+  await new Promise((resolve,reject)=>{
+   const tx=db.transaction('books','readwrite');
+   for(const item of [
+    {id:'page-favorite',title:'Le livre favori',favorite:true,status:'to-read',category:'Tafsir'},
+    {id:'page-reading',title:'En cours de lecture',favorite:false,status:'reading',category:'Fiqh/Malikite'},
+    {id:'page-finished',title:'Livre terminé',favorite:false,status:'finished',category:'Fiqh/Malikite'}
+   ])tx.objectStore('books').put({...item,author:'Exemple',kind:'pdf',createdAt:Date.now(),notes:'',rating:0});
+   tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);
+  });db.close();
+ });
+ await page.reload();
+ await expect(page.locator('.intro')).toBeVisible();
+ await page.locator('.mobile-nav [data-view="favorites"]').click();
+ await expect(page.locator('#librarySubpage')).toBeVisible();
+ await expect(page.locator('.intro')).toBeHidden();
+ await expect(page.locator('.stats')).toBeHidden();
+ await expect(page.locator('#librarySubpageTitle')).toHaveText('Mes favoris');
+ await expect(page.locator('#librarySubpageCount')).toHaveText('1');
+ await expect(page.locator('#librarySubpageSlot .book-card')).toHaveCount(1);
+ await expect(page.locator('#librarySubpageSlot')).toContainText('Le livre favori');
+ await page.locator('.mobile-nav [data-view="reading"]').click();
+ await expect(page.locator('#librarySubpageTitle')).toHaveText('Lectures en cours');
+ await expect(page.locator('#librarySubpageSlot')).toContainText('En cours de lecture');
+ await page.locator('.mobile-nav [data-view="finished"]').click();
+ await expect(page.locator('#librarySubpageTitle')).toHaveText('Livres terminés');
+ await expect(page.locator('#librarySubpageSlot')).toContainText('Livre terminé');
+ // Les collections utilisent le même écran secondaire, sans revenir au tableau de bord.
+ await page.locator('.side-nav [data-view="category:Fiqh/Malikite"]').count().then(async count=>{
+   if(count)await page.locator('.side-nav [data-view="category:Fiqh/Malikite"]').click();
+   else await page.locator('[data-view="category:Fiqh/Malikite"]').first().click();
+ });
+ await expect(page.locator('#librarySubpageTitle')).toHaveText('Malikite');
+ await expect(page.locator('#librarySubpageSlot .book-card')).toHaveCount(2);
+ await page.locator('#librarySubpageBack').click();
+ await expect(page.locator('#librarySubpage')).toBeHidden();
+ await expect(page.locator('.intro')).toBeVisible();
+ await expect(page.locator('.stats')).toBeVisible();
+ await expect(page.locator('#homeBookSlot .book-card')).toHaveCount(3);
+});
