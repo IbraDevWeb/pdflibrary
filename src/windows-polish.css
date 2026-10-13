@@ -1,0 +1,512 @@
+
+/*
+ * FOLIO DESKTOP 2.9
+ * Design system: forest / ivory / aged-gold. Only the folio:// Windows app
+ * receives these refinements; the Android layout is deliberately untouched.
+ */
+html[data-folio-desktop]{
+  --ink:#243f32;--green:#183d31;--deep:#102f27;--mint:#dce9df;
+  --cream:#faf9f5;--paper:#ffffff;--line:#e8ebe5;--muted:#7d9184;--gold:#d9b77d;
+  --desktop-ivory:#fafaf7;--desktop-shadow:0 16px 48px rgba(30,57,44,.065);
+  --desktop-radius:16px;
+  color-scheme:light;
+}
+html[data-folio-desktop] body{
+  background:#f8f9f5;
+  color:#263f32;
+  font:14px/1.55 "Segoe UI Variable","Segoe UI",Arial,sans-serif;
+  letter-spacing:.005em;
+}
+html[data-folio-desktop] ::selection{background:#b8d8bd;color:#15362b}
+html[data-folio-desktop] *{scrollbar-color:#b9caba transparent;scrollbar-width:thin}
+html[data-folio-desktop] button{transition:background-color .18s,border-color .18s,box-shadow .18s,transform .18s,color .18s}
+html[data-folio-desktop] button:focus-visible,
+html[data-folio-desktop] a:focus-visible,
+html[data-folio-desktop] input:focus-visible,
+html[data-folio-desktop] select:focus-visible{
+  outline:3px solid #c4a66e!important;outline-offset:3px;
+}
+html[data-folio-desktop] .app-shell{
+  grid-template-columns:268px minmax(0,1fr);min-height:100dvh;
+}
+html[data-folio-desktop] .sidebar{
+  padding:30px 17px 21px;
+  min-height:0;height:100dvh;
+  background:linear-gradient(173deg,#173b30 0%,#123328 45%,#102a22 100%);
+  border-right:1px solid #305647;
+  box-shadow:7px 0 35px rgba(28,52,38,.06);
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-color:#365b4b transparent;
+}
+html[data-folio-desktop] .sidebar:before{
+  content:"";position:absolute;z-index:0;left:-170px;top:440px;width:340px;height:340px;
+  border:1px solid rgba(217,183,125,.09);border-radius:50%;pointer-events:none;
+  box-shadow:0 0 0 85px rgba(222,192,141,.018),0 0 0 150px rgba(222,192,141,.016);
+}
+html[data-folio-desktop] .sidebar > *{position:relative}
+html[data-folio-desktop] .brand{
+  align-items:center;gap:14px;padding:2px 7px 35px;
+}
+html[data-folio-desktop] .brand-mark{
+  display:grid;place-items:center;overflow:hidden;flex:none;
+  width:54px;height:54px;border-radius:15px;
+  background:#285242;box-shadow:0 7px 21px rgba(0,0,0,.22);
+}
+html[data-folio-desktop] .brand-mark .brand-legacy{display:none}
+html[data-folio-desktop] .brand-emblem{display:block;width:54px;height:54px;object-fit:cover}
+html:not([data-folio-desktop]) .brand-emblem{display:none}
+html[data-folio-desktop] .brand strong{
+  display:block;color:#f8f4e8;
+  font:600 27px/1.08 Georgia,"Times New Roman",serif;
+  letter-spacing:-.5px;
+}
+html[data-folio-desktop] .brand .brand-dot{color:#e1be83}
+html[data-folio-desktop] .brand small{display:block;color:#a8bcb0;font-size:9px;letter-spacing:1.45px;font-weight:700;margin-top:6px}
+html[data-folio-desktop] .sidebar-label{
+  margin:16px 12px 12px;color:#b6c7b5;
+  font-size:10px;font-weight:700;letter-spacing:1.8px;
+}
+html[data-folio-desktop] .side-rule{
+  height:1px;background:rgba(240,244,233,.12);
+  margin:20px 7px 5px;
+}
+html[data-folio-desktop] .sidebar .button,
+html[data-folio-desktop] .sidebar .islamic-side-launch{
+  min-height:46px;border-radius:12px;
+  font-weight:700;font-size:12px;
+}
+html[data-folio-desktop] .catalog-side{
+  border:1px solid rgba(255,255,255,.22);
+  background:rgba(255,255,255,.065);color:#ecf3ea;
+  justify-content:flex-start;padding:12px 15px;margin-bottom:10px;
+}
+html[data-folio-desktop] .catalog-side:hover{
+  border-color:rgba(221,193,138,.6);background:rgba(255,255,255,.13);color:#fff;
+}
+html[data-folio-desktop] .sidebar-add{
+  width:100%;margin:0 0 10px;
+  background:#ebd6ac;color:#254436;border:1px solid rgba(255,255,255,.23);
+  box-shadow:0 8px 24px #04180e19;
+}
+html[data-folio-desktop] .sidebar-add:hover{background:#f7e6c4;transform:translateY(-1px)}
+html[data-folio-desktop] .islamic-side-launch{
+  width:100%;margin:0 0 16px;
+  justify-content:flex-start;padding:11px 14px;
+  background:rgba(211,180,122,.14);border:1px solid rgba(222,192,138,.28);
+  color:#f8e5c1;
+}
+html[data-folio-desktop] .islamic-side-launch:hover{background:rgba(216,186,136,.23);border-color:#c7a574}
+html[data-folio-desktop] .side-nav{
+  display:flex;flex-direction:column;gap:5px;
+}
+html[data-folio-desktop] .side-nav button,
+html[data-folio-desktop] .nav-link{
+  display:flex;align-items:center;min-height:45px;gap:13px;
+  border:1px solid transparent;border-radius:11px;
+  padding:10px 12px;
+  color:#ccdacd;background:transparent;
+  font-size:12px;line-height:1.4;
+}
+html[data-folio-desktop] .side-nav button .icon{
+  width:18px;height:18px;color:#aec5b4;
+}
+html[data-folio-desktop] .side-nav button:hover{
+  background:rgba(233,242,229,.085);color:#fff;border-color:rgba(255,255,255,.06);
+}
+html[data-folio-desktop] .side-nav button.active{
+  background:#e8f0e7;color:#1e4936;
+  border-color:#dceadb;font-weight:750;
+  box-shadow:0 7px 19px #061b1016;
+}
+html[data-folio-desktop] .side-nav button.active .icon{color:#2c6950}
+html[data-folio-desktop] .sidebar .nav-count{
+  margin-left:auto;
+  border-radius:8px;min-width:24px;padding:2px 6px;
+  font-size:10px;text-align:center;
+  color:#c1d4c6;background:rgba(229,241,228,.09);
+}
+html[data-folio-desktop] .sidebar button.active .nav-count{
+  color:#2d6348;background:#d1e4d3;
+}
+html[data-folio-desktop] .sidebar-hint{font-size:11px;color:#98b5a2;margin:15px 10px}
+html[data-folio-desktop] .sidebar-bottom{
+  margin-top:auto;padding-top:19px;border-top:1px solid rgba(255,255,255,.15);
+  color:#c1d4c6;font-size:11px;
+}
+html[data-folio-desktop] .sidebar-bottom .online-dot{box-shadow:0 0 0 4px rgba(103,173,132,.14)}
+html[data-folio-desktop] .sidebar-bottom .icon-button{
+  color:#d4e3d6;background:rgba(255,255,255,.09);
+  border:1px solid rgba(255,255,255,.1);border-radius:10px;
+}
+html[data-folio-desktop] .main{
+  background:radial-gradient(ellipse at 88% -10%,rgba(236,240,230,.65),transparent 40%),#f8f9f6;
+  min-width:0;min-height:100vh;
+}
+html[data-folio-desktop] .topbar{
+  min-height:86px;height:86px;
+  display:flex;align-items:center;gap:13px;
+  padding:0 clamp(24px,3.4vw,52px);
+  background:rgba(255,255,255,.91);
+  border-bottom:1px solid #e7ebe5;
+  box-shadow:0 3px 20px rgba(26,54,36,.025);
+  position:sticky;top:0;z-index:8;
+  backdrop-filter:blur(18px);
+}
+html[data-folio-desktop] .desktop-top-context{
+  display:flex;flex:none;flex-direction:column;gap:2px;margin-right:auto;
+}
+html:not([data-folio-desktop]) .desktop-top-context{display:none}
+html[data-folio-desktop] .desktop-top-context small{
+  color:#8e9f93;font-size:9px;letter-spacing:1.35px;font-weight:800;
+}
+html[data-folio-desktop] .desktop-top-context strong{
+  font:500 18px/1.2 Georgia,serif;color:#214334;white-space:nowrap;
+}
+html[data-folio-desktop] .mobile-brand{display:none}
+html[data-folio-desktop] .search-box{
+  flex:1;max-width:390px;margin-left:auto;margin-right:3px;
+  border:1px solid #dfe7dc;border-radius:12px;
+  background:#f8faf7;color:#94a79a;height:45px;
+}
+html[data-folio-desktop] .search-box:focus-within{
+  border-color:#89b29a;box-shadow:0 0 0 4px #badcc13b;background:#fff;
+}
+html[data-folio-desktop] .search-box kbd{
+  border:1px solid #d9e1da;background:#fff;
+  box-shadow:0 2px 3px #00000008;color:#687d6e;
+  padding:3px 7px;border-radius:6px;font-size:10px;
+}
+html[data-folio-desktop] .topbar > .button{height:44px;border-radius:11px;font-size:12px;white-space:nowrap}
+html[data-folio-desktop] .topbar .catalog-launch{background:#fff;border-color:#d9e5d9;color:#30533e}
+html[data-folio-desktop] .topbar .catalog-launch:hover{background:#eaf2eb}
+html[data-folio-desktop] .topbar .top-add{
+  color:#fff;background:#204b37;border:1px solid #204b37;
+  box-shadow:0 5px 16px rgba(25,74,49,.13);
+}
+html[data-folio-desktop] .topbar .top-add:hover{background:#2b6147;transform:translateY(-1px)}
+html[data-folio-desktop] .top-settings{
+  border:1px solid #e0e8e0;background:#fff;color:#4e6f5c;
+  flex:none;width:42px;height:42px;border-radius:11px;
+}
+html[data-folio-desktop] .topbar .islamic-top-launch{display:none}
+html[data-folio-desktop] .content-wrap{
+  width:min(1450px,100%);max-width:1450px;
+  padding:clamp(25px,3.1vw,43px) clamp(25px,3.1vw,52px) 36px;margin:auto;
+}
+html[data-folio-desktop] .intro{
+  background:linear-gradient(113deg,#173c30 0%,#194537 55%,#315a45 100%);
+  border:1px solid #446956;box-shadow:0 20px 50px #183e2a1c;
+  border-radius:20px;min-height:290px;
+  padding:35px clamp(28px,4vw,58px);
+  margin-bottom:23px;position:relative;isolation:isolate;overflow:hidden;
+}
+html[data-folio-desktop] .intro:before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 81% 35%,rgba(237,218,169,.13),transparent 44%);
+}
+html[data-folio-desktop] .intro:after{
+  content:"";position:absolute;right:-170px;top:-170px;
+  width:580px;height:580px;border-radius:50%;
+  border:1px solid rgba(234,219,181,.14);pointer-events:none;
+}
+html[data-folio-desktop] .intro-copy{z-index:2;max-width:590px;flex:1}
+html[data-folio-desktop] .intro .eyebrow{
+  display:flex;align-items:center;gap:8px;
+  font-size:10px;font-weight:750;color:#e6c996;letter-spacing:2px;
+}
+html[data-folio-desktop] .eyebrow-dash{background:#e7ca95}
+html[data-folio-desktop] .intro h1{
+  color:#fff9eb;
+  font:500 clamp(29px,3.1vw,44px)/1.15 Georgia,serif;
+  letter-spacing:-1.1px;margin:12px 0 12px;
+}
+html[data-folio-desktop] .intro h1 em{font-style:italic;color:#ebcf9c}
+html[data-folio-desktop] .intro p{
+  max-width:465px;color:#c8d8cb;font-size:13px;line-height:1.75;
+}
+html[data-folio-desktop] .intro-actions{
+  display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:23px;
+}
+html:not([data-folio-desktop]) .intro-actions{display:none}
+html[data-folio-desktop] .intro-actions button{
+  padding:11px 17px;min-height:43px;font-size:12px;border-radius:10px;
+}
+html[data-folio-desktop] .intro-import{
+  background:#eedbb9;color:#214537;border:1px solid #f4e8cf;
+  box-shadow:0 7px 16px #081f172e;
+}
+html[data-folio-desktop] .intro-import:hover{background:#fff1d4}
+html[data-folio-desktop] .intro-browse{
+  border:1px solid rgba(244,238,218,.28);
+  color:#f7eddb;background:rgba(255,255,255,.07);
+}
+html[data-folio-desktop] .intro-browse:hover{background:rgba(255,255,255,.14)}
+html[data-folio-desktop] .intro .intro-illustration{
+  position:relative;flex:none;align-self:stretch;
+  width:min(37%,390px);height:auto;min-height:250px;margin:-34px -28px -34px 4px;
+  background:url('/art/folio-library-hero.svg') center center/contain no-repeat;
+}
+html[data-folio-desktop] .intro .intro-illustration > *{display:none}
+html[data-folio-desktop] .stats{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:0 0 34px;
+}
+html[data-folio-desktop] .stat{
+  position:relative;overflow:hidden;padding:19px 21px;
+  background:rgba(255,255,255,.98);
+  border:1px solid #e5ebe4;border-radius:15px;
+  min-height:133px;
+  box-shadow:0 6px 24px #213b2b07;
+}
+html[data-folio-desktop] .stat:before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:#c4aa77;opacity:.65;
+}
+html[data-folio-desktop] .stat:nth-child(2):before{background:#6e9b7c}
+html[data-folio-desktop] .stat:nth-child(3):before{background:#84a6a4}
+html[data-folio-desktop] .stat:nth-child(4):before{background:#c8b18d}
+html[data-folio-desktop] .stat-top{font-size:12px;color:#778e7e}
+html[data-folio-desktop] .stat-top .icon{color:#6f977b}
+html[data-folio-desktop] .stat strong{
+  margin:8px 0 1px;font:600 33px/1.15 Georgia,serif;color:#224534;letter-spacing:-.7px;
+}
+html[data-folio-desktop] .stat small{font-size:11px;color:#91a398}
+html[data-folio-desktop] .resume,
+html[data-folio-desktop] .library-section,
+html[data-folio-desktop] .home-collection-card{
+  border-color:#e4eae2;
+}
+html[data-folio-desktop] .resume{
+  position:relative;border-radius:15px;padding:22px 25px;
+  background:linear-gradient(105deg,#fff,#f7faf6);
+  border:1px solid #e0e9de;
+  box-shadow:0 8px 27px #1b3b2610;
+  margin:0 0 36px;
+}
+html[data-folio-desktop] .resume-caption{font-size:10px;color:#487d59}
+html[data-folio-desktop] .resume-content{gap:22px}
+html[data-folio-desktop] .resume-cover{height:92px;width:66px;border-radius:7px;box-shadow:4px 6px 16px #00000020}
+html[data-folio-desktop] .resume-detail strong{font:500 21px Georgia,serif;color:#2c503a}
+html[data-folio-desktop] .resume-button{background:#235841;color:#fff;border-radius:10px;min-height:43px}
+html[data-folio-desktop] .home-collections{margin:7px 0 31px}
+html[data-folio-desktop] .home-collections-head h2,
+html[data-folio-desktop] .section-head h2{
+  font:500 26px Georgia,serif;letter-spacing:-.35px;color:#244735;
+}
+html[data-folio-desktop] .home-collection-card{
+  background:#fff;border-radius:13px;box-shadow:0 4px 18px #23442c08;
+  min-height:131px;padding:19px;
+}
+html[data-folio-desktop] .home-collection-card:hover{box-shadow:0 10px 27px #163e2720;transform:translateY(-2px)}
+html[data-folio-desktop] .home-collection-card > span{
+  display:grid;place-items:center;background:#eaf2e9;
+  width:40px;height:40px;border-radius:11px;color:#2a6145;
+}
+html[data-folio-desktop] .library-section{margin:0;background:transparent;min-width:0}
+html[data-folio-desktop] .section-eyebrow{letter-spacing:1.8px;color:#668d72;font-size:10px}
+html[data-folio-desktop] .section-head{gap:18px;margin-bottom:20px}
+html[data-folio-desktop] .result-count{
+  background:#eaf2e8;color:#447c56;border-radius:9px;font-size:11px;padding:4px 9px;
+}
+html[data-folio-desktop] .sort-select,
+html[data-folio-desktop] .advanced-filters label{
+  background:#fff;border:1px solid #e1e9de;border-radius:10px;
+}
+html[data-folio-desktop] .advanced-filters{gap:8px;margin:0 0 22px}
+html[data-folio-desktop] .advanced-filters label{padding:8px 10px}
+html[data-folio-desktop] .view-buttons{border-radius:10px;background:#edf2eb;padding:5px}
+html[data-folio-desktop] .view-buttons .icon-button{border-radius:7px}
+html[data-folio-desktop] .books-grid{
+  grid-template-columns:repeat(auto-fill,minmax(175px,1fr));
+  gap:22px 18px;
+}
+html[data-folio-desktop] .book-card{
+  padding:10px 10px 14px;background:#fff;border:1px solid #e5ebe4;
+  border-radius:14px;box-shadow:0 4px 20px #24452c08;
+  transition:transform .18s,box-shadow .18s,border-color .18s;
+}
+html[data-folio-desktop] .book-card:hover{
+  transform:translateY(-3px);box-shadow:0 16px 33px #1a392717;border-color:#cbdcca;
+}
+html[data-folio-desktop] .book-cover{
+  border-radius:8px;overflow:hidden;box-shadow:2px 8px 17px rgba(16,43,30,.14);
+}
+html[data-folio-desktop] .book-card:hover .book-cover{box-shadow:3px 11px 23px rgba(16,43,30,.2)}
+html[data-folio-desktop] .book-cover .cover-small{color:#f4e8ca}
+html[data-folio-desktop] .book-data{padding:11px 3px 0}
+html[data-folio-desktop] .book-category{
+  color:#738c7e;font-size:10px;letter-spacing:.25px;
+}
+html[data-folio-desktop] .book-title{
+  color:#244632;font:600 15px/1.38 Georgia,serif;
+}
+html[data-folio-desktop] .book-author{color:#83968b;font-size:11px}
+html[data-folio-desktop] .book-fav{
+  border:1px solid #dae5d9;background:#fff;
+  box-shadow:0 4px 14px #11261a27;
+}
+html[data-folio-desktop] .book-fav.active{color:#b06e62;background:#fff2ed}
+html[data-folio-desktop] .status{
+  border-radius:7px;font-size:10px;font-weight:750;padding:5px 8px;
+}
+html[data-folio-desktop] .empty-state{
+  padding:50px 25px;border:1px dashed #cbdccb;background:#fff;border-radius:15px;
+}
+html[data-folio-desktop] .main-footer{
+  margin-top:58px;border-top:1px solid #e6ebe4;padding-top:20px;
+  display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;
+  color:#8c9d92;font-size:11px;
+}
+html[data-folio-desktop] .main-footer span:first-child{display:inline-flex;align-items:center;gap:8px;color:#557461}
+html[data-folio-desktop] .library-subpage-back{
+  padding:12px 17px;border-radius:10px;
+}
+html[data-folio-desktop] .library-subpage-hero{
+  background:linear-gradient(110deg,#e9f1e9,#fff9ed);
+  border:1px solid #dce6d9;border-radius:19px;padding:42px;
+}
+html[data-folio-desktop] .library-subpage-hero h1{font-size:clamp(32px,3vw,45px)}
+html[data-folio-desktop] .modal{
+  border:1px solid #e2e9e1;border-radius:17px;
+  box-shadow:0 24px 80px rgba(16,45,30,.22);
+  background:#fffefa;
+}
+html[data-folio-desktop] .modal::backdrop{background:#0b241bbb;backdrop-filter:blur(5px)}
+html[data-folio-desktop] .modal-head h2{font:500 28px Georgia,serif;color:#294f3a}
+html[data-folio-desktop] .modal-kicker{color:#548364}
+html[data-folio-desktop] .drop-zone{
+  border:2px dashed #b9ceb8;border-radius:14px;background:#f7faf5;
+}
+html[data-folio-desktop] .drop-zone:hover{background:#eef6ed;border-color:#87b792}
+html[data-folio-desktop] .modal input:not([type="checkbox"]),
+html[data-folio-desktop] .modal select,
+html[data-folio-desktop] .modal textarea{
+  border:1px solid #d8e4d8;border-radius:10px;
+}
+html[data-folio-desktop] .reader{
+  background:#eeeae1;
+  color:#253f32;
+}
+html[data-folio-desktop] .reader-bar{
+  border-bottom:1px solid #dbe4da;
+  background:#fffefa;
+  box-shadow:0 4px 16px rgba(18,54,34,.045);
+}
+html[data-folio-desktop] .reader-head-row{
+  padding:0 11px;
+}
+html[data-folio-desktop] .reader-head-row .reader-heading strong{
+  font:600 15px/1.3 Georgia,serif;color:#234634;
+}
+html[data-folio-desktop] .reader-head-row .reader-heading small{
+  color:#879e8c;font-size:11px;
+}
+html[data-folio-desktop] .reader-control{
+  border:1px solid transparent;color:#385f47;border-radius:9px;
+}
+html[data-folio-desktop] .reader-control:hover,
+html[data-folio-desktop] .reader-control.active{
+  background:#eaf4e9;border-color:#cadecc;
+}
+html[data-folio-desktop] .reader-tools{
+  border-top:1px solid #edf0e9;
+  padding:7px 16px;background:#fffefa;
+}
+html[data-folio-desktop] .reader-content{
+  background:#eeeae2;padding-top:29px;
+  scrollbar-color:#bdc8b8 #e9e7df;
+}
+html[data-folio-desktop] .reader-content .pdf-page{
+  box-shadow:0 13px 42px rgba(34,52,36,.19);
+}
+html[data-folio-desktop] .reader[data-theme="sepia"] .reader-content{background:#e4d8c1}
+html[data-folio-desktop] .reader[data-theme="dark"] .reader-content{background:#1c2a23}
+html[data-folio-desktop] .reader-sidepanel{
+  background:#fffefa;border-color:#e4e9de;
+  box-shadow:7px 0 29px #182f2215;
+  padding:23px;
+}
+html[data-folio-desktop] .reader-sidepanel h3{color:#668875}
+html[data-folio-desktop] .reader-side-item{
+  border-bottom:1px solid #edf0e9;padding:14px 9px;border-radius:7px;
+}
+html[data-folio-desktop] .reader-side-item:hover{background:#eff6ed}
+html[data-folio-desktop] .reader-position-bar{
+  background:#fffefa;border-top:1px solid #e4e8df;min-height:43px;
+}
+html[data-folio-desktop] .reader-tool-panel,
+html[data-folio-desktop] .reader-tone-panel{
+  border:1px solid #dce5d9;border-radius:14px;background:#fffefa;
+  box-shadow:0 16px 46px rgba(14,39,26,.16);
+}
+html[data-folio-desktop] .reader-immersive-controls{
+  background:#153a2eeb;border:1px solid #729b80;
+  box-shadow:0 12px 32px #0c201c66;
+}
+html[data-folio-desktop] .islamic-overlay{
+  background:#f8f9f5;
+}
+html[data-folio-desktop] .islamic-header{
+  background:#fffefa;border-color:#e1e8de;
+}
+html[data-folio-desktop] .islamic-hero{
+  background:linear-gradient(118deg,#dfebdc,#f8f1e6);
+  border-radius:18px;border:1px solid #d6e3d2;
+}
+html[data-folio-desktop] .islamic-discipline,
+html[data-folio-desktop] .islamic-book,
+html[data-folio-desktop] .islamic-author{
+  border-radius:13px;box-shadow:0 5px 18px #1a3a2a09;
+}
+html[data-folio-desktop] .islamic-discipline:hover,
+html[data-folio-desktop] .islamic-author:hover{
+  border-color:#9dbca4;box-shadow:0 11px 28px #23453215;
+}
+html[data-folio-desktop] .catalog-overlay{
+  background:#f8f9f5;
+}
+html[data-folio-desktop] .catalog-header{background:#fffefa}
+html[data-folio-desktop] .ih-discovery,
+html[data-folio-desktop] .usul-discovery,
+html[data-folio-desktop] .catalog-source-card{
+  border-radius:17px;border-color:#e0e8dd;box-shadow:0 7px 26px #21482a0c;
+}
+@media(max-width:1290px){
+ html[data-folio-desktop] .app-shell{grid-template-columns:246px minmax(0,1fr)}
+ html[data-folio-desktop] .topbar{gap:9px;padding-inline:28px}
+ html[data-folio-desktop] .content-wrap{padding-inline:30px}
+ html[data-folio-desktop] .desktop-top-context strong{font-size:16px}
+ html[data-folio-desktop] .books-grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr))}
+ html[data-folio-desktop] .intro .intro-illustration{width:34%;margin-right:-42px}
+}
+@media(max-width:1040px){
+ html[data-folio-desktop] .app-shell{grid-template-columns:216px minmax(0,1fr)}
+ html[data-folio-desktop] .sidebar{padding-inline:12px}
+ html[data-folio-desktop] .brand{gap:8px;padding-inline:0}
+ html[data-folio-desktop] .brand strong{font-size:22px}
+ html[data-folio-desktop] .brand small{font-size:7px}
+ html[data-folio-desktop] .brand-mark,html[data-folio-desktop] .brand-emblem{width:44px;height:44px}
+ html[data-folio-desktop] .desktop-top-context{display:none}
+ html[data-folio-desktop] .search-box{max-width:none}
+ html[data-folio-desktop] .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ html[data-folio-desktop] .intro{min-height:255px}
+ html[data-folio-desktop] .intro .intro-illustration{width:35%;opacity:.7}
+}
+@media(max-width:860px){
+ /* Conserver la navigation mobile existante et éviter d'écraser ses règles */
+ html[data-folio-desktop] .app-shell{display:block}
+ html[data-folio-desktop] .sidebar{display:none}
+ html[data-folio-desktop] .mobile-brand{display:block}
+ html[data-folio-desktop] .topbar{min-height:76px;height:auto;padding:14px 20px;position:sticky}
+ html[data-folio-desktop] .intro{padding:26px;min-height:245px}
+ html[data-folio-desktop] .intro .intro-illustration{display:none}
+ html[data-folio-desktop] .content-wrap{padding:25px 20px}
+ html[data-folio-desktop] .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ html[data-folio-desktop] .top-add{display:none}
+ html[data-folio-desktop] .books-grid{grid-template-columns:repeat(auto-fill,minmax(145px,1fr))}
+}
+@media(prefers-reduced-motion:reduce){
+ html[data-folio-desktop] *,html[data-folio-desktop] *:before,html[data-folio-desktop] *:after{
+  transition-duration:.01ms!important;animation-duration:.01ms!important;
+ }
+}
