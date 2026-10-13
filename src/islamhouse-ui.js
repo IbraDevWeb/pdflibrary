@@ -36,7 +36,7 @@ function render(){
    (book.description?'<p class="ih-book-summary">'+esc(book.description.slice(0,210))+'</p>':'')+
    '<div class="ih-book-actions">'+
    '<button type="button" class="ih-formats" data-ih-detail="'+esc(book.id)+'" aria-expanded="'+Boolean(files)+'">'+(files?'Formats disponibles':'Voir les PDF / EPUB')+'</button>'+
-   '<button type="button" class="ih-visit" data-ih-visit="'+esc(book.id)+'">Voir la fiche officielle ↗</button></div>'+
+   '<button type="button" class="ih-visit" data-ih-visit="'+esc(book.id)+'">Ouvrir IslamHouse ↗</button></div>'+
    filesPanel+'</div></article>';
  }).join('');
  if(!current.length&&scanned&&!$('ihSearchSubmit').disabled)
