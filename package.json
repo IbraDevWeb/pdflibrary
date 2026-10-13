@@ -1,6 +1,6 @@
 {
   "name": "folio-personal-reader",
-  "version": "2.8.0",
+  "version": "2.8.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,7 +13,7 @@
     "test:e2e": "playwright test",
     "build:desktop": "vite build --mode desktop",
     "windows": "npm run build:desktop && electron-builder --win nsis --x64 --publish never",
-    "desktop:smoke": "node desktop/smoke.cjs"
+    "desktop:smoke": "node desktop/diagnose.cjs"
   },
   "dependencies": {
     "@capacitor/core": "^8.2.0",
