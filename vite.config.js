@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
-export default defineConfig({
+export default defineConfig(({mode})=>({
  base:'./',
- plugins:[VitePWA({
+ // Windows est empaqueté hors ligne : pas de service worker qui cache une ancienne version.
+ plugins:mode==='desktop'?[]:[VitePWA({
   registerType:'autoUpdate',
   strategies:'generateSW',
   includeAssets:['icons/icon.svg','icons/icon-192.png','icons/icon-512.png'],
@@ -10,4 +11,4 @@ export default defineConfig({
   workbox:{globPatterns:['**/*.{js,css,html,svg,png,woff2,mjs}'],maximumFileSizeToCacheInBytes:10*1024*1024,cleanupOutdatedCaches:true,navigateFallback:'index.html'}
  })],
  build:{target:'es2022'}
-});
+}));
