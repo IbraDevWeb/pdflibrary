@@ -131,7 +131,7 @@ export function backInIslamicLibrary(){
  if(authorDialog.open){authorDialog.close();return true;}
  closeIslamicLibrary();return true;
 }
-export function setupIslamicLibrary({books,read,edit,find,browse}){
+export function setupIslamicLibrary({books,read,edit,find,browse,browseUsul=()=>{}}){
  getBooks=books;onRead=read;onEdit=edit;onFind=find;onBrowse=browse;
  selectValues();
  const dialog=document.createElement("dialog");dialog.id="islamicAuthorDialog";dialog.className="modal islamic-author-dialog";
@@ -142,6 +142,7 @@ export function setupIslamicLibrary({books,read,edit,find,browse}){
  for(const id of ["islamicOpen","islamicSide","islamicMobile"])$(id).addEventListener("click",openIslamicLibrary);
  $("islamicClose").addEventListener("click",closeIslamicLibrary);
  $("islamicCatalog").addEventListener("click",onBrowse);
+ $("islamicSearchUsul").addEventListener("click",browseUsul);
  $("islamicDisciplines").addEventListener("click",e=>{
   const button=e.target.closest("[data-islamic-discipline]");if(!button)return;
   discipline=discipline===button.dataset.islamicDiscipline?"":button.dataset.islamicDiscipline;
