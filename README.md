@@ -97,6 +97,33 @@ Publier uniquement le dossier `dist/` sur un hébergement HTTPS statique (ou Git
 
 La PWA stocke les PDF/EPUB dans **IndexedDB**, propriété du navigateur. L'APK Android stocke les **fichiers** dans `Directory.Data` de Capacitor (stockage privé de l'application) et les **fiches** en IndexedDB dans la WebView. Le stockage reste local dans les deux cas.
 
+## Folio 2.4 — Espace personnel des sciences islamiques
+
+La bibliothèque Folio comporte un espace **Sciences islamiques** accessible depuis la barre de navigation mobile, la barre supérieure ou le menu latéral. Il fonctionne sans compte et sans serveur ; vos PDF/EPUB et notices restent dans le stockage local.
+
+### Disciplines et écoles
+
+Les ouvrages peuvent être organisés dans dix familles : Coran/tafsîr, hadith/Sunna, fiqh, usûl al-fiqh, ʿaqîda, sîra/biographies, langue arabe, histoire islamique, akhlâq/spiritualité, autres sciences. On peut filtrer par discipline, école juridique (mâlikite, hanafite, shâfiʿite, hanbalite, comparative), langue ou auteur. Les ouvrages sont comptés dans un tableau de bord ; les ouvrages sans discipline sont indiqués comme **À classer**.
+
+**Aucune affiliation ou biographie n'est déduite automatiquement** du titre : les disciplines, écoles, dates et éditions sont enregistrées seulement lorsqu'elles sont saisies par l'utilisateur. Les ouvrages importés depuis les catalogues islamiques sont automatiquement proposés dans cet espace comme *ouvrages à classer*, sans inventer leur matière.
+
+### Fiches bibliographiques et notices d'auteurs
+
+Ouvrez la **Fiche** d'un livre, puis **Sciences islamiques — fiche bibliographique**, et cochez *Classer ce livre*. Vous pouvez renseigner le domaine, sous-discipline, école, langue, titre original, nom arabe de l'auteur, époque, dates de décès (H / calendrier grégorien), traducteur, éditeur, édition, année, tome et provenance bibliographique. Les champs vides ne sont pas remplis par supposition.
+
+L'**Index des auteurs** regroupe les livres par nom d'auteur connu et permet de consulter une fiche réunissant les informations déjà saisies et les ouvrages présents dans Folio. Aucune biographie externe n'est chargée.
+
+### Recherche hors ligne
+
+La recherche dans l'espace islamique porte sur les **titres, auteurs, noms arabes, disciplines, écoles, notes, signets, annotations et champs bibliographiques**. L'arabe est normalisé pour ignorer les voyelles courtes et certaines variantes d'alif ; la recherche latine tolère les accents. Les filtres se combinent. Pour chercher un terme dans le texte intégral d'un ouvrage, cliquez sur **Dans le texte** : Folio ouvre son lecteur et cherche dans ce PDF/EPUB sur l'appareil (le texte d'un PDF scanné nécessite un OCR non intégré). Il n'existe pas encore d'index plein texte permanent de *toute* la bibliothèque.
+
+### Données et compatibilité
+
+- Les livres déjà classés dans une collection `Sciences islamiques/...` sont reconnus, sauf si vous les excluez explicitement depuis leur fiche.
+- Le champ `islamic` est conservé avec le reste des métadonnées du livre et dans l'export/restauration ZIP. Les anciennes sauvegardes restent prises en charge.
+- Les catalogues en ligne sont des portes d'entrée vers des sites tiers : cet espace n'inclut aucun ouvrage téléchargeable supplémentaire et ne valide pas automatiquement leurs métadonnées.
+- Les tests unitaires couvrent la taxonomie, les recherches arabes/françaises, les écoles, auteurs et exclusions ; des tests mobiles simulent le classement, la recherche, les notices et la sauvegarde ZIP.
+
 ## Folio 2.3 — Lecteur perfectionné : recherche, typographie et annotations
 
 Dans le lecteur PDF/EPUB, la barre de commande propose des fonctions supplémentaires :
