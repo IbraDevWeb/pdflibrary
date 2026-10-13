@@ -75,6 +75,9 @@ test('IslamHouse : rechercher titre/auteur → vraie fiche PDF → importer dans
 test('IslamHouse : l’ancienne URL ne montre plus les 505 liens de navigation',async ({page})=>{
  await page.goto('/');
  await page.locator('#catalogOpen').click();
+ await expect(page.locator('#catalogPanel')).toBeHidden();
+ await page.locator('#catalogSourceTabs [data-source-tab="general"]').click();
+ await expect(page.locator('#catalogPanel')).toBeVisible();
  await page.locator('#catalogUrlInput').fill('https://islamhouse.com/fr/books/fr/1?sort=date');
  await page.locator('#catalogUrlForm button[type=submit]').click();
  await expect(page.locator('#ihSearchForm')).toBeVisible();
