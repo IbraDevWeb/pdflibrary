@@ -84,6 +84,25 @@ async function main(){
  try{
   await page.waitForSelector('#booksGrid',{state:'attached',timeout:30000});
   const initial=await snapshot(page,'initial');
+  const brand=await page.evaluate(()=>({
+    desktop:document.documentElement.dataset.folioDesktop==='true',
+    sidebarBackground:getComputedStyle(document.querySelector('.sidebar')).backgroundImage,
+    introBackground:getComputedStyle(document.querySelector('.intro')).backgroundImage,
+    introGraphic:getComputedStyle(document.querySelector('.intro-illustration')).backgroundImage,
+    logoLoaded:(()=>{const img=document.querySelector('.brand-emblem');return img?.complete&&img?.naturalWidth>20;})(),
+    introButtons:document.querySelectorAll('.intro-actions button').length,
+    searchShortcut:document.getElementById('searchShortcut').textContent,
+  }));
+  console.log('BRANDING_FOLIO_WINDOWS:',JSON.stringify(brand));
+  assert.equal(brand.desktop,true,'Le thème Windows doit être activé via folio://app');
+  assert.match(brand.sidebarBackground,/gradient/,'Barre latérale sans nouveau style');
+  assert.match(brand.introBackground,/gradient/,'Accueil sans nouveau style');
+  assert.match(brand.introGraphic,/folio-library-hero/,'Illustration Folio non chargée');
+  assert.equal(brand.logoLoaded,true,'Logo Folio non chargé');
+  assert.equal(brand.introButtons,2,'Actions accueil incomplètes');
+  assert.equal(brand.searchShortcut,'Ctrl K');
+  fs.mkdirSync('desktop-previews',{recursive:true});
+  await page.screenshot({path:'desktop-previews/01-accueil.png',fullPage:true});
   assert.ok(initial.url.startsWith('folio://app/'),'L’application doit démarrer depuis folio://app');
   for(const type of ['pdf','epub']){
    const encoded=type==='pdf'?pdfDocument():await epubDocument();
@@ -106,6 +125,7 @@ async function main(){
    await page.locator('[data-action="read"][data-id="'+id+'"]').click();
    await page.waitForTimeout(3000);
    const result=await snapshot(page,'after-opening-'+type);
+   await page.screenshot({path:'desktop-previews/02-lecteur-'+type+'.png'});
    assert.equal(result.readerHidden,false,'Le lecteur '+type+' doit être visible');
    assert.ok(result.url.startsWith('folio://app/'),'Le livre ne doit pas naviguer hors de Folio');
    assert.notEqual(result.barDisplay,'none','La barre de navigation doit rester visible');
