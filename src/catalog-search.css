@@ -35,3 +35,9 @@
 .catalog-directory{margin-top:25px}
 @media(max-width:880px){.ih-books{grid-template-columns:1fr}.ih-discovery{padding:20px}.ih-search-form{grid-template-columns:minmax(0,1fr) 128px}.ih-search-form button{grid-column:1/-1}}
 @media(max-width:500px){.ih-search-form{grid-template-columns:1fr}.ih-search-form button{grid-column:auto}.ih-book{padding:12px;gap:9px}.ih-book-cover{width:38px;height:51px;font-size:20px}.ih-book h4{font-size:17px}.ih-discovery{padding:16px}.ih-source-help{flex-direction:column;align-items:flex-start}}
+
+.catalog-import-guide{display:flex;align-items:center;justify-content:space-between;gap:17px;background:#ecf3e9;border:1px solid #d5e5d6;border-radius:13px;padding:16px 20px;margin:22px 0;color:#2c5640}
+.catalog-import-guide strong{font-size:13px}
+.catalog-import-guide p{color:#6a8571;line-height:1.55;font-size:12px;margin:6px 0 0}
+.catalog-import-guide button{min-width:165px;min-height:45px;flex:none}
+@media(max-width:650px){.catalog-import-guide{flex-direction:column;align-items:stretch}.catalog-import-guide button{width:100%}}
