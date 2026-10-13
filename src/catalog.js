@@ -2,6 +2,8 @@ import { CapacitorHttp } from '@capacitor/core';
 import { native } from './storage.js';
 import './catalog.css';
 import './catalog-search.css';
+import './usul.css';
+import {setupUsulSearch,activateUsulSearch,activateIslamhouseSearch} from './usul-ui.js';
 import {prepareIslamhouse,showIslamhouseSearch} from './islamhouse-ui.js';
 import { SOURCES, TOPICS } from './catalog-sources.js';
 import { loadGutenberg, loadOPDS } from './catalog-providers.js';
@@ -95,14 +97,15 @@ function renderSources() {
     const selected=source.id===activeSource?.id,star=favorites.has(source.id);
     const isIslam=source.group==='islam';
     const builtIn=source.id==='islamhouse-fr';
-    const badge=builtIn?'Recherche intégrée · PDF':isIslam?'Visite du site officiel':source.mode==='browse'?'Consultation':source.mode==='opds'?'OPDS · téléchargement':source.mode==='gutendex'?'Recherche EPUB':'PDF / EPUB selon le site';
+    const usul=source.id==='usul';
+    const badge=usul?'Recherche livres · lecture en ligne':builtIn?'Recherche intégrée · PDF':isIslam?'Visite du site officiel':source.mode==='browse'?'Consultation':source.mode==='opds'?'OPDS · téléchargement':source.mode==='gutendex'?'Recherche EPUB':'PDF / EPUB selon le site';
     return '<article class="catalog-source-card'+(selected?' active':'')+'"><div class="source-card-top"><span class="source-emoji">'+esc(source.icon)+'</span>'+
       '<button type="button" class="source-star'+(star?' selected':'')+'" data-source-star="'+esc(source.id)+'" aria-label="'+(star?'Retirer des favoris':'Ajouter aux favoris')+'" aria-pressed="'+star+'">'+(star?'★':'☆')+'</button></div>'+
       '<strong>'+esc(source.label)+'</strong><small>'+esc(source.language)+' · '+esc(badge)+'</small>'+
       '<p>'+esc(source.desc)+'</p><div class="source-tags">'+source.topics.slice(0,3).map(tag=>'<span>'+esc(tag)+'</span>').join('')+'</div>'+
       '<div class="source-actions">'+
-      (builtIn?'<button type="button" class="source-open" data-source-open="'+esc(source.id)+'">🔎 Rechercher des livres</button>':'<button type="button" class="source-open" data-source-visit="'+esc(source.id)+'">Ouvrir la bibliothèque ↗</button>')+
-      (builtIn?'<button type="button" class="source-explore" data-source-visit="'+esc(source.id)+'">Visiter le site officiel ↗</button>':!isIslam&&source.mode!=='browse'?'<button type="button" class="source-explore" data-source-open="'+esc(source.id)+'">Trouver des PDF/EPUB ↓</button>':'')+'</div></article>';
+      (usul?'<button type="button" class="source-open" data-source-open="'+esc(source.id)+'">🔎 Rechercher sur Usul</button>':builtIn?'<button type="button" class="source-open" data-source-open="'+esc(source.id)+'">🔎 Rechercher des livres</button>':'<button type="button" class="source-open" data-source-visit="'+esc(source.id)+'">Ouvrir la bibliothèque ↗</button>')+
+      (builtIn||usul?'<button type="button" class="source-explore" data-source-visit="'+esc(source.id)+'">Visiter le site officiel ↗</button>':!isIslam&&source.mode!=='browse'?'<button type="button" class="source-explore" data-source-open="'+esc(source.id)+'">Trouver des PDF/EPUB ↓</button>':'')+'</div></article>';
   }).join(''):'<p class="catalog-nothing">Aucune source pour ce filtre. Essayez une autre discipline ou la vue « Toutes les sources ».</p>';
 }
 async function visitSource(id){
@@ -116,7 +119,11 @@ async function visitSource(id){
 function openSource(id){
   const source=SOURCES.find(item=>item.id===id);if(!source)return;
   activeSource=source;renderSources();
+  if(source.id==='usul'){
+    activateUsulSearch();return;
+  }
   if(source.id==='islamhouse-fr'){
+    activateIslamhouseSearch();
     showIslamhouseSearch({loadLatest:true});return;
   }
   if(source.group==='islam'||source.mode==='browse'){visitSource(id);return;}
@@ -165,6 +172,7 @@ async function navigate(input,back=false){
     const isArabic=target.pathname.startsWith('/ar/');
     $('catalogPanel').hidden=true;
     $('catalogLoaded').hidden=true;
+    activateIslamhouseSearch();
     showIslamhouseSearch({lang:isArabic?'ar':'fr',loadLatest:true});
     feedback('Pour IslamHouse, utilisez la recherche de livres en haut de la page : les liens du site ne sont plus affichés comme des ouvrages.');
     return;
@@ -216,6 +224,12 @@ export function backInCatalog(){
 export function setupCatalog({onImport}){
   importBook=onImport;
   prepareIslamhouse({onDownload:onImport});
+  setupUsulSearch();
+  $('catalogProviderTabs').addEventListener('click',e=>{
+    const button=e.target.closest('[data-provider]');if(!button)return;
+    if(button.dataset.provider==='usul')activateUsulSearch();
+    else{activateIslamhouseSearch();$('islamhouseSearchSection').scrollIntoView({behavior:'smooth',block:'start'});}
+  });
   renderSources();
   $('catalogOpen').addEventListener('click',open);
   $('catalogSide').addEventListener('click',open);
