@@ -1,0 +1,37 @@
+/* Recherche guidée : la couverture de catalogue est un ouvrage, pas un lien de navigation. */
+.ih-discovery{scroll-margin-top:calc(89px + var(--safe-top));margin:0 0 28px;padding:clamp(18px,3vw,34px);border:1px solid #dce6db;border-radius:18px;background:#fff;box-shadow:0 10px 34px #21391d0b}
+.ih-topline{display:flex;flex-wrap:wrap;justify-content:space-between;gap:9px;align-items:center}
+.ih-api-label{font-size:10px;color:#537759;background:#eaf4e8;border:1px solid #d3e7d1;padding:5px 9px;border-radius:15px}
+.ih-discovery h3{font:500 clamp(25px,3.6vw,36px)/1.17 Georgia,serif;color:#204334;margin:11px 0 10px}
+.ih-discovery>p{color:#708575;font-size:13px;line-height:1.6;max-width:750px}
+.ih-search-form{display:grid;grid-template-columns:minmax(0,1fr) 170px 125px;gap:10px;margin-top:20px}
+.ih-search-form input,.ih-search-form select{min-height:49px;min-width:0;border:1px solid #cbdccd;border-radius:10px;background:#fcfdfa;padding:10px 12px;color:#274f3a;font-size:13px}
+.ih-search-form input{font-size:14px}
+.ih-search-form button{min-height:49px;border-radius:10px;font-size:13px;font-weight:700}
+.ih-examples{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0;font-size:11px;color:#85998a}
+.ih-examples button{padding:7px 11px;background:#edf5eb;border:1px solid #d5e7d3;border-radius:20px;color:#3c7252;font-size:11px}
+.ih-help{color:#899b8c!important;font-size:11px!important;margin:9px 0}
+.ih-status{min-height:29px;font-size:12px;color:#4c745a;margin:12px 0;line-height:1.5}
+.ih-status.error{color:#9a5047}
+.ih-books{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.ih-book{display:flex;align-items:flex-start;gap:13px;background:#f8faf7;border:1px solid #dce9df;padding:16px;border-radius:12px;min-width:0}
+.ih-book-cover{width:54px;height:69px;border-radius:5px 9px 9px 5px;flex:none;background:#315b48;display:grid;place-items:center;font-size:28px}
+.ih-book-main{min-width:0;flex:1}
+.ih-book h4{font:500 18px/1.45 Georgia,serif;margin:0 0 7px;color:#264a36;overflow-wrap:anywhere}
+.ih-book-author{font-size:11px!important;margin:0 0 7px!important;color:#607d68!important}
+.ih-book-summary{font-size:11px!important;margin:0 0 12px!important;color:#728876!important;line-height:1.5!important}
+.ih-book-actions{display:flex;flex-wrap:wrap;gap:8px;margin:9px 0}
+.ih-book-actions button{min-height:41px;padding:8px 10px;border:1px solid #c6ddcb;border-radius:8px;background:#eff6ee;color:#326c4a;font-weight:700;font-size:11px}
+.ih-book-actions .ih-formats{background:#285a41;color:#fff;border-color:#285a41}
+.ih-files{display:flex;flex-direction:column;gap:7px;margin:10px 0 3px}
+.ih-download{background:#e0f2e2;border:1px solid #98caa3;border-radius:9px;color:#235b38;min-height:48px;text-align:left;padding:12px 13px;font-weight:750;font-size:12px;line-height:1.5}
+.ih-download:disabled{opacity:.65}
+.ih-no-file,.ih-empty{padding:12px;font-size:12px;color:#788c7d;line-height:1.5;background:#fff;border-radius:7px}
+.ih-continue{min-height:45px;border:1px solid #bfd8c5;background:#eff6ec;color:#326b45;border-radius:10px;padding:12px 16px;margin:18px 0;font-size:12px;font-weight:750;width:100%}
+.ih-source-help{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:22px;padding:13px 15px;border-radius:10px;background:#f6f8f3;border:1px solid #e1eadc;color:#718676;font-size:11px}
+.ih-source-help strong{color:#3b5c45}
+.ih-source-help button{border:0;background:transparent;text-decoration:underline;color:#2b6446;font-weight:750;padding:6px}
+.catalog-source-card .source-actions button{white-space:normal}
+.catalog-directory{margin-top:25px}
+@media(max-width:880px){.ih-books{grid-template-columns:1fr}.ih-discovery{padding:20px}.ih-search-form{grid-template-columns:minmax(0,1fr) 128px}.ih-search-form button{grid-column:1/-1}}
+@media(max-width:500px){.ih-search-form{grid-template-columns:1fr}.ih-search-form button{grid-column:auto}.ih-book{padding:12px;gap:9px}.ih-book-cover{width:38px;height:51px;font-size:20px}.ih-book h4{font-size:17px}.ih-discovery{padding:16px}.ih-source-help{flex-direction:column;align-items:flex-start}}
