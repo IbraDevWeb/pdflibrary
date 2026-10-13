@@ -13,8 +13,9 @@ export function installNavigation({getView,changeView}){
     try{
       const dialog=Array.from(document.querySelectorAll('dialog[open]')).at(-1);
       if(dialog){dialog.close();return;}
-      if(backInCatalog())return;
+      // Le lecteur est au-dessus des catalogues : fermer d'abord ses outils/son immersion.
       if(Reader.back())return;
+      if(backInCatalog())return;
       if(backInIslamicLibrary())return;
       if(getView()!=='all'){
         changeView('all');return;
