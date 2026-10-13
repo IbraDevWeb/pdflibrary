@@ -2,6 +2,7 @@ import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import JSZip from 'jszip';
 import { Share } from '@capacitor/share';
+import { normalizeIslamicMetadata } from './islamic-library.js';
 
 const DB = 'folio-library', STORE = 'books';
 export const native = Capacitor.isNativePlatform();
@@ -115,7 +116,8 @@ function normalize(info){
     createdAt:Number(info.createdAt)||Date.now(),updatedAt:Date.now(),
     lastReadAt:Number(info.lastReadAt)||null,
     sourceUrl:typeof info.sourceUrl==='string'?info.sourceUrl.slice(0,2000):null,
-    sourceName:typeof info.sourceName==='string'?info.sourceName.slice(0,200):null
+    sourceName:typeof info.sourceName==='string'?info.sourceName.slice(0,200):null,
+    ...(info.islamic&&typeof info.islamic==='object'?{islamic:normalizeIslamicMetadata(info.islamic)}:{})
   };
 }
 export async function exportZip(books){
