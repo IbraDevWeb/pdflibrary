@@ -11,3 +11,16 @@ export function pinchRatio(initialDistance,currentDistance){
 }
 export function touchDistance(a,b){return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);}
 export function nextZoom(zoom,factor){return Math.round(clamp((Number(zoom)||1)*factor,.65,3)*100)/100;}
+
+/** En zoom PDF, un balayage explore le document jusqu'au bord.
+ * Pour changer de page, le geste doit COMMENCER au bord dans la direction voulue.
+ * Le sens 'next' physique = balayage vers la gauche, donc bord droit du document.
+ */
+export function zoomedSwipeAction({zoom=1,scrollWidth=0,clientWidth=0,scrollLeft=0,direction}={}){
+ if(zoom<=1.08||scrollWidth<=clientWidth+6)return 'turn';
+ const limit=Math.max(0,scrollWidth-clientWidth);
+ const x=clamp(Number(scrollLeft)||0,0,limit);
+ if(direction==='next')return x>=limit-7?'turn':'pan';
+ if(direction==='previous')return x<=7?'turn':'pan';
+ return 'pan';
+}
