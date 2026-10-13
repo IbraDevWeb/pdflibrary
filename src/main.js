@@ -6,6 +6,7 @@ import { downloadToLibrary } from './direct-download.js';
 import { installNavigation } from './navigation.js';
 import './mobile-polish.css';
 import './reader-advanced.css';
+import './collection-pages.css';
 import './islamic-library.css';
 import { DISCIPLINES,MADHAHIB,LANGUAGES,isIslamicBook,islamicMetadata,normalizeIslamicMetadata } from './islamic-library.js';
 import { setupIslamicLibrary,refreshIslamicLibrary } from './islamic-ui.js';
