@@ -1,0 +1,76 @@
+
+/* Folio Sciences Islamiques : espace bibliographique local, tactile et accessible. */
+.islamic-top-launch,.islamic-side-launch{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid #cbdacb;background:#f1f6ee;color:#285443;padding:11px 13px;border-radius:10px;font-size:12px;font-weight:750;white-space:nowrap}
+.islamic-top-launch:hover{background:#e2efe4}
+.islamic-side-launch{width:100%;margin:-25px 0 26px;background:#2f5647;color:#f5eed6;border-color:#527964}
+.islamic-side-launch:hover{background:#3d6857}
+.islamic-mobile-launch{font-weight:700!important}
+.islamic-overlay{position:fixed;z-index:35;inset:0;height:100dvh;width:100vw;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;background:#f8f9f5;color:var(--ink)}
+.islamic-overlay[hidden]{display:none!important}
+.islamic-header{position:sticky;top:0;z-index:9;display:flex;align-items:center;gap:10px;padding:calc(10px + var(--safe-top)) max(16px,var(--safe-right)) 10px max(16px,var(--safe-left));background:#fff;border-bottom:1px solid #e3e9e0;box-shadow:0 2px 14px #1e44220d;min-height:68px}
+.islamic-header-title{display:flex;flex-direction:column;min-width:0;flex:1}
+.islamic-header-title strong{font:500 19px Georgia,serif;color:#234a3d}
+.islamic-header-title small{font-size:10px;color:#82968a}
+.islamic-header .button{font-size:11px;padding:9px 12px}
+.islamic-content{max-width:1190px;margin:0 auto;padding:26px max(17px,var(--safe-left)) calc(70px + var(--safe-bottom)) max(17px,var(--safe-right))}
+.islamic-hero{background:#e7eee3;border:1px solid #d9e3d5;border-radius:18px;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:clamp(22px,4vw,39px);margin-bottom:27px}
+.islamic-hero h2{font:500 clamp(27px,4.1vw,42px)/1.12 Georgia,serif;margin:9px 0 11px;letter-spacing:-1px;color:#1d4535}
+.islamic-hero p{font-size:13px;line-height:1.7;color:#6b8476;max-width:520px;margin:0}
+.islamic-stats{display:grid;grid-template-columns:repeat(3,minmax(68px,1fr));gap:8px;min-width:255px}
+.islamic-stats div{background:#fffffff0;border:1px solid #dbe7db;border-radius:12px;padding:12px;text-align:center}
+.islamic-stats strong{display:block;font:600 26px Georgia,serif;color:#235540}
+.islamic-stats small{display:block;font-size:10px;color:#849988;margin-top:2px}
+.islamic-section{margin:25px 0 31px}
+.islamic-section-title{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:15px}
+.islamic-section-title h3{font:500 24px Georgia,serif;margin:0;color:#274536}
+.islamic-section-title span{font-size:11px;color:#789080}
+.islamic-discipline-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.islamic-discipline{display:flex;flex-direction:column;min-height:117px;align-items:flex-start;justify-content:space-between;text-align:left;gap:6px;padding:13px;border:1px solid #e2eae0;background:#fff;border-radius:11px;min-width:0;color:#29503d}
+.islamic-discipline strong{font-size:12px;line-height:1.4}
+.islamic-discipline .islamic-arabic{font:normal 16px/1.4 Georgia,serif;color:#7c9b86;max-width:100%;overflow-wrap:anywhere}
+.islamic-discipline small{font-size:10px;color:#8c9e92}
+.islamic-discipline.active{border:2px solid #366f50;background:#eaf4eb;padding:12px}
+.islamic-searchbar{display:grid;grid-template-columns:minmax(200px,2fr) repeat(3,minmax(110px,1fr));gap:9px}
+.islamic-searchbar label{display:flex;align-items:center;gap:8px;padding:9px 11px;border:1px solid #dbe5db;border-radius:10px;background:#fff;min-width:0}
+.islamic-searchbar label .icon{width:15px;color:#7a9682}
+.islamic-searchbar input{flex:1;min-width:0;border:0;background:transparent;font-size:12px;outline:0}
+.islamic-searchbar select{width:100%;border:1px solid #dbe5db;background:#fff;border-radius:10px;color:#345542;padding:11px 8px;font-size:11px;min-height:41px;min-width:0}
+.islamic-search-help{margin:11px 0 16px;color:#8b9b90;font-size:11px;line-height:1.5}
+.islamic-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.islamic-book{display:flex;flex-direction:column;gap:9px;padding:16px;border:1px solid #e2e9df;border-radius:12px;background:#fff;min-width:0}
+.islamic-book-meta{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.islamic-book-tag{background:#eef5ee;border-radius:15px;padding:3px 8px;font-size:10px;color:#55795c;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.islamic-book h4{font:500 18px/1.3 Georgia,serif;color:#284835;overflow-wrap:anywhere;margin:2px 0 0}
+.islamic-book .islamic-original{font-size:15px;color:#657e67;line-height:1.7;margin:0;overflow-wrap:anywhere}
+.islamic-book p{font-size:12px;color:#7b917f;line-height:1.5;margin:0;overflow-wrap:anywhere}
+.islamic-book .islamic-books-data{font-size:11px;color:#8d9d91}
+.islamic-book-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:5px}
+.islamic-book-actions button{border:1px solid #d0ded0;border-radius:8px;background:#f3f8f3;min-height:41px;padding:9px 12px;font-size:11px;font-weight:700;color:#3d654d}
+.islamic-book-actions button:first-child{background:#275542;border-color:#275542;color:white}
+.islamic-empty{border:1px dashed #c7daca;background:#fff;border-radius:12px;color:#6e8875;padding:29px;text-align:center;font-size:13px;line-height:1.7}
+.islamic-author-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.islamic-author{background:#fff;border:1px solid #e2e9e1;border-radius:12px;text-align:left;padding:17px;display:flex;flex-direction:column;gap:6px;min-height:122px;align-items:flex-start;min-width:0;color:#254d38}
+.islamic-author strong{font:500 17px/1.3 Georgia,serif;overflow-wrap:anywhere}
+.islamic-author .islamic-arabic{font:normal 17px/1.5 Georgia,serif;overflow-wrap:anywhere;color:#688f72}
+.islamic-author small{font-size:11px;color:#85978b;overflow-wrap:anywhere}
+.islamic-author:hover{border-color:#9ebfa9;background:#f3f9f3}
+.islamic-footer{font-size:11px;color:#899b8c;text-align:center;line-height:1.6;margin:30px 0 0}
+.islamic-edit-details{border:1px solid #d8e6d8;padding:14px 15px;margin:18px 0 0;background:#f5faf5;border-radius:12px}
+.islamic-edit-details>summary{cursor:pointer;font-weight:750;font-size:13px;color:#2d5d42}
+.islamic-edit-details p{font-size:11px;color:#78907b;line-height:1.5;margin:13px 0}
+.islamic-edit-details .islamic-check{display:flex;flex-direction:row;align-items:center;gap:8px;font-weight:700}
+.islamic-check input{width:20px;height:20px;accent-color:#2e7250;flex:none}
+.islamic-edit-fields[hidden]{display:none!important}
+.islamic-edit-details .field-row{flex-wrap:wrap}
+.islamic-edit-details .field-row>.field{min-width:140px}
+.islamic-author-dialog{width:min(94vw,540px)}
+.islamic-author-profile{line-height:1.65}
+.islamic-author-profile h3{font:500 23px Georgia,serif;margin:0}
+.islamic-author-profile .islamic-arabic{font-size:19px;color:#437b58}
+.islamic-author-profile p{font-size:12px;color:#799381;margin:7px 0}
+.islamic-author-profile ol{padding-left:20px}
+.islamic-author-profile li{font-size:12px;margin-bottom:9px}
+@media(max-width:1020px){.islamic-discipline-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.islamic-author-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:860px){.islamic-top-launch{display:none}.islamic-header-title strong{font-size:17px}.islamic-content{padding-top:17px}.mobile-nav button{min-width:0;flex:1}.mobile-nav .mobile-add{flex:none}}
+@media(max-width:630px){.islamic-hero{flex-direction:column;align-items:stretch;gap:15px}.islamic-stats{min-width:0}.islamic-searchbar{grid-template-columns:repeat(2,minmax(0,1fr))}.islamic-searchbar label{grid-column:1/-1}.islamic-discipline-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.islamic-results{grid-template-columns:1fr}.islamic-header .button{max-width:104px;white-space:normal;line-height:1.2;padding:8px}.islamic-header-title small{font-size:9px}.islamic-content{padding-left:14px;padding-right:14px}}
+@media(max-width:400px){.islamic-author-grid{grid-template-columns:1fr}.islamic-hero h2{font-size:28px}.islamic-discipline{min-height:109px}.islamic-header{gap:5px}.islamic-header-title strong{font-size:15px}.islamic-header .button{font-size:10px}}
