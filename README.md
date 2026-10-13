@@ -97,6 +97,31 @@ Publier uniquement le dossier `dist/` sur un hébergement HTTPS statique (ou Git
 
 La PWA stocke les PDF/EPUB dans **IndexedDB**, propriété du navigateur. L'APK Android stocke les **fichiers** dans `Directory.Data` de Capacitor (stockage privé de l'application) et les **fiches** en IndexedDB dans la WebView. Le stockage reste local dans les deux cas.
 
+## Folio 2.5 — Trouver et télécharger les livres islamiques
+
+**Pourquoi le catalogue a changé :** la première version analysait simplement les liens HTML de bibliothèques externes ; elle présentait les centaines de liens de navigation d'IslamHouse comme des « pages/collections », sans véritable lien PDF sur les listes. Cela ne constituait pas une recherche de livres.
+
+### Mode d'emploi : IslamHouse (recherche et téléchargement dans Folio)
+
+1. **Découvrir → Trouver un livre à télécharger** en haut de la page (ou sélectionner « IslamHouse — livres français → Rechercher des livres »).
+2. Taper le **titre** ou le **nom de l'auteur**, sélectionner **Français** ou **Arabe**, puis **Rechercher**. Les exemples sont des recherches locales dans les données récupérées, pas des suggestions préinstallées.
+3. Lire les cartes **livre / auteur**, toucher **Voir les PDF / EPUB**. Folio récupère la fiche détaillée de l'ouvrage depuis **l'API publique IslamHouse v3** et affiche uniquement les véritables pièces jointes PDF/EPUB, pas les 505 liens de navigation des pages HTML.
+4. Appuyer sur **Télécharger PDF dans Folio** pour importer le fichier en local dans la bibliothèque. Le bouton et la ligne d'état indiquent l'avancement et la réussite ou l'erreur. L'ouvrage reste lisible hors ligne après import.
+
+L'API IslamHouse dispose d'une pagination par 50 titres. Folio recherche parmi les titres récupérés, jusqu'à dix pages par passe en français et huit en arabe. Ce n'est **pas une recherche sur toutes les ressources du site en un seul appel** ; le bouton **Chercher dans les pages suivantes** permet de poursuivre. Le nombre de titres réellement examinés est indiqué à l'écran. Le mode « livres récents » charge une seule page initialement.
+
+Les fiches sont récupérées à la demande ; les formats PDF et EPUB ne sont jamais affichés tant que l'API n'a pas confirmé le fichier. La recherche distante nécessite Internet, mais les livres téléchargés restent privés. L'API publique est documentée sur https://github.com/islamhouse-dev/islamhouse-api ; endpoint de liste `main/books/{lang}/{lang}/{page}/50/json`, détail `main/get-item/{id}/{lang}/json`, fichier `attachments[].url`. La disponibilité peut changer indépendamment de Folio.
+
+### Al-Waqfeya, Shamela et autres sources sans catalogue exploitable
+
+Les bibliothèques islamiques qui n'ont pas d'API de livres PDF vérifiée sont **ouvertes sur leur vrai site**, et ne sont plus présentées dans le navigateur interne comme des centaines de liens techniques. Sur le site externe, recherchez un ouvrage, **téléchargez le PDF/EPUB sur le téléphone**, puis revenez dans Folio : **Ajouter → Depuis mon appareil** (ou le bouton **Importer mon PDF/EPUB** affiché dans Découvrir).
+
+Le lecteur ne contourne ni les droits d'auteur ni les protections de téléchargement. Un site peut retirer un ouvrage, changer d'adresse ou demander une navigation manuelle.
+
+### Validations
+
+Les tests unitaires couvrent la forme de l'API IslamHouse, les auteurs, les formats, la pagination et la normalisation arabe. Les tests sur navigateur mobile reproduisent recherche → fiche PDF → ajout local, et vérifient qu'une ancienne URL IslamHouse ne produit plus les liens techniques. Une vérification réseau GitHub Actions teste l'accès en direct à l'API IslamHouse ainsi que les pièces jointes d'un ouvrage réel. **Cela ne remplace pas un test de téléchargement sur un téléphone Android physique.**
+
 ## Folio 2.4 — Espace personnel des sciences islamiques
 
 La bibliothèque Folio comporte un espace **Sciences islamiques** accessible depuis la barre de navigation mobile, la barre supérieure ou le menu latéral. Il fonctionne sans compte et sans serveur ; vos PDF/EPUB et notices restent dans le stockage local.
