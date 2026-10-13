@@ -16,6 +16,8 @@ const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>'
 const colors=[['#284d48','#17352e'],['#a66e53','#764b3c'],['#466a7a','#263e57'],['#7d6587','#4e405d'],['#9e8260','#6b573b'],['#5e765a','#374c38'],['#aa6963','#773f48']];
 let books=[],view='all',layout=localStorage.getItem('folio-layout')==='list'?'list':'grid';
 let editingId=null,editingRating=0,query='',toastTimer,installPrompt=null,editingRead=null,loaded=false;
+const VIEW_LABELS={all:'Tous mes livres',reading:'Lectures en cours',finished:'Livres terminés',favorites:'Mes favoris'};
+const VIEW_DESCRIPTIONS={reading:'Reprenez les ouvrages que vous avez commencés, exactement où vous les aviez laissés.',finished:'Retrouvez les livres que vous avez terminés et redécouvrez vos notes.',favorites:'Tous les livres que vous avez marqués d’un cœur, réunis au même endroit.'};
 const coverURLs=new Map();
 const findBook=id=>books.find(book=>book.id===id);
 
@@ -128,8 +130,13 @@ function render(){
   document.querySelectorAll('[data-layout]').forEach(el=>el.classList.toggle('active',el.dataset.layout===layout));
   const title=view.startsWith('category:')?view.slice(9):({all:'Tous mes livres',reading:'Lectures en cours',finished:'Livres terminés',favorites:'Mes favoris'}[view]||'Ma bibliothèque');
   $('sectionTitle').firstChild.textContent=title+' ';
+  if(view!=='all'){
+    $('librarySubpageTitle').textContent=view.startsWith('category:')?view.slice(9).split('/').at(-1):title;
+    $('librarySubpageDescription').textContent=view.startsWith('category:')?'Tous les ouvrages de cette collection et de ses sous-collections.':VIEW_DESCRIPTIONS[view]||'Les livres de votre sélection.';
+  }
   const shown=filtered();
   $('resultCount').textContent=shown.length;
+  $('librarySubpageCount').textContent=shown.length;
   $('booksGrid').className='books-grid'+(layout==='list'?' list-layout':'');
   $('booksGrid').innerHTML=shown.map(card).join('');
   $('emptyState').hidden=shown.length>0;
@@ -137,7 +144,7 @@ function render(){
   $('emptyDescription').textContent=books.length?'Essayez un autre filtre ou une autre recherche.':'Ajoutez un PDF ou un EPUB pour commencer votre collection.';
   $('emptyAction').hidden=books.length>0;
   const last=[...reading].filter(b=>b.lastReadAt).sort((a,b)=>b.lastReadAt-a.lastReadAt)[0];
-  $('resumeSection').hidden=!last;
+  $('resumeSection').hidden=view!=='all'||!last;
   if(last){
     const c=palette(last),cover=coverUrl(last),style=cover?"background:url('"+cover+"') center / cover":'background:linear-gradient(145deg,'+c[0]+','+c[1]+')';
     $('resumeContent').innerHTML='<div class="resume-content"><div class="resume-cover" style="'+style+'"></div><div class="resume-detail"><strong>'+escape(last.title)+'</strong><span>'+escape(last.author||'Auteur inconnu')+' · '+pct(last)+' %</span><div class="resume-progress"><span style="width:'+pct(last)+'%"></span></div></div><button class="button button-primary resume-button" data-action="read" data-id="'+escape(last.id)+'">Continuer '+icon('arrow')+'</button></div>';
@@ -342,8 +349,26 @@ async function restore(file){
     $('settingsDialog').close();await reload();toast(result.added+' livre(s) restauré(s), '+result.skipped+' déjà présent(s).');
   }catch(e){toast('Import ZIP impossible : '+e.message,true);}
 }
-function changeView(next){view=next;query='';$('searchInput').value='';render();const viewport=document.querySelector('.app-shell > .main');if(viewport&&getComputedStyle(viewport).overflowY!=='visible')viewport.scrollTo({top:0,behavior:'smooth'});else window.scrollTo({top:0,behavior:'smooth'});}
+function changeView(next){
+  if(next!=='all'&&!['favorites','reading','finished'].includes(next)&&!next.startsWith('category:'))next='all';
+  view=next;
+  query='';$('searchInput').value='';
+  const subpage=next!=='all';
+  const library=$('booksGrid').closest('.library-section');
+  (subpage?$('librarySubpageSlot'):$('homeBookSlot')).append(library);
+  $('librarySubpage').hidden=!subpage;
+  // Le tableau de bord appartient exclusivement à l'accueil.
+  document.querySelector('.intro').hidden=subpage;
+  document.querySelector('.stats').hidden=subpage;
+  if(subpage)$('resumeSection').hidden=true;
+  document.querySelector('.content-wrap').classList.toggle('collection-active',subpage);
+  render();
+  const viewport=document.querySelector('.app-shell > .main');
+  if(viewport&&getComputedStyle(viewport).overflowY!=='visible')viewport.scrollTo({top:0,behavior:'instant'});
+  else window.scrollTo(0,0);
+}
 function events(){
+  $('librarySubpageBack').addEventListener('click',()=>changeView('all'));
   initIslamicMetadataForm();
   setupCatalog({onImport:importRemoteBook});
   setupIslamicLibrary({books:()=>books,read:id=>openBook(id),edit:openEdit,find:(id,term)=>openBook(id,term),browse:()=>$('catalogOpen').click(),browseUsul:openUsulCatalog});
@@ -391,6 +416,8 @@ function events(){
   document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$('searchInput').focus();}});
 }
 async function start(){
+  // Installe la grille dans son véritable conteneur d'accueil avant les interactions.
+  $('homeBookSlot').append($('booksGrid').closest('.library-section'));
   events();
   installNavigation({getView:()=>view,changeView});
   try{await initStorage();await reload();createCoverMissing();}
