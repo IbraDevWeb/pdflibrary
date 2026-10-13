@@ -97,6 +97,21 @@ Publier uniquement le dossier `dist/` sur un hébergement HTTPS statique (ou Git
 
 La PWA stocke les PDF/EPUB dans **IndexedDB**, propriété du navigateur. L'APK Android stocke les **fichiers** dans `Directory.Data` de Capacitor (stockage privé de l'application) et les **fiches** en IndexedDB dans la WebView. Le stockage reste local dans les deux cas.
 
+## Folio 2.6 — Recherche Usul.ai dans Découvrir
+
+L'espace **Sciences islamiques** propose un raccourci **Rechercher dans les textes d'Usul.ai**. Dans **Découvrir**, choisissez l'onglet **Usul.ai — notices et lecture sur Usul**, ou la source **Usul.ai — recherche de textes islamiques**.
+
+1. Entrer le titre arabe ou translittéré, ou le nom d'un auteur, dans la recherche Usul.
+2. Voir les **livres**, **titres arabes**, **auteurs**, **disciplines**, **éditeurs** et **années d'édition** renvoyés par Usul.
+3. Avancer ou reculer dans les pages de résultats.
+4. Toucher **Lire sur Usul ↗** pour ouvrir la fiche correspondante dans le navigateur intégré d'Android.
+
+**Aucun livre Usul n'est importé dans Folio** : la recherche ne télécharge ni PDF, ni EPUB, ni textes intégraux. Même si une notice référence une édition PDF, un lien détectable techniquement ne constitue pas une licence de téléchargement ni d'import. La lecture, les éventuels abonnements et les droits d'accès restent du ressort d'Usul.ai.
+
+Le fournisseur utilise, pour rechercher des **métadonnées**, l'endpoint public `https://api.usul.ai/search/books` avec `q`, `limit=15`, `page` et `locale`. Son accessibilité a été vérifiée depuis une exécution réseau GitHub Actions, y compris la pagination. **Usul réserve l'usage de son API dans certaines offres payantes**, et l'endpoint est configuré pour n'accepter que son propre site comme origine de navigateur (CORS). L'intégration utilise les requêtes HTTP natives sur Android quand le service l'autorise ; elle peut devenir indisponible sans préavis, et ne contourne aucune authentification. Dans la PWA web, si la requête est bloquée, Folio indique le problème et propose **Ouvrir Usul.ai ↗**. Les termes cherchés sont transmis à l'API Usul pour renvoyer les résultats.
+
+Usul.ai est une plateforme tierce indépendante de Folio. La fonction est une découverte bibliographique : elle ne crée pas automatiquement de livres dans votre bibliothèque privée. Les tests unitaires garantissent le format des notices, les liens vers les fiches officielles, la pagination et l'absence de bouton de téléchargement ; les tests d'interface couvrent également les indisponibilités.
+
 ## Folio 2.5 — Trouver et télécharger les livres islamiques
 
 **Pourquoi le catalogue a changé :** la première version analysait simplement les liens HTML de bibliothèques externes ; elle présentait les centaines de liens de navigation d'IslamHouse comme des « pages/collections », sans véritable lien PDF sur les listes. Cela ne constituait pas une recherche de livres.
