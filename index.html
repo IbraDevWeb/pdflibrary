@@ -82,6 +82,17 @@
           <div id="resumeContent"></div>
         </section>
 
+        <section id="librarySubpage" class="library-subpage" aria-label="Page de collection" hidden>
+          <button id="librarySubpageBack" class="library-subpage-back" type="button" aria-label="Retour à l'accueil de la bibliothèque">← Ma bibliothèque</button>
+          <header class="library-subpage-hero">
+            <span class="section-eyebrow">MA BIBLIOTHÈQUE / COLLECTION</span>
+            <h1 id="librarySubpageTitle">Mes favoris</h1>
+            <p id="librarySubpageDescription">Retrouvez vos livres dans cette collection.</p>
+            <div class="library-subpage-number"><strong id="librarySubpageCount">0</strong> ouvrages dans cette page</div>
+          </header>
+          <div id="librarySubpageSlot"></div>
+        </section>
+        <div id="homeBookSlot"></div>
         <section class="library-section">
           <div class="section-head"><div><span class="section-eyebrow">VOTRE COLLECTION</span><h2 id="sectionTitle">Tous mes livres <span id="resultCount" class="result-count">0</span></h2></div>
             <div class="filters"><label class="sort-select"><span>Trier :</span><select id="sortSelect" aria-label="Trier les livres"><option value="recent">Plus récents</option><option value="title">Titre A–Z</option><option value="author">Auteur A–Z</option><option value="rating">Mieux notés</option></select></label><div class="view-buttons"><button class="icon-button active" data-layout="grid" aria-label="Affichage grille" title="Grille"><svg class="icon"><use href="#i-grid"/></svg></button><button class="icon-button" data-layout="list" aria-label="Affichage liste" title="Liste"><svg class="icon"><use href="#i-list"/></svg></button></div></div>
@@ -265,7 +276,12 @@
     <div class="reader-tone-ends"><span>Tamisée</span><span>Normale</span></div>
     <button id="readerToneReset" type="button" class="reader-tone-reset">Réinitialiser les réglages</button>
   </section>
-  <button id="readerExitFullscreen" class="reader-exit-fullscreen" type="button" aria-label="Quitter le plein écran" title="Quitter le plein écran" hidden>⛶ <span>Afficher les commandes</span></button>
+  <div id="readerImmersiveControls" class="reader-immersive-controls" hidden aria-label="Commandes de lecture plein écran">
+    <button id="readerImmersivePrev" type="button" aria-label="Page précédente">‹</button>
+    <span id="readerImmersivePosition" aria-live="polite">Lecture</span>
+    <button id="readerImmersiveNext" type="button" aria-label="Page suivante">›</button>
+    <button id="readerExitFullscreen" type="button" aria-label="Quitter le plein écran" title="Quitter le plein écran">Quitter ⛶</button>
+  </div>
   <div class="reader-stage">
     <aside id="readerSidebar" class="reader-sidepanel" hidden>
       <div class="reader-sidebar-top"><strong>Mon carnet de lecture</strong><button id="readerSideClose" aria-label="Fermer le sommaire">×</button></div>
