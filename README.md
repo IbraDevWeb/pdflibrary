@@ -2,13 +2,21 @@
 
 Folio est une bibliothèque personnelle en français qui lit des livres **PDF** et **EPUB** sans compte, sans backend, sans analytique et sans synchronisation cloud. Le code de l'application est dans ce dépôt ; les **livres ne sont jamais envoyés sur GitHub**.
 
+## Correctif Folio Windows 2.8.1 — page blanche en lecture
+
+La version Windows 2.8.0 pouvait afficher une **page PDF blanche** au lieu du contenu : PDF.js 5 utilisait `Map.prototype.getOrInsertComputed`, absent de la version Chromium intégrée à Electron. Le correctif 2.8.1 installe une implémentation de compatibilité de `Map/WeakMap` uniquement si nécessaire, avant toute lecture. Cela ne modifie ni les PDF/EPUB ni la bibliothèque IndexedDB du PC.
+
+Une vérification automatique lance une vraie fenêtre Electron sous affichage Linux virtuel, ouvre un PDF et un EPUB d'essai, **mesure les pixels du texte du PDF** (un canvas blanc échoue désormais) et contrôle la présence du texte EPUB. C'est un test de rendu réel en Electron, mais **la version installée doit encore être vérifiée sur un PC Windows physique**.
+
+Pour la mise à jour Windows, **installer Folio 2.8.1 sur la version existante**, sans désinstaller et sans effacer les données. L'identifiant et le profil local Electron restent identiques ; livres, progression et annotations devraient donc être conservés. Il reste prudent d'**exporter la bibliothèque en ZIP avant la mise à jour**. En cas de page blanche persistante, conserver cette sauvegarde et signaler le format (PDF ou EPUB) et le titre/fichier concerné.
+
 ## Installer Folio sur Windows 10/11
 
 Folio possède une version **Windows 64 bits** empaquetée avec Electron (installateur NSIS `.exe`). Elle contient son interface, PDF.js et EPUB.js : **les livres déjà importés sont lisibles sans connexion**, et la bibliothèque est conservée dans le profil local de Folio entre les ouvertures. Aucune base de données distante n'est créée. Une connexion n'est nécessaire que pour la découverte des ouvrages sur les sites tiers.
 
 1. Ouvrir l'onglet **Actions** du dépôt puis le workflow **Construire Folio pour Windows**.
 2. Ouvrir la dernière exécution **réussie** et télécharger l'artifact **folio-windows-setup-x64**.
-3. Extraire le ZIP de l'artifact, puis lancer `Folio-Setup-2.8.0-x64.exe` et suivre l'installation ; un raccourci Bureau et un raccourci du menu Démarrer sont créés.
+3. Extraire le ZIP de l'artifact, puis lancer `Folio-Setup-2.8.1-x64.exe` et suivre l'installation ; un raccourci Bureau et un raccourci du menu Démarrer sont créés.
 4. Lancer Folio, puis choisir **Ajouter un livre** pour sélectionner des fichiers PDF/EPUB ou les déposer sur la fenêtre.
 
 **Édition non signée :** l'installateur est généré par GitHub Actions sans certificat de signature Windows. Microsoft Defender SmartScreen peut afficher un avertissement. Vérifier que le téléchargement provient bien des Actions de ce dépôt avant de poursuivre. La version Windows n'est pas une application Microsoft Store.
