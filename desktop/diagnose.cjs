@@ -42,6 +42,10 @@ async function snapshot(page,label){
    url:location.href,title:document.title,
    bodyText:document.body?.innerText?.slice(0,350),
    bodyHeight:document.body?.scrollHeight,
+   bookGridDisplay:getComputedStyle(document.getElementById('booksGrid')).display,
+   booksParentDisplay:getComputedStyle(document.getElementById('booksGrid').parentElement).display,
+   homeSlotHidden:document.getElementById('homeBookSlot')?.hidden,
+   mainHTML:document.querySelector('main')?.innerText?.slice(0,220),
    readerHidden:reader?.hidden,readerDisplay:reader?getComputedStyle(reader).display:null,
    readerBox:reader?.getBoundingClientRect().toJSON(),barDisplay:bar?getComputedStyle(bar).display:null,
    bookText:host?.innerText?.slice(0,200),
@@ -61,7 +65,7 @@ async function main(){
  page.on('requestfailed',r=>console.log('REQUEST_FAILURE:',r.url(),r.failure()?.errorText));
  page.on('framenavigated',f=>console.log('NAVIGATION:',f.url()));
  try{
-  await page.waitForSelector('#booksGrid',{timeout:30000});
+  await page.waitForSelector('#booksGrid',{state:'attached',timeout:30000});
   const initial=await snapshot(page,'initial');
   assert.ok(initial.url.startsWith('folio://app/'),'L’application doit démarrer depuis folio://app');
   for(const type of ['pdf','epub']){
