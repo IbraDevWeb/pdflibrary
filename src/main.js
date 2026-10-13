@@ -10,6 +10,7 @@ import './collection-pages.css';
 import './islamic-library.css';
 import { DISCIPLINES,MADHAHIB,LANGUAGES,isIslamicBook,islamicMetadata,normalizeIslamicMetadata } from './islamic-library.js';
 import { setupIslamicLibrary,refreshIslamicLibrary } from './islamic-ui.js';
+import './windows-polish.css';
 
 const $=id=>document.getElementById(id);
 const icon=name=>'<svg class="icon" aria-hidden="true"><use href="#i-'+name+'"/></svg>';
@@ -376,6 +377,21 @@ function changeView(next){
 }
 function events(){
   $('librarySubpageBack').addEventListener('click',()=>changeView('all'));
+  // Les raccourcis de la version PC ne touchent pas à la navigation Android.
+  if(location.protocol==='folio:'){
+    $('searchShortcut').textContent='Ctrl K';
+    $('desktopBrowseBooks').addEventListener('click',()=>$('catalogOpen').click());
+    document.addEventListener('keydown',event=>{
+      const active=document.activeElement;
+      const editable=active?.matches?.('input,textarea,select,[contenteditable="true"]');
+      if(event.ctrlKey&&!event.altKey&&!event.shiftKey&&event.key.toLowerCase()==='k'){
+        event.preventDefault();
+        $('searchInput').focus();$('searchInput').select();
+      }else if(event.key==='Escape'&&active===$('searchInput')&&!event.defaultPrevented){
+        active.blur();
+      }
+    });
+  }
   initIslamicMetadataForm();
   setupCatalog({onImport:importRemoteBook});
   setupIslamicLibrary({books:()=>books,read:id=>openBook(id),edit:openEdit,find:(id,term)=>openBook(id,term),browse:()=>$('catalogOpen').click(),browseUsul:openUsulCatalog});
