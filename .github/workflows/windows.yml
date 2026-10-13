@@ -1,0 +1,50 @@
+name: Construire Folio pour Windows
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    name: Installer Folio Windows 64 bits
+    runs-on: windows-latest
+    timeout-minutes: 25
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Installer les dépendances
+        run: npm install --no-audit --no-fund
+      - name: Tester la bibliothèque et les accès aux fichiers
+        run: npm test
+      - name: Compiler la liseuse hors ligne
+        run: npm run build:desktop
+      - name: Vérifier que l'application fonctionne réellement sur Windows
+        run: npm run desktop:smoke
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Créer l'icône Windows à partir du logo Folio
+        shell: pwsh
+        run: |
+          python -m pip install --quiet pillow
+          python -c "from PIL import Image; Image.open('public/icons/icon-512.png').save('desktop/icon.ico',format='ICO',sizes=[(16,16),(32,32),(48,48),(64,64),(128,128),(256,256)])"
+      - name: Fabriquer l'installateur Windows EXE
+        run: npx electron-builder --win nsis --x64 --publish never
+      - name: Vérifier le fichier d'installation
+        shell: pwsh
+        run: |
+          $installers = @(Get-ChildItem 'release/Folio-Setup-*-x64.exe' -ErrorAction Stop)
+          if ($installers.Count -ne 1) { throw 'Installateur Folio introuvable ou ambigu' }
+          if ($installers[0].Length -lt 10000000) { throw 'Installateur Folio anormalement petit' }
+          Write-Output "Installateur vérifié : $($installers[0].Name), $([math]::Round($installers[0].Length / 1MB, 1)) Mo"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: folio-windows-setup-x64
+          path: release/Folio-Setup-*-x64.exe
+          retention-days: 30
+          if-no-files-found: error
