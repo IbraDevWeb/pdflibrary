@@ -36,9 +36,9 @@ function registerAssets(){
 }
 function createWindow(){
  const win=new BrowserWindow({
-  title:'Folio — Ma bibliothèque',
-  width:1290,height:850,minWidth:610,minHeight:520,
-  backgroundColor:'#f8f9f5',show:false,
+  title:'Folio — Votre bibliothèque personnelle',
+  width:1380,height:870,minWidth:690,minHeight:540,
+  backgroundColor:'#f8f9f6',show:false,
   autoHideMenuBar:true,
   webPreferences:{
    sandbox:true,contextIsolation:true,nodeIntegration:false,webSecurity:true,
