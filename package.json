@@ -1,6 +1,6 @@
 {
   "name": "folio-personal-reader",
-  "version": "2.8.1",
+  "version": "2.9.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -35,7 +35,7 @@
     "electron": "^39.0.0",
     "electron-builder": "^26.15.3"
   },
-  "description": "Folio, bibliothèque privée hors ligne PDF et EPUB pour Android et Windows",
+  "description": "Folio — bibliothèque personnelle PDF/EPUB Android et Windows au design premium",
   "author": "Folio Contributors",
   "main": "desktop/main.cjs",
   "build": {
@@ -49,6 +49,7 @@
       "dist/**/*",
       "desktop/main.cjs",
       "desktop/paths.cjs",
+      "desktop/icon.png",
       "package.json",
       "!**/*.map"
     ],
