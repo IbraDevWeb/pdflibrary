@@ -74,3 +74,9 @@
 @media(max-width:860px){.islamic-top-launch{display:none}.islamic-header-title strong{font-size:17px}.islamic-content{padding-top:17px}.mobile-nav button{min-width:0;flex:1}.mobile-nav .mobile-add{flex:none}}
 @media(max-width:630px){.islamic-hero{flex-direction:column;align-items:stretch;gap:15px}.islamic-stats{min-width:0}.islamic-searchbar{grid-template-columns:repeat(2,minmax(0,1fr))}.islamic-searchbar label{grid-column:1/-1}.islamic-discipline-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.islamic-results{grid-template-columns:1fr}.islamic-header .button{max-width:104px;white-space:normal;line-height:1.2;padding:8px}.islamic-header-title small{font-size:9px}.islamic-content{padding-left:14px;padding-right:14px}}
 @media(max-width:400px){.islamic-author-grid{grid-template-columns:1fr}.islamic-hero h2{font-size:28px}.islamic-discipline{min-height:109px}.islamic-header{gap:5px}.islamic-header-title strong{font-size:15px}.islamic-header .button{font-size:10px}}
+
+/* Paramètres accessibles aussi sur écran mobile pour les sauvegardes. */
+@media(max-width:860px){
+ .topbar #settingsTop{display:grid!important;flex:none;min-width:38px;width:38px;height:38px}
+}
+.islamic-export-more{background:#eff6ef;border:1px solid #c8decf;border-radius:9px;padding:13px;min-height:44px;color:#366b4b;font-size:12px;font-weight:750}
