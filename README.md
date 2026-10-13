@@ -1,6 +1,33 @@
-# Folio 2 — Lecteur PDF & EPUB privé (Android et PWA)
+# Folio — Lecteur PDF & EPUB privé (Android, Windows et PWA)
 
 Folio est une bibliothèque personnelle en français qui lit des livres **PDF** et **EPUB** sans compte, sans backend, sans analytique et sans synchronisation cloud. Le code de l'application est dans ce dépôt ; les **livres ne sont jamais envoyés sur GitHub**.
+
+## Installer Folio sur Windows 10/11
+
+Folio possède une version **Windows 64 bits** empaquetée avec Electron (installateur NSIS `.exe`). Elle contient son interface, PDF.js et EPUB.js : **les livres déjà importés sont lisibles sans connexion**, et la bibliothèque est conservée dans le profil local de Folio entre les ouvertures. Aucune base de données distante n'est créée. Une connexion n'est nécessaire que pour la découverte des ouvrages sur les sites tiers.
+
+1. Ouvrir l'onglet **Actions** du dépôt puis le workflow **Construire Folio pour Windows**.
+2. Ouvrir la dernière exécution **réussie** et télécharger l'artifact **folio-windows-setup-x64**.
+3. Extraire le ZIP de l'artifact, puis lancer `Folio-Setup-2.8.0-x64.exe` et suivre l'installation ; un raccourci Bureau et un raccourci du menu Démarrer sont créés.
+4. Lancer Folio, puis choisir **Ajouter un livre** pour sélectionner des fichiers PDF/EPUB ou les déposer sur la fenêtre.
+
+**Édition non signée :** l'installateur est généré par GitHub Actions sans certificat de signature Windows. Microsoft Defender SmartScreen peut afficher un avertissement. Vérifier que le téléchargement provient bien des Actions de ce dépôt avant de poursuivre. La version Windows n'est pas une application Microsoft Store.
+
+**Passer des livres Android à Windows :** sur Android, ouvrir **Paramètres → Exporter ma bibliothèque (.zip)** puis transférer ce fichier ZIP sur votre PC ; sur Windows, ouvrir **Paramètres → Restaurer une sauvegarde** et sélectionner l'archive. Les deux installations ne se synchronisent pas automatiquement. Conserver le ZIP en lieu sûr avant toute réinstallation.
+
+**Limites :** la version Windows utilise un protocole d'application sécurisé et stable (`folio://app`) pour garantir que les données IndexedDB restent disponibles d'une session à l'autre. Certaines bibliothèques distantes exigent des requêtes CORS autorisées par leur site : elles peuvent être consultables dans le navigateur externe sans être interrogeables depuis la fenêtre Folio. Les fonctions natives Capacitor Android (import dans Directory.Data, masquage de la barre d'état) ne sont pas reproduites telles quelles sur PC. Les tests automatisés Windows vérifient la compilation et les chemins, mais le fonctionnement de l'interface doit encore être confirmé sur un ordinateur Windows physique.
+
+### Fabrication pour les contributeurs
+
+```powershell
+npm install
+npm test
+npm run build:desktop
+# Sur Windows, après avoir créé desktop/icon.ico à partir du PNG de Folio :
+npx electron-builder --win nsis --x64 --publish never
+```
+
+La CI Windows effectue cette procédure automatiquement, génère l'icône puis publie l'installateur comme artifact.
 
 ## Fonctionnalités
 
