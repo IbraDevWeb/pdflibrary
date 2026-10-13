@@ -164,6 +164,6 @@ export function setupIslamicLibrary({books,read,edit,find,browse}){
   }
  });
  document.addEventListener("keydown",e=>{
-  if(e.key==="Escape"&&!$("islamicLibrary").hidden&&!dialog.open&&!document.querySelector("dialog[open]")){backInIslamicLibrary();}
+  if(e.key==="Escape"&&!$("islamicLibrary").hidden&&$("reader").hidden&&$("catalog").hidden&&!dialog.open&&!document.querySelector("dialog[open]")){backInIslamicLibrary();}
  });
 }
