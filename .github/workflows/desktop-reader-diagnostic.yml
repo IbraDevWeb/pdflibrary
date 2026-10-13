@@ -1,0 +1,28 @@
+name: Diagnostic de lecture Folio Desktop
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'desktop/**'
+      - 'vite.config.js'
+      - 'package.json'
+      - '.github/workflows/desktop-reader-diagnostic.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reader:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npm run build:desktop
+      - name: Ouvrir un PDF et EPUB dans Electron avec affichage virtuel
+        run: xvfb-run -a node desktop/diagnose.cjs
+        env:
+          ELECTRON_DISABLE_GPU: '1'
