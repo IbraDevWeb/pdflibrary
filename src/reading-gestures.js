@@ -25,7 +25,7 @@ export function attachReadingGestures(target,callbacks={}){
       start=null;return;
     }
     if(e.touches.length!==1){reset();return;}
-    start={x:e.touches[0].clientX,y:e.touches[0].clientY,time:Date.now(),moved:false};
+    start={x:e.touches[0].clientX,y:e.touches[0].clientY,time:Date.now(),moved:false,context:callbacks.getGestureContext?.()||null};
   };
   const onMove=e=>{
     if(!pinch&&e.touches.length>=2){
@@ -63,10 +63,11 @@ export function attachReadingGestures(target,callbacks={}){
     const targetWindow=target.ownerDocument.defaultView||window;
     const dir=swipeDirection(start,{x:t.clientX,y:t.clientY},Date.now()-start.time,targetWindow.innerWidth);
     const wasMoved=start.moved;
+    const context=start.context;
     start=null;
     if(dir){
       if(e.cancelable)e.preventDefault();
-      callbacks.onSwipe?.(dir);
+      callbacks.onSwipe?.(dir,context);
       return;
     }
     if(!wasMoved){
