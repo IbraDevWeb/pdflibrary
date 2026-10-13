@@ -11,6 +11,12 @@ function assetPath(distRoot,requestURL){
  try{
   const url=new URL(requestURL);
   if(url.protocol!=='folio:'||url.hostname!=='app'||url.username||url.password||url.port)return null;
+  // Vérifier le chemin tel qu'il a été demandé, AVANT la normalisation des segments .. par URL.
+  const input=String(requestURL);
+  const firstSlash=input.indexOf('/',input.indexOf('://')+3);
+  const original=firstSlash>=0?input.slice(firstSlash).split(/[?#]/,1)[0]:'/';
+  const decodedOriginal=decodeURIComponent(original);
+  if(decodedOriginal.split('/').some(p=>p==='.'||p==='..'||p.startsWith('.')))return null;
   const raw=decodeURIComponent(url.pathname);
   if(/\\/.test(raw)||raw.includes('\0'))return null;
   const local=raw==='/'?'/index.html':raw;
