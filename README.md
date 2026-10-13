@@ -97,6 +97,26 @@ Publier uniquement le dossier `dist/` sur un hébergement HTTPS statique (ou Git
 
 La PWA stocke les PDF/EPUB dans **IndexedDB**, propriété du navigateur. L'APK Android stocke les **fichiers** dans `Directory.Data` de Capacitor (stockage privé de l'application) et les **fiches** en IndexedDB dans la WebView. Le stockage reste local dans les deux cas.
 
+## Folio 2.7 — Pages de bibliothèque, PDF zoomé et plein écran
+
+### Pages indépendantes des collections
+
+Sur téléphone, **Livres**, **En cours**, **Favoris** et **Terminés** ouvrent désormais une page propre avec son titre, son nombre d'ouvrages, sa liste et un bouton **← Ma bibliothèque**. La grande bannière et les statistiques de l'accueil ne sont plus répétées sur ces pages. La barre de navigation mobile reste disponible pour passer directement d'une page à l'autre. Depuis l'accueil, des **cartes de collections** donnent accès aux catégories et à leurs sous-collections ; sur tablette ou ordinateur, la navigation latérale reste disponible.
+
+Le retour Android, y compris le geste système depuis le bord, revient depuis ces pages vers **Tous mes livres**, sans quitter Folio. Aucune catégorie ni donnée locale n'est déplacée : seule la vue change.
+
+### Gestes PDF avec zoom
+
+Pour un PDF à l'échelle normale, glisser horizontalement tourne les pages comme avant. Lorsque le **PDF est agrandi et déborde sur les côtés**, glisser horizontalement fait d'abord défiler **la page actuelle**. Une fois au bord droit, **un nouveau balayage vers la gauche** passe à la page suivante ; depuis le bord gauche, **un nouveau balayage vers la droite** revient à la page précédente. En mode RTL, le sens logique des pages est inversé. Au changement de page vers la précédente, la nouvelle page s'affiche du côté approprié. Les gestes de retour système depuis l'extrême bord du téléphone restent prioritaires.
+
+### Lecture plein écran
+
+Le bouton **⛶** active le mode lecture immersive. Il masque les barres Folio, et sur Android demande aussi de masquer les barres système. Les commandes flottantes sont montrées brièvement au départ, puis disparaissent. **Un toucher simple** sur la page les montre ou les masque **sans quitter le plein écran**. Elles permettent page précédente, page suivante et **Quitter ⛶**. Le bouton/geste Retour Android quitte le mode immersif avant de fermer le livre. Les commandes reviennent automatiquement lorsque le mode immersif se termine.
+
+Le changement de dimensions (orientation, entrée/sortie du plein écran) déclenche une remise en page du PDF/EPUB pour éviter les pages tronquées. Les réglages de zoom et la position de lecture restent enregistrés par livre. Le test de rotation Chrome se fait après la sortie de son API Fullscreen, car Chrome interdit le changement de taille de la fenêtre tant que le mode fullscreen navigateur est actif ; cela ne simule pas toutes les variantes de barres natives Android.
+
+**Vérifications à faire sur un téléphone physique** : gestes de navigation sur PDF zoomé (en particulier près des bords système), contrôle flottant après plusieurs minutes en plein écran, rotation portrait/paysage, lecture EPUB en mode RTL et retour depuis une fiche ouverte à partir de Découvrir. La compilation et les tests automatisés ne remplacent pas cette validation matérielle.
+
 ## Folio 2.6 — Recherche Usul.ai dans Découvrir
 
 L'espace **Sciences islamiques** propose un raccourci **Rechercher dans les textes d'Usul.ai**. Dans **Découvrir**, choisissez l'onglet **Usul.ai — notices et lecture sur Usul**, ou la source **Usul.ai — recherche de textes islamiques**.
