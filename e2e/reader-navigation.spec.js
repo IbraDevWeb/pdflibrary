@@ -98,10 +98,16 @@ test('plein écran : toucher affiche et masque les commandes, sans quitter la le
  await expect(page.locator('#readerImmersiveControls')).toBeVisible();
  await page.locator('#readerImmersiveNext').click();
  await expect(page.locator('#readerPage')).toHaveValue('2');
- await page.setViewportSize({width:800,height:400});
- await expect(page.locator('#readerContent canvas')).toBeVisible();
  await page.locator('#readerExitFullscreen').click();
  await expect(page.locator('#reader')).toHaveAttribute('data-immersive','false');
  await expect(page.locator('.reader-bar')).toBeVisible();
  await expect(page.locator('#readerImmersiveControls')).toBeHidden();
+ // Le navigateur bloque le redimensionnement pendant son API fullscreen.
+ // Simuler la rotation après la sortie, puis vérifier une nouvelle entrée.
+ await page.setViewportSize({width:800,height:400});
+ await expect(page.locator('#readerContent canvas')).toBeVisible();
+ await page.locator('#readerFullscreen').click();
+ await expect(page.locator('#reader')).toHaveAttribute('data-immersive','true');
+ await page.keyboard.press('Escape');
+ await expect(page.locator('#reader')).toHaveAttribute('data-immersive','false');
 });
