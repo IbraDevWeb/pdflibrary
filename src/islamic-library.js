@@ -40,7 +40,8 @@ export function normalizeIslamicMetadata(value={}){
  return normalized;
 }
 export function isIslamicBook(book){
- return book?.islamic?.enabled===true||/^sciences islamiques(?:\/|$)/i.test(String(book?.category||""));
+ if(typeof book?.islamic?.enabled==="boolean")return book.islamic.enabled;
+ return /^sciences islamiques(?:\/|$)/i.test(String(book?.category||""));
 }
 export function islamicMetadata(book){return normalizeIslamicMetadata({...book?.islamic,enabled:isIslamicBook(book)});}
 export function disciplineName(id){return DISCIPLINES.find(x=>x.id===id)?.label||"À classer";}
