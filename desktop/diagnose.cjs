@@ -8,8 +8,8 @@ const electronExecutable=require('electron');
 const JSZip=require('jszip');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
-function pdfDocument(){
- const text='BT /F1 20 Tf 35 330 Td (Folio Windows PDF) Tj ET';
+function pdfDocument(rasterOnly=false){
+ const text=rasterOnly?'0 0 0 rg 40 125 220 50 re f':'BT /F1 20 Tf 35 330 Td (Folio Windows PDF) Tj ET';
  const objs=[
  '<< /Type /Catalog /Pages 2 0 R >>',
  '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
@@ -215,6 +215,39 @@ async function main(){
    await page.locator('#closeReader').click();
    assert.equal((await snapshot(page,'after-close-'+type)).readerHidden,true);
   }
+  // Les livres scannés n'ont pas de calque OCR : ils doivent néanmoins
+  // permettre de tracer un surlignage rectangulaire sur l'image de la page.
+  const scanId='e2e-desktop-scanned-pdf';
+  await page.evaluate(async({encoded,id})=>{
+    const bytes=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));
+    const db=await new Promise((resolve,reject)=>{
+      const req=indexedDB.open('folio-library',1);
+      req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+    });
+    await new Promise((resolve,reject)=>{
+      const tx=db.transaction('books','readwrite');
+      tx.objectStore('books').put({id,title:'PDF scanné exemple',author:'Folio',kind:'pdf',
+        status:'to-read',page:1,zoom:1,createdAt:Date.now(),annotations:[],bookmarks:[],
+        file:new Blob([bytes],{type:'application/pdf'})});
+      tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);
+    });
+    db.close();
+  },{encoded:pdfDocument(true),id:scanId});
+  await page.reload();
+  await page.locator('[data-action="read"][data-id="'+scanId+'"]').click();
+  await page.waitForSelector('#readerContent canvas',{timeout:20000});
+  await page.waitForTimeout(600);
+  await page.locator('#readerHighlight').click();
+  const rect=await page.locator('#readerContent canvas').boundingBox();
+  await page.mouse.move(rect.x+rect.width*.24,rect.y+rect.height*.4);
+  await page.mouse.down();
+  await page.mouse.move(rect.x+rect.width*.63,rect.y+rect.height*.49,{steps:8});
+  await page.mouse.up();
+  await page.waitForSelector('#readerContent .pdf-highlight-rect',{timeout:6000});
+  console.log('PDF_SCANNED_HIGHLIGHT: OK');
+  await page.screenshot({path:'desktop-previews/04-pdf-scan-annotation.png'});
+  await page.locator('#closeReader').click();
+
   assert.equal(errors.length,0,'Aucune erreur JavaScript dans la fenêtre du lecteur');
   console.log('DÉMARRAGE ET LECTURE PDF/EPUB ELECTRON : SUCCÈS');
  }finally{await app.close();}
