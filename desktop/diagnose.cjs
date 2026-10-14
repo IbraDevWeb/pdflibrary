@@ -293,7 +293,9 @@ async function main(){
       count:document.querySelectorAll('.pdf-text-layer span').length};
   });
   console.log('PDF_EMBEDDED_FONT:',JSON.stringify(fontData));
-  assert.equal(fontData.mode,'outlines','Electron doit démarrer en mode contours fidèles pour les PDF');
+  // Le livre est sauvegardé de façon différée (450 ms) : vérifier le mode
+  // ACTIF dans la liseuse, et contrôler sa persistance lors de la fermeture.
+  await page.locator('#readerPdfFonts').waitFor({state:'visible'});
   assert.ok(fontData.count>2,'Le texte de la police intégrée doit rester sélectionnable');
   assert.match(fontData.fill,/rgba?\(0, 0, 0, 0\)|transparent/,'Le calque de texte doit être invisible');
   assert.equal((await page.locator('#readerPdfFonts').innerText()),'Polices : fidèles');
@@ -311,6 +313,17 @@ async function main(){
   assert.ok(restored.pdfInkPixels>30,'La bascule retour doit afficher le texte');
   console.log('EMBEDDED_FONT_FIDELITY_MODE: OK');
   await page.locator('#closeReader').click();
+  const savedFontMode=await page.evaluate(async()=>{
+    const db=await new Promise((resolve,reject)=>{
+      const req=indexedDB.open('folio-library',1);
+      req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+    });
+    const tx=db.transaction('books','readonly');
+    const req=tx.objectStore('books').get('e2e-embedded-font-pdf');
+    const book=await new Promise((resolve,reject)=>{req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});
+    db.close();return book?.pdfFontMode;
+  });
+  assert.equal(savedFontMode,'outlines','Le choix typographique doit être sauvegardé par livre');
   assert.equal(errors.length,0,'Aucune erreur JavaScript dans la fenêtre du lecteur');
   console.log('DÉMARRAGE ET LECTURE PDF/EPUB ELECTRON : SUCCÈS');
  }finally{await app.close();}
