@@ -6,6 +6,7 @@ import ePub from 'epubjs';
 import { bookBlob,kindOf,saveBook,saveOrShare } from './storage.js';
 import { attachReadingGestures } from './reading-gestures.js';
 import { nextZoom,zoomedSwipeAction } from './gesture-math.js';
+import {fitPDFPage,safeCanvasRatio,rectsFromSelection,pdfTextStatus} from './reader-layout.js';
 import { SystemBars } from '@capacitor/core';
 import { native } from './storage.js';
 import { readingPalette,clampTone } from './reading-appearance.js';
@@ -219,87 +220,71 @@ function drawPDFMarks(){
   }
 }
 async function renderPDFPage({keepScroll=false,initialHorizontalEdge='start'}={}){
-  const s=state;
-  if(!s||s.kind!=='pdf')return;
-  const ticket=++s.ticket;
-  s.renderTask?.cancel();
-  const page=await s.pdf.getPage(s.book.page||1);
+ const s=state;if(!s||s.kind!=='pdf'||!s.pdf)return;
+ const ticket=++s.ticket;
+ try{s.renderTask?.cancel();}catch{}
+ const page=await s.pdf.getPage(s.book.page||1);
+ if(s!==state||ticket!==s.ticket)return;
+ const host=$('readerContent');
+ const oldScroll=keepScroll?{x:(host.scrollLeft+host.clientWidth/2)/Math.max(1,host.scrollWidth),y:(host.scrollTop+host.clientHeight/2)/Math.max(1,host.scrollHeight)}:null;
+ const orig=page.getViewport({scale:1});
+ const fit=fitPDFPage({pageWidth:orig.width,pageHeight:orig.height,hostWidth:host.clientWidth,hostHeight:host.clientHeight,zoom:s.book.zoom||1,fit:s.book.pdfFit||'width'});
+ const viewport=page.getViewport({scale:fit.scale});
+ const wrapper=document.createElement('div');wrapper.className='pdf-page';
+ wrapper.style.width=viewport.width+'px';wrapper.style.height=viewport.height+'px';
+ wrapper.style.setProperty('--scale-factor',String(viewport.scale));wrapper.style.setProperty('--total-scale-factor',String(viewport.scale));
+ const canvas=document.createElement('canvas');
+ const ratio=safeCanvasRatio(viewport.width,viewport.height,window.devicePixelRatio||1);
+ canvas.width=Math.max(1,Math.round(viewport.width*ratio));canvas.height=Math.max(1,Math.round(viewport.height*ratio));
+ canvas.style.width=viewport.width+'px';canvas.style.height=viewport.height+'px';
+ wrapper.append(canvas);
+ const marks=document.createElement('div');marks.id='pdfMarks';marks.className='pdf-marks';wrapper.append(marks);
+ const layer=document.createElement('div');layer.className='textLayer pdf-text-layer';
+ layer.style.setProperty('--scale-factor',String(viewport.scale));layer.style.setProperty('--total-scale-factor',String(viewport.scale));wrapper.append(layer);
+ // Conserver la page précédente pendant le dessin évite les flashes blancs.
+ const task=page.render({canvasContext:canvas.getContext('2d',{alpha:false}),viewport,transform:ratio!==1?[ratio,0,0,ratio,0,0]:null});
+ s.renderTask=task;
+ try{await task.promise;}catch(e){if(e?.name==='RenderingCancelledException'||s!==state||ticket!==s.ticket)return;throw e;}
+ if(s!==state||ticket!==s.ticket)return;
+ host.replaceChildren(wrapper);
+ try{
+  const text=await page.getTextContent({includeMarkedContent:false});
   if(s!==state||ticket!==s.ticket)return;
-  const host=$('readerContent');
-  const oldScroll=keepScroll?{
-    x:(host.scrollLeft+host.clientWidth/2)/Math.max(1,host.scrollWidth),
-    y:(host.scrollTop+host.clientHeight/2)/Math.max(1,host.scrollHeight)
-  }:null;
-  host.replaceChildren();
-  const orig=page.getViewport({scale:1});
-  const availableWidth=Math.max(220,host.clientWidth-25);
-  const scale=(availableWidth/orig.width)*(s.book.zoom||1);
-  const viewport=page.getViewport({scale});
-  const wrapper=document.createElement('div');
-  wrapper.className='pdf-page';
-  wrapper.style.width=viewport.width+'px';
-  wrapper.style.height=viewport.height+'px';
-  const canvas=document.createElement('canvas');
-  const ratio=Math.min(2,window.devicePixelRatio||1);
-  canvas.width=Math.ceil(viewport.width*ratio);
-  canvas.height=Math.ceil(viewport.height*ratio);
-  canvas.style.width=viewport.width+'px';
-  canvas.style.height=viewport.height+'px';
-  wrapper.append(canvas);
-  const marks=document.createElement('div');
-  marks.id='pdfMarks';marks.className='pdf-marks';
-  wrapper.append(marks);
-  const layer=document.createElement('div');
-  layer.className='textLayer pdf-text-layer';
-  wrapper.append(layer);host.append(wrapper);
-  s.renderTask=page.render({canvasContext:canvas.getContext('2d'),viewport,transform:ratio!==1?[ratio,0,0,ratio,0,0]:null});
-  try{await s.renderTask.promise;}
-  catch(e){if(e.name!=='RenderingCancelledException')throw e;return;}
-  if(s!==state||ticket!==s.ticket)return;
-  try{
-    const textLayer=new pdfjs.TextLayer({textContentSource:page.streamTextContent(),container:layer,viewport});
-    await textLayer.render();
-  }catch(e){console.warn('Couche de sélection de texte indisponible',e);}
-  if(s!==state||ticket!==s.ticket)return;
-  drawPDFMarks();updateFooter();
-  if(oldScroll){
-    host.scrollLeft=Math.max(0,oldScroll.x*host.scrollWidth-host.clientWidth/2);
-    host.scrollTop=Math.max(0,oldScroll.y*host.scrollHeight-host.clientHeight/2);
-  }else{host.scrollTop=0;host.scrollLeft=initialHorizontalEdge==='end'?Math.max(0,host.scrollWidth-host.clientWidth):0;}
+  s.pdfSelectable=pdfTextStatus(text.items)==='selectable';
+  const textLayer=new pdfjs.TextLayer({textContentSource:text,container:layer,viewport});
+  await textLayer.render();
+ }catch(e){s.pdfSelectable=false;console.warn('Couche PDF indisponible : image de page conservée',e);}
+ if(s!==state||ticket!==s.ticket)return;
+ drawPDFMarks();updateFooter();
+ if(s.highlightMode)$('readerTip').textContent=s.pdfSelectable?'Sélectionnez une phrase pour la surligner.':'Cette page ne contient pas de texte sélectionnable (PDF scanné ou texte non reconnu).';
+ if(oldScroll){host.scrollLeft=Math.max(0,oldScroll.x*host.scrollWidth-host.clientWidth/2);host.scrollTop=Math.max(0,oldScroll.y*host.scrollHeight-host.clientHeight/2);}
+ else{host.scrollTop=0;host.scrollLeft=initialHorizontalEdge==='end'?Math.max(0,host.scrollWidth-host.clientWidth):0;}
 }
 function initializePDFSelection(){
-  const host=$('readerContent');
-  const capture=()=>{
-    if(!state||state.kind!=='pdf'||!state.highlightMode)return;
-    setTimeout(()=>{
-      const selection=window.getSelection();
-      if(!selection||selection.isCollapsed||!selection.toString().trim())return;
-      const page=$('readerContent').querySelector('.pdf-page');
-      if(!page||!page.contains(selection.anchorNode)||!page.contains(selection.focusNode))return;
-      const bounds=page.getBoundingClientRect();
-      const rects=Array.from(selection.getRangeAt(0).getClientRects())
-        .filter(r=>r.width>0&&r.height>0)
-        .map(r=>({x:Math.max(0,(r.left-bounds.left)/bounds.width),y:Math.max(0,(r.top-bounds.top)/bounds.height),w:Math.min(1,r.width/bounds.width),h:Math.min(1,r.height/bounds.height)}))
-        .filter(r=>r.x<1&&r.y<1);
-      if(!rects.length)return;
-      const text=selection.toString().slice(0,4000).trim();
-      selection.removeAllRanges();
-      addHighlight({kind:'pdf',page:state.book.page,rects,text});
-    },80);
-  };
-  host.addEventListener('pointerup',capture);
-  host.addEventListener('touchend',capture,{passive:true});
+ const host=$('readerContent');let pending=null;
+ const capture=()=>{
+  clearTimeout(pending);pending=setTimeout(()=>{
+   if(!state||state.kind!=='pdf'||!state.highlightMode)return;
+   const selection=window.getSelection();
+   if(!selection||selection.isCollapsed||!selection.toString().trim()||!selection.rangeCount)return;
+   const page=host.querySelector('.pdf-page'),range=selection.getRangeAt(0);
+   if(!page||!page.contains(range.startContainer)||!page.contains(range.endContainer))return;
+   const rects=rectsFromSelection(range.getClientRects(),page.getBoundingClientRect());
+   if(!rects.length)return;
+   const text=selection.toString().trim().slice(0,4000);
+   selection.removeAllRanges();addHighlight({kind:'pdf',page:state.book.page,rects,text});
+  },65);
+ };
+ host.addEventListener('pointerup',capture);host.addEventListener('touchend',capture,{passive:true});
 }
 function addHighlight(partial){
-  if(!state)return;
-  const note=window.prompt('Note liée à ce passage (facultatif) :','');
-  if(note===null)return;
-  const annotation={id:crypto.randomUUID(),note:note.slice(0,10000),createdAt:Date.now(),color:safeHighlightColor(state.book.highlightColor),...partial};
-  state.book.annotations??=[];
-  state.book.annotations.push(annotation);
-  if(partial.kind==='pdf')drawPDFMarks();
-  else applyEPUBHighlight(annotation);
-  drawPanel();scheduleSave();
+ if(!state)return;
+ // Pas de prompt au milieu de la sélection : la note reste éditable dans le carnet.
+ const annotation={id:crypto.randomUUID(),note:'',createdAt:Date.now(),color:safeHighlightColor(state.book.highlightColor),...partial};
+ state.book.annotations??=[];state.book.annotations.push(annotation);
+ if(partial.kind==='pdf')drawPDFMarks();else applyEPUBHighlight(annotation);
+ drawPanel();scheduleSave();
+ $('readerTip').textContent='Passage surligné. Retrouvez-le dans Sommaire → Annotations pour ajouter une note.';
 }
 function setZoom(factor){
   const current=state;
@@ -307,7 +292,7 @@ function setZoom(factor){
   current.book.zoom=nextZoom(current.book.zoom,factor);
   $('reader').classList.toggle('pdf-zoomed',current.kind==='pdf'&&current.book.zoom>1.08);
   $('readerZoomValue').textContent=Math.round(current.book.zoom*100)+' %';
-  if(current.kind==='pdf')renderPDFPage({keepScroll:true}).catch(e=>console.warn('Zoom PDF',e));
+  if(current.kind==='pdf')renderPDFPage({keepScroll:true}).catch(e=>console.error('Zoom PDF',e));
   else applyTypography();
   scheduleSave();
 }
@@ -447,7 +432,8 @@ function flatten(items){return items.flatMap(item=>[item,...flatten(item.subitem
 async function readPDF(s,blob){
   const data=new Uint8Array(await blob.arrayBuffer());
   if(s!==state)return;
-  s.pdf=await pdfjs.getDocument({data,isEvalSupported:false}).promise;
+  const pdfBase=new URL('./pdfjs/',window.location.href).href;
+  s.pdf=await pdfjs.getDocument({data,isEvalSupported:false,cMapUrl:pdfBase+'cmaps/',cMapPacked:true,standardFontDataUrl:pdfBase+'standard_fonts/'}).promise;
   if(s!==state)return;
   s.book.totalPages=s.pdf.numPages;
   s.book.page=Math.max(1,Math.min(s.book.page||1,s.pdf.numPages));
@@ -478,7 +464,7 @@ async function open(book,callbacks={}){
   book.highlightColor=safeHighlightColor(book.highlightColor);
   book.dimmer=clampTone(book.dimmer??100,100,60,100);
   // Le sens peut être sélectionné manuellement pour les livres PDF en arabe.
-  if(kind==='pdf')book.readingDirection??='ltr';
+  if(kind==='pdf'){book.readingDirection??='ltr';book.pdfFit??=location.protocol==='folio:'?'page':'width';}
   state={book,kind,pdf:null,epub:null,rendition:null,chapters:[],ticket:0,searchToken:0,searchResults:[],highlightMode:false,gestureCleanup:[],onUpdate:callbacks.onUpdate,onEdit:callbacks.onEdit,onDownload:callbacks.onDownload};
   const s=state;
   $('readerTitle').textContent=book.title;
@@ -500,6 +486,8 @@ async function open(book,callbacks={}){
   $('readerHighlight').classList.remove('active');
   $('readerHighlight').setAttribute('aria-pressed','false');
   $('readerZoomValue').textContent=Math.round(book.zoom*100)+' %';
+  $('readerFit').hidden=kind!=='pdf';
+  $('readerFit').textContent=book.pdfFit==='page'?'Page entière':'Largeur';
   $('readerDirection').textContent=book.readingDirection==='rtl'?'RTL':'LTR';
   $('readerPage').hidden=kind==='epub';
   $('readerTip').textContent='Glissez pour tourner · Pincez pour zoomer · Double-tapez pour agrandir · 🖍 pour annoter';
@@ -514,7 +502,7 @@ async function open(book,callbacks={}){
       await readPDF(s,blob);
     }else await readEPUB(s,blob);
   }catch(e){
-    if(s===state){$('readerContent').textContent='Impossible d’ouvrir ce livre : '+e.message;console.error(e);}
+    if(s===state){console.error('Erreur de lecture',e);const host=$('readerContent');if(!host.querySelector('.pdf-page')&&!host.querySelector('iframe'))host.textContent='Impossible d’afficher ce livre : '+e.message;$('readerTip').textContent='Erreur de lecture : essayez une autre page ou réinitialisez le zoom.';}
   }
   if(s===state){
     const host=$('readerContent');
@@ -687,12 +675,13 @@ function setup(){
     updateHighlightPalette();scheduleSave();
   }));
   $('readerExportNotes').addEventListener('click',exportReaderNotes);
+  $('readerFit').addEventListener('click',()=>{if(state?.kind!=='pdf')return;state.book.pdfFit=state.book.pdfFit==='page'?'width':'page';$('readerFit').textContent=state.book.pdfFit==='page'?'Page entière':'Largeur';state.book.zoom=1;$('readerZoomValue').textContent='100 %';renderPDFPage().catch(console.error);scheduleSave();});
   $('readerHighlight').addEventListener('click',()=>{
     if(!state)return;
     state.highlightMode=!state.highlightMode;
     $('readerHighlight').classList.toggle('active',state.highlightMode);
     $('readerHighlight').setAttribute('aria-pressed',String(state.highlightMode));
-    $('readerTip').textContent=state.highlightMode?'Sélectionnez un passage pour le surligner. Désactivez 🖍 pour tourner les pages par gestes.':'Glissez pour tourner · Pincez pour zoomer · Double-tapez pour agrandir';
+    $('readerTip').textContent=state.highlightMode?(state.kind==='pdf'&&!state.pdfSelectable?'Cette page ne dispose pas de texte sélectionnable. Pour un PDF scanné, un OCR est nécessaire.':'Sélectionnez un passage : il sera surligné immédiatement. Ajoutez une note depuis Sommaire.'):'Glissez pour tourner · Pincez pour zoomer · Double-tapez pour agrandir';
     $('readerHighlight').title=state.highlightMode?'Sélectionnez un passage pour le surligner':'Activer le surlignage';
   });
   $('readerBookmark').addEventListener('click',()=>{
