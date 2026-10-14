@@ -256,13 +256,31 @@ async function renderPDFPage({keepScroll=false,initialHorizontalEdge='start'}={}
  }catch(e){s.pdfSelectable=false;console.warn('Couche PDF indisponible : image de page conservée',e);}
  if(s!==state||ticket!==s.ticket)return;
  drawPDFMarks();updateFooter();
- if(s.highlightMode)$('readerTip').textContent=s.pdfSelectable?'Sélectionnez une phrase pour la surligner.':'Cette page ne contient pas de texte sélectionnable (PDF scanné ou texte non reconnu).';
+ if(s.highlightMode)$('readerTip').textContent=s.pdfSelectable?'Sélectionnez une phrase pour la surligner.':'PDF scanné : faites glisser la souris pour surligner une zone.';
  if(oldScroll){host.scrollLeft=Math.max(0,oldScroll.x*host.scrollWidth-host.clientWidth/2);host.scrollTop=Math.max(0,oldScroll.y*host.scrollHeight-host.clientHeight/2);}
  else{host.scrollTop=0;host.scrollLeft=initialHorizontalEdge==='end'?Math.max(0,host.scrollWidth-host.clientWidth):0;}
 }
 function initializePDFSelection(){
- const host=$('readerContent');let pending=null;
- const capture=()=>{
+ const host=$('readerContent');
+ let pending=null,pointerStart=null;
+ host.addEventListener('pointerdown',event=>{
+  if(event.button!==0||state?.kind!=='pdf'||!state.highlightMode||state.pdfSelectable!==false){pointerStart=null;return;}
+  const page=event.target.closest('.pdf-page');
+  pointerStart=page?{x:event.clientX,y:event.clientY,page,book:state.book.page}:null;
+ });
+ const capture=event=>{
+  const down=pointerStart;pointerStart=null;
+  if(down&&state?.kind==='pdf'&&state.highlightMode&&state.pdfSelectable===false&&down.book===state.book.page){
+   const bound=down.page.getBoundingClientRect();
+   const x1=Math.max(bound.left,Math.min(bound.right,down.x));
+   const y1=Math.max(bound.top,Math.min(bound.bottom,down.y));
+   const x2=Math.max(bound.left,Math.min(bound.right,event.clientX));
+   const y2=Math.max(bound.top,Math.min(bound.bottom,event.clientY));
+   if(Math.abs(x2-x1)>9&&Math.abs(y2-y1)>6){
+    const rects=rectsFromSelection([{left:Math.min(x1,x2),top:Math.min(y1,y2),right:Math.max(x1,x2),bottom:Math.max(y1,y2)}],bound);
+    if(rects.length){addHighlight({kind:'pdf',page:state.book.page,rects,text:'Zone surlignée (PDF scanné)'});return;}
+   }
+  }
   clearTimeout(pending);pending=setTimeout(()=>{
    if(!state||state.kind!=='pdf'||!state.highlightMode)return;
    const selection=window.getSelection();
@@ -275,7 +293,9 @@ function initializePDFSelection(){
    selection.removeAllRanges();addHighlight({kind:'pdf',page:state.book.page,rects,text});
   },65);
  };
- host.addEventListener('pointerup',capture);host.addEventListener('touchend',capture,{passive:true});
+ host.addEventListener('pointerup',capture);
+ host.addEventListener('pointercancel',()=>{pointerStart=null;});
+ host.addEventListener('touchend',event=>{if(!pointerStart)capture(event);},{passive:true});
 }
 function addHighlight(partial){
  if(!state)return;
@@ -681,7 +701,7 @@ function setup(){
     state.highlightMode=!state.highlightMode;
     $('readerHighlight').classList.toggle('active',state.highlightMode);
     $('readerHighlight').setAttribute('aria-pressed',String(state.highlightMode));
-    $('readerTip').textContent=state.highlightMode?(state.kind==='pdf'&&!state.pdfSelectable?'Cette page ne dispose pas de texte sélectionnable. Pour un PDF scanné, un OCR est nécessaire.':'Sélectionnez un passage : il sera surligné immédiatement. Ajoutez une note depuis Sommaire.'):'Glissez pour tourner · Pincez pour zoomer · Double-tapez pour agrandir';
+    $('readerTip').textContent=state.highlightMode?(state.kind==='pdf'&&!state.pdfSelectable?'PDF scanné : faites glisser la souris sur la zone à surligner. Pour copier le texte, un OCR sera nécessaire.':'Sélectionnez un passage : il sera surligné immédiatement. Ajoutez une note depuis Sommaire.'):'Glissez pour tourner · Pincez pour zoomer · Double-tapez pour agrandir';
     $('readerHighlight').title=state.highlightMode?'Sélectionnez un passage pour le surligner':'Activer le surlignage';
   });
   $('readerBookmark').addEventListener('click',()=>{
