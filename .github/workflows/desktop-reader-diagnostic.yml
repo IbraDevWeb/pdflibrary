@@ -22,6 +22,10 @@ jobs:
           node-version: '22'
       - run: npm install --no-audit --no-fund
       - run: npm run build:desktop
+      - name: Générer un PDF typographique avec une police libre embarquée
+        run: |
+          python3 -m pip install --quiet reportlab
+          python3 desktop/generate-font-fixture.py
       - name: Ouvrir un PDF et EPUB dans Electron avec affichage virtuel
         run: xvfb-run -a node desktop/diagnose.cjs
         env:
