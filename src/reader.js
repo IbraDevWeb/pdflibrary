@@ -449,11 +449,61 @@ async function readEPUB(s,blob){
   }).catch(()=>{});
 }
 function flatten(items){return items.flatMap(item=>[item,...flatten(item.subitems||[])]);}
+function pdfDocumentOptions(data,book){
+ const pdfBase=new URL('./pdfjs/',window.location.href).href;
+ return {data,isEvalSupported:false,
+  // Le rendu en contours ne dépend pas de @font-face/FontFace API dans Electron.
+  disableFontFace:book.pdfFontMode==='outlines',
+  useSystemFonts:book.pdfFontMode!=='outlines',
+  cMapUrl:pdfBase+'cmaps/',cMapPacked:true,
+  standardFontDataUrl:pdfBase+'standard_fonts/'};
+}
+function pdfFontButton(){
+ const button=$('readerPdfFonts');if(!state||state.kind!=='pdf'){button.hidden=true;return;}
+ button.hidden=false;
+ const outlines=state.book.pdfFontMode==='outlines';
+ button.textContent=outlines?'Polices : fidèles':'Polices : standard';
+ button.setAttribute('aria-pressed',String(outlines));
+ button.title=outlines?'Contours des polices du document. Cliquer pour le rendu navigateur.':'Rendu des polices par le navigateur. Cliquer pour les contours du PDF.';
+}
+async function changePdfFontMode(){
+ const s=state;
+ if(!s||s.kind!=='pdf'||!s.pdf)return;
+ const button=$('readerPdfFonts');
+ button.disabled=true;
+ const previousMode=s.book.pdfFontMode;
+ const previousPdf=s.pdf;
+ let replacement=null;
+ try{
+  const blob=await bookBlob(s.book);
+  if(s!==state)return;
+  const data=new Uint8Array(await blob.arrayBuffer());
+  s.book.pdfFontMode=previousMode==='outlines'?'browser':'outlines';
+  replacement=await pdfjs.getDocument(pdfDocumentOptions(data,s.book)).promise;
+  if(s!==state){await replacement.destroy();return;}
+  s.ticket++;
+  try{s.renderTask?.cancel();}catch{}
+  s.pdf=replacement;
+  await renderPDFPage({keepScroll:true});
+  if(s!==state)return;
+  await previousPdf.destroy();
+  pdfFontButton();scheduleSave();
+ }catch(error){
+  console.error('Changement du rendu des polices PDF',error);
+  if(s===state){
+   s.pdf=previousPdf;
+   s.book.pdfFontMode=previousMode;
+   pdfFontButton();
+   $('readerTip').textContent='Ce mode de rendu est indisponible pour ce PDF. Le mode précédent a été restauré.';
+   renderPDFPage({keepScroll:true}).catch(console.error);
+  }
+  if(replacement&&replacement!==previousPdf)replacement.destroy().catch(()=>{});
+ }finally{button.disabled=false;}
+}
 async function readPDF(s,blob){
   const data=new Uint8Array(await blob.arrayBuffer());
   if(s!==state)return;
-  const pdfBase=new URL('./pdfjs/',window.location.href).href;
-  s.pdf=await pdfjs.getDocument({data,isEvalSupported:false,cMapUrl:pdfBase+'cmaps/',cMapPacked:true,standardFontDataUrl:pdfBase+'standard_fonts/'}).promise;
+  s.pdf=await pdfjs.getDocument(pdfDocumentOptions(data,s.book)).promise;
   if(s!==state)return;
   s.book.totalPages=s.pdf.numPages;
   s.book.page=Math.max(1,Math.min(s.book.page||1,s.pdf.numPages));
@@ -484,7 +534,11 @@ async function open(book,callbacks={}){
   book.highlightColor=safeHighlightColor(book.highlightColor);
   book.dimmer=clampTone(book.dimmer??100,100,60,100);
   // Le sens peut être sélectionné manuellement pour les livres PDF en arabe.
-  if(kind==='pdf'){book.readingDirection??='ltr';book.pdfFit??=location.protocol==='folio:'?'page':'width';}
+  if(kind==='pdf'){
+    book.readingDirection??='ltr';
+    book.pdfFit??=location.protocol==='folio:'?'page':'width';
+    book.pdfFontMode??=location.protocol==='folio:'?'outlines':'browser';
+  }
   state={book,kind,pdf:null,epub:null,rendition:null,chapters:[],ticket:0,searchToken:0,searchResults:[],highlightMode:false,gestureCleanup:[],onUpdate:callbacks.onUpdate,onEdit:callbacks.onEdit,onDownload:callbacks.onDownload};
   const s=state;
   $('readerTitle').textContent=book.title;
@@ -508,6 +562,7 @@ async function open(book,callbacks={}){
   $('readerZoomValue').textContent=Math.round(book.zoom*100)+' %';
   $('readerFit').hidden=kind!=='pdf';
   $('readerFit').textContent=book.pdfFit==='page'?'Page entière':'Largeur';
+  pdfFontButton();
   $('readerDirection').textContent=book.readingDirection==='rtl'?'RTL':'LTR';
   $('readerPage').hidden=kind==='epub';
   $('readerTip').textContent='Glissez pour tourner · Pincez pour zoomer · Double-tapez pour agrandir · 🖍 pour annoter';
@@ -695,6 +750,7 @@ function setup(){
     updateHighlightPalette();scheduleSave();
   }));
   $('readerExportNotes').addEventListener('click',exportReaderNotes);
+  $('readerPdfFonts').addEventListener('click',()=>changePdfFontMode());
   $('readerFit').addEventListener('click',()=>{if(state?.kind!=='pdf')return;state.book.pdfFit=state.book.pdfFit==='page'?'width':'page';$('readerFit').textContent=state.book.pdfFit==='page'?'Page entière':'Largeur';state.book.zoom=1;$('readerZoomValue').textContent='100 %';renderPDFPage().catch(console.error);scheduleSave();});
   $('readerHighlight').addEventListener('click',()=>{
     if(!state)return;
