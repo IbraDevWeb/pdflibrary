@@ -11,7 +11,8 @@ export function fitPDFPage({pageWidth,pageHeight,hostWidth,hostHeight,zoom=1,fit
  const height=Math.max(100,hh-margin*2);
  const widthFit=width/w;
  const base=fit==='page'?Math.min(widthFit,height/h):widthFit;
- const scale=base*Math.max(.5,Math.min(4,Number(zoom)||1));
+ // Ne jamais créer une page CSS gigantesque pour un PDF aux dimensions atypiques.
+ const scale=Math.min(base*Math.max(.5,Math.min(4,Number(zoom)||1)),16000/Math.max(w,h));
  return {scale,width:w*scale,height:h*scale,fitWidth:width,fitHeight:height};
 }
 export function safeCanvasRatio(width,height,deviceRatio=1){
