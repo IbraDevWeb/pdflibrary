@@ -313,6 +313,15 @@ async function main(){
   assert.ok(restored.pdfInkPixels>30,'La bascule retour doit afficher le texte');
   console.log('EMBEDDED_FONT_FIDELITY_MODE: OK');
   await page.locator('#closeReader').click();
+  await page.waitForFunction(async()=>{
+    const req=indexedDB.open('folio-library',1);
+    const db=await new Promise((resolve,reject)=>{
+      req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+    });
+    const tx=db.transaction('books','readonly'),r=tx.objectStore('books').get('e2e-embedded-font-pdf');
+    const book=await new Promise((resolve,reject)=>{r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
+    db.close();return book?.pdfFontMode==='outlines';
+  },null,{timeout:10000});
   const savedFontMode=await page.evaluate(async()=>{
     const db=await new Promise((resolve,reject)=>{
       const req=indexedDB.open('folio-library',1);
