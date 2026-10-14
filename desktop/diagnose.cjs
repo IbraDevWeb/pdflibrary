@@ -180,7 +180,24 @@ async function main(){
      assert.ok(geom.pageWidth>0&&geom.scrollWidth>=geom.hostWidth,'Le zoom PDF doit rester défilable');
      await page.waitForTimeout(600);
    }
-   else assert.ok(result.epubText?.includes('Folio Windows'),'EPUB affiché sans contenu lisible');
+   else {
+     assert.ok(result.epubText?.includes('Folio Windows'),'EPUB affiché sans contenu lisible');
+     const framing=await page.locator('#readerContent').evaluate(host=>{
+       const outer=host.getBoundingClientRect();
+       const inner=host.querySelector('iframe')?.getBoundingClientRect();
+       return {left:outer.left,right:outer.right,top:outer.top,bottom:outer.bottom,
+               frameLeft:inner?.left,frameRight:inner?.right,frameTop:inner?.top,frameBottom:inner?.bottom};
+     });
+     console.log('EPUB_FRAMING:',JSON.stringify(framing));
+     assert.ok(framing.frameLeft>=framing.left-1&&framing.frameRight<=framing.right+1,
+       'Colonne EPUB décalée : l’iframe déborde hors de son lecteur');
+     assert.ok(framing.frameTop>=framing.top-1&&framing.frameBottom<=framing.bottom+1,
+       'Page EPUB rognée verticalement dans la liseuse');
+     await page.locator('#readerZoomIn').click();
+     await page.waitForTimeout(800);
+     assert.ok((await snapshot(page,'epub-after-zoom')).epubText?.includes('Folio Windows'),
+       'Le texte EPUB doit rester visible après changement de taille');
+   }
    await page.locator('#closeReader').click();
    assert.equal((await snapshot(page,'after-close-'+type)).readerHidden,true);
   }
