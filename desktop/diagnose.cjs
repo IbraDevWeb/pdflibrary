@@ -122,7 +122,7 @@ async function main(){
     });db.close();
    },{encoded,id,type});
    await page.reload();
-   await page.locator('[data-action="read"][data-id="'+id+'"]').click();
+   await page.locator('.book-card [data-action="read"][data-id="'+id+'"]').first().click();
    await page.waitForTimeout(3000);
    const result=await snapshot(page,'after-opening-'+type);
    await page.screenshot({path:'desktop-previews/02-lecteur-'+type+'.png'});
@@ -216,7 +216,7 @@ async function main(){
    assert.equal((await snapshot(page,'after-close-'+type)).readerHidden,true);
    if(type==='pdf'){
      await page.reload();
-     await page.locator('[data-action="read"][data-id="'+id+'"]').click();
+     await page.locator('.book-card [data-action="read"][data-id="'+id+'"]').first().click();
      await page.waitForSelector('#readerContent .pdf-highlight-rect',{timeout:10000});
      console.log('PDF_HIGHLIGHT_PERSISTENCE: OK');
      await page.locator('#closeReader').click();
