@@ -1,17 +1,17 @@
 {
   "name": "folio-personal-reader",
-  "version": "2.9.0",
+  "version": "2.9.1",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "vite build",
+    "build": "vite build && node scripts/copy-pdf-assets.mjs",
     "preview": "vite preview --host",
     "android": "npm run build && npx cap sync android",
     "android:init": "npm run build && npx cap add android && npx cap sync android",
     "test": "node --test tests/*.test.js",
     "test:e2e": "playwright test",
-    "build:desktop": "vite build --mode desktop",
+    "build:desktop": "vite build --mode desktop && node scripts/copy-pdf-assets.mjs",
     "windows": "npm run build:desktop && electron-builder --win nsis --x64 --publish never",
     "desktop:smoke": "node desktop/diagnose.cjs"
   },
