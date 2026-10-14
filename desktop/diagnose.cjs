@@ -214,6 +214,13 @@ async function main(){
    }
    await page.locator('#closeReader').click();
    assert.equal((await snapshot(page,'after-close-'+type)).readerHidden,true);
+   if(type==='pdf'){
+     await page.reload();
+     await page.locator('[data-action="read"][data-id="'+id+'"]').click();
+     await page.waitForSelector('#readerContent .pdf-highlight-rect',{timeout:10000});
+     console.log('PDF_HIGHLIGHT_PERSISTENCE: OK');
+     await page.locator('#closeReader').click();
+   }
   }
   // Les livres scannés n'ont pas de calque OCR : ils doivent néanmoins
   // permettre de tracer un surlignage rectangulaire sur l'image de la page.
