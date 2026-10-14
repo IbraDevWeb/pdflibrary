@@ -35,3 +35,9 @@ test('PDF scanné ne prétend pas contenir du texte sélectionnable',()=>{
  assert.equal(pdfTextStatus([{str:' '},{str:''}]),'image-only');
  assert.equal(pdfTextStatus([{str:'الكتاب'},{str:' arabe'}]),'selectable');
 });
+
+test('PDF exceptionnellement long : aucun élément géant même en mode largeur',()=>{
+ const r=fitPDFPage({pageWidth:595,pageHeight:130000,hostWidth:1100,hostHeight:700,fit:'width',zoom:4});
+ assert.ok(r.height<=16000.001);
+ assert.ok(r.width<1100);
+});
