@@ -10,6 +10,22 @@ Une vérification automatique lance une vraie fenêtre Electron sous affichage L
 
 Pour la mise à jour Windows, **installer Folio 2.8.1 sur la version existante**, sans désinstaller et sans effacer les données. L'identifiant et le profil local Electron restent identiques ; livres, progression et annotations devraient donc être conservés. Il reste prudent d'**exporter la bibliothèque en ZIP avant la mise à jour**. En cas de page blanche persistante, conserver cette sauvegarde et signaler le format (PDF ou EPUB) et le titre/fichier concerné.
 
+## Folio 2.9.1 — Fiabilité de lecture Windows (PDF et EPUB)
+
+Cette version corrige plusieurs problèmes qui pouvaient empêcher de lire ou d'annoter un ouvrage :
+
+- **PDF :** choix explicite **Page entière / Largeur**, ajustement aux dimensions du document et à la taille du lecteur, centrage sûr au zoom (le côté gauche n'est plus tronqué), rendu du canvas terminé avant de remplacer la page précédente, limites de mémoire pour les pages très longues.
+- **Texte invisible sur certains PDF :** les polices standard et tables CMap de PDF.js sont désormais embarquées dans les paquets Windows et Android. Le moteur dispose des ressources locales nécessaires à de nombreux PDF anciens ou multilingues.
+- **Sélection et surlignage PDF :** couche de texte alignée avec l'image par la même échelle PDF.js, normalisation correcte des rectangles, ajout du surlignage **immédiatement après la sélection**, sans fenêtre qui interrompt la sélection. Les notes restent modifiables dans le carnet.
+- **Livres PDF numérisés sans texte :** il est possible de **tracer un rectangle de surlignage sur l'image**. L'extraction de mots et la recherche dans l'image nécessitent toujours un OCR, qui n'est pas intégré.
+- **EPUB :** suppression du padding extérieur qui faisait déborder l'iframe et rogner les colonnes. Les réglages de police et zoom restent fonctionnels et les surlignages EPUB sont testés depuis la sélection du texte.
+
+Le workflow **Diagnostic de lecture Folio Desktop** vérifie dans une fenêtre Electron : vrais pixels du PDF, caractères sélectionnables, création et restauration de surlignages, adaptation largeur/page, texte EPUB non rogné et surlignage EPUB. Les tests unitaires couvrent également la géométrie PDF et les pages hors format.
+
+**Les PDF atypiques peuvent nécessiter une vérification au cas par cas.** Une police non incluse dans le document et non résoluble, un EPUB endommagé ou une numérisation sans OCR ne permettent pas toujours d'obtenir un texte sélectionnable. En cas de problème persistant sur un ouvrage précis, conserver une copie et relever son format, sa page et les réglages de zoom pour reproduire l'erreur. Les résultats automatisés ne remplacent pas un test sur un PC Windows physique.
+
+Avant la mise à jour : **exporter sa bibliothèque en ZIP**, puis installer `Folio-Setup-2.9.1-x64.exe` sur la version précédente **sans désinstaller**, afin de conserver le profil local et les livres.
+
 ## Folio Windows 2.9 — Identité visuelle et expérience de lecture
 
 L'édition **Windows 2.9.0** modernise la présentation de l'application sans changer le format de stockage des livres. Elle conserve les sauvegardes ZIP existantes et le profil utilisateur `folio://app`.
@@ -25,7 +41,7 @@ Le thème est limité à la fenêtre Windows grâce à l'attribut `data-folio-de
 
 Un contrôle automatisé ouvre Folio dans Electron, inspecte le thème, la présence du logo et de l'illustration, puis ouvre un PDF et un EPUB avec des assertions sur leur rendu réel. Les captures de test de l'accueil et du lecteur sont publiées comme artefact `folio-windows-design-previews` du workflow **Diagnostic de lecture Folio Desktop**. Le logiciel reste à examiner sur une installation Windows physique pour les variantes de résolution et mise à l'échelle.
 
-**Mise à jour sans perte :** fermer Folio, conserver une sauvegarde ZIP de ses livres, puis installer `Folio-Setup-2.9.0-x64.exe` par-dessus la version antérieure sans désinstaller. Le même identifiant d'application est conservé.
+**Mise à jour sans perte :** fermer Folio, conserver une sauvegarde ZIP de ses livres, puis installer `Folio-Setup-2.9.1-x64.exe` par-dessus la version antérieure sans désinstaller. Le même identifiant d'application est conservé.
 
 ## Installer Folio sur Windows 10/11
 
@@ -33,7 +49,7 @@ Folio possède une version **Windows 64 bits** empaquetée avec Electron (instal
 
 1. Ouvrir l'onglet **Actions** du dépôt puis le workflow **Construire Folio pour Windows**.
 2. Ouvrir la dernière exécution **réussie** et télécharger l'artifact **folio-windows-setup-x64**.
-3. Extraire le ZIP de l'artifact, puis lancer `Folio-Setup-2.9.0-x64.exe` et suivre l'installation ; un raccourci Bureau et un raccourci du menu Démarrer sont créés.
+3. Extraire le ZIP de l'artifact, puis lancer `Folio-Setup-2.9.1-x64.exe` et suivre l'installation ; un raccourci Bureau et un raccourci du menu Démarrer sont créés.
 4. Lancer Folio, puis choisir **Ajouter un livre** pour sélectionner des fichiers PDF/EPUB ou les déposer sur la fenêtre.
 
 **Édition non signée :** l'installateur est généré par GitHub Actions sans certificat de signature Windows. Microsoft Defender SmartScreen peut afficher un avertissement. Vérifier que le téléchargement provient bien des Actions de ce dépôt avant de poursuivre. La version Windows n'est pas une application Microsoft Store.
