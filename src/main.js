@@ -11,6 +11,7 @@ import './islamic-library.css';
 import { DISCIPLINES,MADHAHIB,LANGUAGES,isIslamicBook,islamicMetadata,normalizeIslamicMetadata } from './islamic-library.js';
 import { setupIslamicLibrary,refreshIslamicLibrary } from './islamic-ui.js';
 import './windows-polish.css';
+import './reader-reliability.css';
 
 const $=id=>document.getElementById(id);
 const icon=name=>'<svg class="icon" aria-hidden="true"><use href="#i-'+name+'"/></svg>';
