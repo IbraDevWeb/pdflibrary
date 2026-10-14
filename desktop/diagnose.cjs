@@ -197,6 +197,20 @@ async function main(){
      await page.waitForTimeout(800);
      assert.ok((await snapshot(page,'epub-after-zoom')).epubText?.includes('Folio Windows'),
        'Le texte EPUB doit rester visible après changement de taille');
+     await page.locator('#readerHighlight').click();
+     await page.locator('#readerContent iframe').evaluate(iframe=>{
+       const doc=iframe.contentDocument;
+       const element=doc.querySelector('p');
+       const range=doc.createRange();range.selectNodeContents(element);
+       const selection=doc.getSelection();
+       selection.removeAllRanges();selection.addRange(range);
+       doc.dispatchEvent(new Event('selectionchange',{bubbles:true}));
+       element.dispatchEvent(new MouseEvent('mouseup',{bubbles:true}));
+     });
+     await page.waitForTimeout(900);
+     const epubMarks=await page.locator('#readerNotesList [data-go-annotation]').count();
+     console.log('EPUB_SELECTION_MARKS:',epubMarks);
+     assert.ok(epubMarks>=1,'Le surlignage EPUB par sélection doit enregistrer une annotation');
    }
    await page.locator('#closeReader').click();
    assert.equal((await snapshot(page,'after-close-'+type)).readerHidden,true);
