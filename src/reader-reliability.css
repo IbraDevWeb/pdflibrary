@@ -28,6 +28,14 @@
  -webkit-user-select:text!important;
  pointer-events:auto;
 }
+.reader[data-kind="pdf"] .pdf-text-layer,
+.reader[data-kind="pdf"] .pdf-text-layer span{
+ /* Le calque HTML sert UNIQUEMENT à sélectionner : il ne doit jamais
+    redessiner par-dessus le PDF avec Arial ou une autre police Windows. */
+ color:transparent!important;
+ -webkit-text-fill-color:transparent!important;
+ text-shadow:none!important;
+}
 .reader[data-kind="pdf"] .pdf-text-layer span{
  user-select:text!important;
  -webkit-user-select:text!important;
@@ -74,3 +82,6 @@
 .reader[data-kind="epub"] .reader-content iframe{
  max-width:100%;
 }
+
+.reader-font-rendering{font-size:11px!important;white-space:nowrap;min-width:104px}
+.reader[data-kind="epub"] #readerPdfFonts{display:none!important}
