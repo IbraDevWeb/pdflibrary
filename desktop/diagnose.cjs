@@ -132,6 +132,54 @@ async function main(){
    assert.ok(type==='pdf'?result.pdfCanvas?.width>10:result.epubIframe?.width>10,
      'Le livre '+type+' doit afficher une page visible');
    if(type==='pdf')assert.ok(result.pdfInkPixels>10,'PDF rendu blanc : aucun texte dessiné dans le canvas ('+result.pdfInkPixels+')');
+   if(type==='pdf'){
+     const textMetrics=await page.locator('#readerContent .pdf-text-layer').evaluate(layer=>{
+       const span=layer.querySelector('span');
+       const rect=span?.getBoundingClientRect();
+       return {
+         spanCount:layer.querySelectorAll('span').length,
+         width:rect?.width||0,height:rect?.height||0,
+         scale:getComputedStyle(layer).getPropertyValue('--scale-factor'),
+         viewport:document.getElementById('readerContent').getBoundingClientRect().toJSON()
+       };
+     });
+     console.log('PDF_TEXT_LAYER:',JSON.stringify(textMetrics));
+     assert.ok(textMetrics.spanCount>0&&textMetrics.width>3&&textMetrics.height>3,
+       'Le PDF dessine du texte mais son calque sélectionnable est invisible/décalé');
+     assert.ok(Number(textMetrics.scale)>0,'Variable de mise à l’échelle PDF.js absente');
+     await page.locator('#readerHighlight').click();
+     await page.locator('#readerContent .pdf-text-layer span').first().evaluate(span=>{
+       const selection=window.getSelection(),range=document.createRange();
+       range.selectNodeContents(span);selection.removeAllRanges();selection.addRange(range);
+       span.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerType:'mouse'}));
+     });
+     await page.waitForSelector('#readerContent .pdf-highlight-rect',{timeout:7000});
+     const mark=await page.locator('#readerContent .pdf-highlight-rect').first().evaluate(node=>{
+       const p=node.getBoundingClientRect(),base=node.closest('.pdf-page').getBoundingClientRect();
+       return {width:p.width,height:p.height,left:p.left,right:p.right,pageLeft:base.left,pageRight:base.right};
+     });
+     console.log('PDF_HIGHLIGHT:',JSON.stringify(mark));
+     assert.ok(mark.width>3&&mark.height>3,'Le surlignage ne couvre aucun texte');
+     assert.ok(mark.left>=mark.pageLeft-.5&&mark.right<=mark.pageRight+.5,'Surlignage déplacé hors de la page');
+     await page.screenshot({path:'desktop-previews/03-surlignage-pdf.png'});
+     const pageBefore=await page.locator('#readerContent .pdf-page').evaluate(node=>node.getBoundingClientRect().toJSON());
+     const modeBefore=await page.locator('#readerFit').innerText();
+     await page.locator('#readerFit').click();
+     await page.waitForTimeout(950);
+     const pageAfter=await page.locator('#readerContent .pdf-page').evaluate(node=>node.getBoundingClientRect().toJSON());
+     const modeAfter=await page.locator('#readerFit').innerText();
+     console.log('PDF_FIT:',JSON.stringify({modeBefore,modeAfter,before:pageBefore.width,after:pageAfter.width}));
+     assert.notEqual(modeBefore,modeAfter,'Le mode adapter page / largeur doit changer');
+     assert.ok(Math.abs(pageBefore.width-pageAfter.width)>15,'Le mode ajustement ne modifie pas réellement le rendu');
+     await page.locator('#readerZoomIn').click();
+     await page.waitForTimeout(950);
+     const geom=await page.locator('#readerContent').evaluate(host=>{
+       const p=host.querySelector('.pdf-page').getBoundingClientRect(),r=host.getBoundingClientRect();
+       return {pageWidth:p.width,hostWidth:r.width,scrollWidth:host.scrollWidth,scrollLeft:host.scrollLeft};
+     });
+     assert.ok(geom.pageWidth>0&&geom.scrollWidth>=geom.hostWidth,'Le zoom PDF doit rester défilable');
+     await page.waitForTimeout(600);
+   }
    else assert.ok(result.epubText?.includes('Folio Windows'),'EPUB affiché sans contenu lisible');
    await page.locator('#closeReader').click();
    assert.equal((await snapshot(page,'after-close-'+type)).readerHidden,true);
