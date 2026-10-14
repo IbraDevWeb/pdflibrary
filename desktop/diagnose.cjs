@@ -255,6 +255,62 @@ async function main(){
   await page.screenshot({path:'desktop-previews/04-pdf-scan-annotation.png'});
   await page.locator('#closeReader').click();
 
+  // Régression : un vrai PDF avec TrueType embarquée doit préserver
+  // les contours de la police, sans rendre visible le faux texte HTML.
+  const fixturePath='desktop-previews/embedded-serif-test.pdf';
+  if(!fs.existsSync(fixturePath))throw Error('Fixture typographique non générée : '+fixturePath);
+  const fontFixtureId='e2e-embedded-font-pdf';
+  await page.evaluate(async({encoded,id})=>{
+    const binary=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));
+    const db=await new Promise((resolve,reject)=>{
+      const req=indexedDB.open('folio-library',1);
+      req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+    });
+    await new Promise((resolve,reject)=>{
+      const tx=db.transaction('books','readwrite');
+      tx.objectStore('books').put({
+        id,title:'Police intégrée - test PDF',author:'Folio',kind:'pdf',status:'to-read',
+        page:1,zoom:1,createdAt:Date.now(),annotations:[],bookmarks:[],
+        file:new Blob([binary],{type:'application/pdf'})
+      });
+      tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);
+    });db.close();
+  },{encoded:fs.readFileSync(fixturePath).toString('base64'),id:fontFixtureId});
+  await page.reload();
+  await page.locator('.book-card [data-action="read"][data-id="'+fontFixtureId+'"]').first().click();
+  await page.waitForSelector('#readerContent .pdf-text-layer span',{timeout:16000});
+  let fontData=await page.evaluate(async()=>{
+    const db=await new Promise((resolve,reject)=>{
+      const req=indexedDB.open('folio-library',1);
+      req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+    });
+    const tx=db.transaction('books','readonly');
+    const request=tx.objectStore('books').get('e2e-embedded-font-pdf');
+    const book=await new Promise((resolve,reject)=>{request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});
+    db.close();
+    const layer=document.querySelector('.pdf-text-layer span');
+    return {mode:book.pdfFontMode,fill:getComputedStyle(layer).webkitTextFillColor,ink:getComputedStyle(layer).color,
+      count:document.querySelectorAll('.pdf-text-layer span').length};
+  });
+  console.log('PDF_EMBEDDED_FONT:',JSON.stringify(fontData));
+  assert.equal(fontData.mode,'outlines','Electron doit démarrer en mode contours fidèles pour les PDF');
+  assert.ok(fontData.count>2,'Le texte de la police intégrée doit rester sélectionnable');
+  assert.match(fontData.fill,/rgba?\(0, 0, 0, 0\)|transparent/,'Le calque de texte doit être invisible');
+  assert.equal((await page.locator('#readerPdfFonts').innerText()),'Polices : fidèles');
+  const defaultFont=await snapshot(page,'embedded-font-outlines');
+  assert.ok(defaultFont.pdfInkPixels>30,'La police intégrée doit réellement être dessinée');
+  await page.screenshot({path:'desktop-previews/05-pdf-polices-fideles.png'});
+  await page.locator('#readerPdfFonts').click();
+  await page.waitForFunction(()=>document.querySelector('#readerPdfFonts').textContent==='Polices : standard',{timeout:15000});
+  const fallback=await snapshot(page,'embedded-font-browser-mode');
+  assert.ok(fallback.pdfInkPixels>30,'Mode de compatibilité PDF doit aussi afficher du texte');
+  await page.screenshot({path:'desktop-previews/06-pdf-polices-standard.png'});
+  await page.locator('#readerPdfFonts').click();
+  await page.waitForFunction(()=>document.querySelector('#readerPdfFonts').textContent==='Polices : fidèles',{timeout:15000});
+  const restored=await snapshot(page,'embedded-font-restored');
+  assert.ok(restored.pdfInkPixels>30,'La bascule retour doit afficher le texte');
+  console.log('EMBEDDED_FONT_FIDELITY_MODE: OK');
+  await page.locator('#closeReader').click();
   assert.equal(errors.length,0,'Aucune erreur JavaScript dans la fenêtre du lecteur');
   console.log('DÉMARRAGE ET LECTURE PDF/EPUB ELECTRON : SUCCÈS');
  }finally{await app.close();}
